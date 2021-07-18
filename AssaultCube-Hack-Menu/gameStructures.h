@@ -276,7 +276,7 @@ public:
 	uint16_t N00000AB0; //0x0110
 	uint16_t N00000CAC; //0x0112
 	uint16_t firstShotsSpread; //0x0114
-	uint16_t kickBack; //0x0116
+	uint16_t kickback; //0x0116
 	uint16_t MaxAmmoPerMagazine; //0x0118
 	uint16_t recoilAnimation; //0x011A
 	uint16_t kickbackAnimation; //0x011C
@@ -284,7 +284,7 @@ public:
 	uint16_t unknown; //0x0120
 	uint16_t recoil; //0x0122
 	uint16_t N00000AB5; //0x0124
-	uint16_t ennemyKickback; //0x0126
+	uint16_t targetKickback; //0x0126
 	uint16_t isSemiAutomatic; //0x0128
 }; //Size: 0x012A
 static_assert(sizeof(WeaponCharacs) == 0x12A);

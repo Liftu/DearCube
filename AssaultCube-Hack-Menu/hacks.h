@@ -14,7 +14,19 @@ namespace Hacks
 	bool isValidEntity(PlayerEntity* playerEntity);
 
 	// Weapons stuff
-	Weapon* getWeaponPtr(PlayerEntity* playerEntity, WeaponTypes weaponType);
-	bool toggleWeaponNoRecoil(PlayerEntity* playerEntity, WeaponTypes weaponType);
+	enum class WeaponHackTypes : int32_t
+	{
+		NoSpread = 0,
+		NoRecoil = 1,
+		NoKickback = 2,
+		NoSelfKickback = 3,
+		SemiAuto = 4
+	};
 
+	Weapon* getWeaponPtr(PlayerEntity* playerEntity, WeaponTypes weaponType);
+	WeaponTypes getCurrentWeaponType(PlayerEntity* playerEntity);
+	bool toggleWeaponHack(PlayerEntity* playerEntity, WeaponTypes weaponType, WeaponHackTypes weaponHackType);
+	bool toggleWeaponHack(PlayerEntity* playerEntity, WeaponTypes weaponType, WeaponHackTypes weaponHackType, bool enable);
+	bool toggleAllWeaponsHack(PlayerEntity* playerEntity, WeaponHackTypes weaponHackType, bool enable);
+	bool getWeaponHackState(PlayerEntity* playerEntity, WeaponTypes weaponType, WeaponHackTypes weaponHackType);
 }

@@ -35,6 +35,7 @@ DWORD WINAPI injectedThread(HMODULE hModule)
     // Hack loop
     /**/std::cout << "Hack loop : " << std::endl;
     bool running = true;
+    bool enable = false;
     while (running)
     {
         // Key input
@@ -42,11 +43,68 @@ DWORD WINAPI injectedThread(HMODULE hModule)
             running = false;
         else if (GetAsyncKeyState(VK_INSERT) & 1)
         {
+            /**/std::cout << "Showing/hide menu" << std::endl; 
+            continue;
+        }
+        // This will be replaced by an ImGui menu
+        else if (GetAsyncKeyState(VK_F1) & 1)
+        {
             ///**/std::cout << "Showing/hide menu" << std::endl; 
-            if (Hacks::toggleWeaponNoRecoil(myPlayerEntity, WeaponTypes::Assault))
-                /**/std::cout << "Toggled Assault no recoil." << std::endl;
+            if (Hacks::toggleWeaponHack(myPlayerEntity, Hacks::getCurrentWeaponType(myPlayerEntity), Hacks::WeaponHackTypes::NoSpread))
+                /**/std::cout << "Toggled no spread." << std::endl;
             /**/else
-                /**/std::cout << "Unable to toggle Assault no  recoil." << std::endl;
+                /**/std::cout << "Unable to toggle no spread." << std::endl;
+
+            continue;
+        }
+        else if (GetAsyncKeyState(VK_F2) & 1)
+        {
+            ///**/std::cout << "Showing/hide menu" << std::endl; 
+            if (Hacks::toggleWeaponHack(myPlayerEntity, Hacks::getCurrentWeaponType(myPlayerEntity), Hacks::WeaponHackTypes::NoRecoil))
+                /**/std::cout << "Toggled no recoil." << std::endl;
+            /**/else
+                /**/std::cout << "Unable to toggle no recoil." << std::endl;
+
+            continue;
+        }
+        else if (GetAsyncKeyState(VK_F3) & 1)
+        {
+            ///**/std::cout << "Showing/hide menu" << std::endl; 
+            if (Hacks::toggleWeaponHack(myPlayerEntity, Hacks::getCurrentWeaponType(myPlayerEntity), Hacks::WeaponHackTypes::NoKickback))
+                /**/std::cout << "Toggled no kickback." << std::endl;
+            /**/else
+                /**/std::cout << "Unable to toggle kickback." << std::endl;
+
+            continue;
+        }
+        else if (GetAsyncKeyState(VK_F4) & 1)
+        {
+            ///**/std::cout << "Showing/hide menu" << std::endl; 
+            if (Hacks::toggleWeaponHack(myPlayerEntity, Hacks::getCurrentWeaponType(myPlayerEntity), Hacks::WeaponHackTypes::NoSelfKickback))
+                /**/std::cout << "Toggled no self kickback." << std::endl;
+            /**/else
+                /**/std::cout << "Unable to toggle no self kickback." << std::endl;
+
+            continue;
+        }
+        else if (GetAsyncKeyState(VK_F5) & 1)
+        {
+            ///**/std::cout << "Showing/hide menu" << std::endl; 
+            if (Hacks::toggleWeaponHack(myPlayerEntity, Hacks::getCurrentWeaponType(myPlayerEntity), Hacks::WeaponHackTypes::SemiAuto))
+                /**/std::cout << "Toggled semi auto." << std::endl;
+            /**/else
+                /**/std::cout << "Unable to toggle semi auto." << std::endl;
+
+            continue;
+        }
+        else if (GetAsyncKeyState(VK_F6) & 1)
+        {
+            enable = !enable;
+            ///**/std::cout << "Showing/hide menu" << std::endl; 
+            if (Hacks::toggleAllWeaponsHack(myPlayerEntity, Hacks::WeaponHackTypes::NoRecoil, enable))
+                /**/std::cout << "Toggled all hack." << std::endl;
+            /**/else
+                /**/std::cout << "Unable to toggle all hack." << std::endl;
 
             continue;
         }
