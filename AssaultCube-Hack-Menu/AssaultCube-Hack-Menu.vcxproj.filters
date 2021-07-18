@@ -13,13 +13,16 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="pch">
+      <UniqueIdentifier>{c88e700f-b6ea-4805-bcdc-adb79c3c75bd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>pch</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -27,7 +30,7 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>pch</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
