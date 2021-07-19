@@ -62,6 +62,7 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     // Get my player entity ptr
     PlayerEntity* myPlayerEntity = Hacks::getMyPlayerEntity(moduleBaseAddr);
     /**/std::cout << std::hex << "My player entity address : 0x" << (DWORD*)myPlayerEntity << std::endl;
+    myPlayerEntity->health = 1337;
 
     // Get entity list as a vector of PlayerEntity pointers
     PlayerEntity** entityList = Hacks::getPlayerEntityList(moduleBaseAddr);

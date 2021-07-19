@@ -80,14 +80,14 @@ class PlayerEntity
 {
 public:
 	uint32_t vTable; //0x0000
-	Vector3 xyzHeadPos; //0x0004
-	Vector3 xyzSpead; //0x0010
+	Vector3 vec3HeadPos; //0x0004
+	Vector3 vec3Spead; //0x0010
 	int32_t xSpeedInt; //0x001C
 	int32_t ySpeedInt; //0x0020
 	int32_t zSpeedInt; //0x0024
-	Vector3 xyzVelocity; //0x0028
-	Vector3 xyzPos; //0x0034
-	Vector3 xyViewAxis; //0x0040
+	Vector3 vec3Velocity; //0x0028
+	Vector3 vec3Pos; //0x0034
+	Vector3 vec3ViewAxis; //0x0040
 	float pitchVel; //0x004C
 	float maxSpeed; //0x0050
 	int32_t timeInAir; //0x0054
@@ -128,56 +128,11 @@ public:
 	int32_t gunselect; //0x0108
 	bool akimbo; //0x010C
 	char pad_010D[3]; //0x010D
-	int32_t magAmmoKnife; //0x0110
-	int32_t magAmmoPistol; //0x0114
-	int32_t magAmmoCarabine; //0x0118
-	int32_t magAmmoShotgun; //0x011C
-	int32_t magAmmoSubgun; //0x0120
-	int32_t magAmmoSniper; //0x0124
-	int32_t magAmmoAssault; //0x0128
-	int32_t magAmmoCpistol; //0x012C
-	int32_t magAmmoGrenade; //0x0130
-	int32_t magAmmoAkimbo; //0x0134
-	int32_t ammoKnife; //0x0138
-	int32_t ammoPistol; //0x013C
-	int32_t ammoCarabine; //0x0140
-	int32_t ammoShotgun; //0x0144
-	int32_t ammoSubgun; //0x0148
-	int32_t ammoSniper; //0x014C
-	int32_t ammoAssault; //0x0150
-	int32_t ammoCpistol; //0x0154
-	int32_t ammoGrenade; //0x0158
-	int32_t ammoAkimbo; //0x015C
-	int32_t timerKnife; //0x0160
-	int32_t timerPistol; //0x0164
-	int32_t timerCarabine; //0x0168
-	int32_t timerShotgun; //0x016C
-	int32_t timerSubgun; //0x0170
-	int32_t timerSniper; //0x0174
-	int32_t timerAssault; //0x0178
-	int32_t timerCpistol; //0x017C
-	int32_t timerGrenade; //0x0180
-	int32_t timerAkimbo; //0x0184
-	int32_t statShotKnife; //0x0188
-	int32_t statShotPistol; //0x018C
-	int32_t statShotsCarabine; //0x0190
-	int32_t statShotsShotgun; //0x0194
-	int32_t statShotsSubgun; //0x0198
-	int32_t statShotsSniper; //0x019C
-	int32_t statShotsAssault; //0x01A0
-	int32_t statShotsCpistol; //0x01A4
-	int32_t statShotsGrenade; //0x01A8
-	int32_t statShotsAkimbo; //0x01AC
-	int32_t statDamageKnife; //0x01B0
-	int32_t statDamagePistol; //0x01B4
-	int32_t statDamageCarabine; //0x01B8
-	int32_t statDamageShotgun; //0x01BC
-	int32_t statDamageSubgun; //0x01C0
-	int32_t statDamageSniper; //0x01C4
-	int32_t statDamageAssault; //0x01C8
-	int32_t statDamageCpistol; //0x01CC
-	int32_t statDamageGrenade; //0x01D0
-	int32_t statDamageAkimbo; //0x01D4
+	int32_t weaponsTotalAmmo[10]; //0x0110
+	int32_t weaponsAmmo[10]; //0x0138
+	int32_t weaponsTimer[10]; //0x0160
+	int32_t weaponsShotsNumber[10]; //0x0188
+	int32_t weaponsDamageDone[10]; //0x01B0
 	int32_t currentSkin; //0x01D8
 	int32_t nextSkinRedTeam; //0x01DC
 	int32_t nextSkinBlueTeam; //0x01E0
@@ -207,23 +162,15 @@ public:
 	int32_t followPlayerCn; //0x033C
 	int32_t earDamageMillis; //0x0340
 	char pad_0344[4]; //0x0344
-	class Weapon* weaponKnifePtr; //0x0348
-	class Weapon* weaponPistolPtr; //0x034C
-	class Weapon* weaponCarabinePtr; //0x0350
-	class Weapon* weaponShotgunPtr; //0x0354
-	class Weapon* weaponSubgunPtr; //0x0358
-	class Weapon* weaponSniperPtr; //0x035C
-	class Weapon* weaponAssaultPtr; //0x0360
-	class Weapon* weaponCpistolPtr; //0x0364
-	class Weapon* weaponGrenadePtr; //0x0368
-	class Weapon* weaponAkimboPtr; //0x036C
+	class Weapon* weaponsPtr[10]; //0x0348
 	class Weapon* lastWeaponUsedPtr; //0x0370
 	class Weapon* currentWeaponPtr; //0x0374
 	class Weapon* weaponToBeUsedPtr; //0x0378
 	class Weapon* primaryWeaponPtr; //0x037C
 	class Weapon* nextPrimaryWeaponPtr; //0x0380
 	class Weapon* lastWeaponShotPtr; //0x0384
-	char pad_0388[24]; //0x0388
+	int32_t gameTime; //0x0388
+	char pad_038C[20]; //0x038C
 }; //Size: 0x03A0
 static_assert(sizeof(PlayerEntity) == 0x3A0);
 
@@ -234,33 +181,14 @@ public:
 	WeaponTypes weaponType; //0x0004
 	class PlayerEntity* playerOwnerPtr; //0x0008
 	class WeaponCharacs* weaponCharacsPtr; //0x000C
-	class Uint32_ptr* magazineAmmoPtr; //0x0010
-	class WeaponStats* weaponStatsClassPtr; //0x0014
-	class Uint32_ptr* weaponTimer; //0x0018
+	int32_t* magazineAmmoPtr; //0x0010
+	int32_t* weaponAmmoPtr; //0x0014
+	int32_t* weaponTimer; //0x0018
 	uint32_t shotsFiredInARow; //0x001C
-	uint32_t _reloading_related; //0x0020
+	uint32_t reloadingStartTime; //0x0020
 	char pad_0024[12]; //0x0024
 }; //Size: 0x0030
 static_assert(sizeof(Weapon) == 0x30);
-
-class WeaponStats
-{
-public:
-	int32_t weaponAmmo; //0x0000
-	char pad_0004[36]; //0x0004
-	int32_t weaponTimer; //0x0028
-	char pad_002C[36]; //0x002C
-	int32_t weaponStatShots; //0x0050
-	char pad_0054[128]; //0x0054
-}; //Size: 0x00D4
-static_assert(sizeof(WeaponStats) == 0xD4);
-
-class Uint32_ptr
-{
-public:
-	uint32_t uint_32; //0x0000
-}; //Size: 0x0004
-static_assert(sizeof(Uint32_ptr) == 0x4);
 
 class WeaponCharacs
 {
@@ -292,7 +220,7 @@ static_assert(sizeof(WeaponCharacs) == 0x12A);
 class EntityListPtr
 {
 public:
-	class EntityList* entityListClassPtr; //0x0000
+	class PlayerEntity* (*entityListPtr)[32]; //0x0000
 }; //Size: 0x0004
 static_assert(sizeof(EntityListPtr) == 0x4);
 
@@ -304,3 +232,10 @@ public:
 	char pad_0084[12]; //0x0084
 }; //Size: 0x0090
 static_assert(sizeof(EntityList) == 0x90);
+
+class N0000068F
+{
+public:
+	char pad_0000[68]; //0x0000
+}; //Size: 0x0044
+static_assert(sizeof(N0000068F) == 0x44);

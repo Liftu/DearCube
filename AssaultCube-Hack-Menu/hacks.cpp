@@ -69,45 +69,45 @@ bool Hacks::isValidEntity(PlayerEntity* playerEntity)
 
 // Weapons stuff
 
-Weapon* Hacks::getWeaponPtr(PlayerEntity* playerEntity, WeaponTypes weaponType)
-{
-	// Get weapon ptr
-	Weapon* weapon = nullptr;
-	switch (weaponType)
-	{
-	case WeaponTypes::Knife:
-		weapon = playerEntity->weaponKnifePtr;
-		break;
-	case WeaponTypes::Pistol:
-		weapon = playerEntity->weaponPistolPtr;
-		break;
-	case WeaponTypes::Carabine:
-		weapon = playerEntity->weaponCarabinePtr;
-		break;
-	case WeaponTypes::Shotgun:
-		weapon = playerEntity->weaponShotgunPtr;
-		break;
-	case WeaponTypes::Subgun:
-		weapon = playerEntity->weaponSubgunPtr;
-		break;
-	case WeaponTypes::Sniper:
-		weapon = playerEntity->weaponSniperPtr;
-		break;
-	case WeaponTypes::Assault:
-		weapon = playerEntity->weaponAssaultPtr;
-		break;
-	case WeaponTypes::Cpistol:
-		weapon = playerEntity->weaponCpistolPtr;
-		break;
-	case WeaponTypes::Grenade:
-		weapon = playerEntity->weaponGrenadePtr;
-		break;
-	case WeaponTypes::Akimbo:
-		weapon = playerEntity->weaponAkimboPtr;
-		break;
-	}
-	return weapon;
-}
+//Weapon* Hacks::getWeaponPtr(PlayerEntity* playerEntity, WeaponTypes weaponType)
+//{
+//	// Get weapon ptr
+//	Weapon* weapon = nullptr;
+//	switch (weaponType)
+//	{
+//	case WeaponTypes::Knife:
+//		weapon = playerEntity->weaponKnifePtr;
+//		break;
+//	case WeaponTypes::Pistol:
+//		weapon = playerEntity->weaponPistolPtr;
+//		break;
+//	case WeaponTypes::Carabine:
+//		weapon = playerEntity->weaponCarabinePtr;
+//		break;
+//	case WeaponTypes::Shotgun:
+//		weapon = playerEntity->weaponShotgunPtr;
+//		break;
+//	case WeaponTypes::Subgun:
+//		weapon = playerEntity->weaponSubgunPtr;
+//		break;
+//	case WeaponTypes::Sniper:
+//		weapon = playerEntity->weaponSniperPtr;
+//		break;
+//	case WeaponTypes::Assault:
+//		weapon = playerEntity->weaponAssaultPtr;
+//		break;
+//	case WeaponTypes::Cpistol:
+//		weapon = playerEntity->weaponCpistolPtr;
+//		break;
+//	case WeaponTypes::Grenade:
+//		weapon = playerEntity->weaponGrenadePtr;
+//		break;
+//	case WeaponTypes::Akimbo:
+//		weapon = playerEntity->weaponAkimboPtr;
+//		break;
+//	}
+//	return weapon;
+//}
 
 WeaponTypes Hacks::getCurrentWeaponType(PlayerEntity* playerEntity)
 {
@@ -123,89 +123,89 @@ bool Hacks::toggleWeaponHack(PlayerEntity* playerEntity, WeaponTypes weaponType,
 	if (!isValidEntity(playerEntity))
 		return false;
 
-	Weapon* weapon = getWeaponPtr(playerEntity, weaponType);
+	Weapon* weaponPtr = playerEntity->weaponsPtr[(int)weaponType];// getWeaponPtr(playerEntity, weaponType);
 
-	if (weapon == nullptr)
+	if (weaponPtr == nullptr)
 		return false;
 
 	switch (weaponHackType)
 	{
 	case WeaponHackTypes::NoSpread:
 		// No spread was disabled
-		if (weapon->weaponCharacsPtr->firstShotsSpread == c_defaultWeaponsSpread[(WORD)weaponType])
+		if (weaponPtr->weaponCharacsPtr->firstShotsSpread == c_defaultWeaponsSpread[(WORD)weaponType])
 		{
 			// Enable no spread
-			weapon->weaponCharacsPtr->firstShotsSpread = 0;
+			weaponPtr->weaponCharacsPtr->firstShotsSpread = 0;
 		}
 		// No spread was enabled
 		else
 		{
 			// Disable no spread
-			weapon->weaponCharacsPtr->firstShotsSpread = c_defaultWeaponsSpread[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->firstShotsSpread = c_defaultWeaponsSpread[(WORD)weaponType];
 		}
 		break;
 
 	case WeaponHackTypes::NoRecoil:
 		// No recoil was disabled
-		if (weapon->weaponCharacsPtr->recoil == c_defaultWeaponsRecoil[(WORD)weaponType])
+		if (weaponPtr->weaponCharacsPtr->recoil == c_defaultWeaponsRecoil[(WORD)weaponType])
 		{
 			// Enable no recoil
-			weapon->weaponCharacsPtr->recoil = 0;
-			weapon->weaponCharacsPtr->recoilAnimation = 0;
+			weaponPtr->weaponCharacsPtr->recoil = 0;
+			weaponPtr->weaponCharacsPtr->recoilAnimation = 0;
 		}
 		// No recoil was enabled
 		else
 		{
 			// Disable no recoil
-			weapon->weaponCharacsPtr->recoil = c_defaultWeaponsRecoil[(WORD)weaponType];
-			weapon->weaponCharacsPtr->recoilAnimation = c_defaultWeaponsRecoilAnimation[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->recoil = c_defaultWeaponsRecoil[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->recoilAnimation = c_defaultWeaponsRecoilAnimation[(WORD)weaponType];
 		}
 		break;
 
 	case WeaponHackTypes::NoKickback:
 		// No kickback was disabled
-		if (weapon->weaponCharacsPtr->kickback == c_defaultWeaponsKickback[(WORD)weaponType])
+		if (weaponPtr->weaponCharacsPtr->kickback == c_defaultWeaponsKickback[(WORD)weaponType])
 		{
 			// Enable no kickback
-			weapon->weaponCharacsPtr->kickback = 0;
-			weapon->weaponCharacsPtr->kickbackAnimation = 0;
+			weaponPtr->weaponCharacsPtr->kickback = 0;
+			weaponPtr->weaponCharacsPtr->kickbackAnimation = 0;
 		}
 		// No kickback was enabled
 		else
 		{
 			// Disable no kickback
-			weapon->weaponCharacsPtr->kickback = c_defaultWeaponsKickback[(WORD)weaponType];
-			weapon->weaponCharacsPtr->kickbackAnimation = c_defaultWeaponsKickbackAnimation[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->kickback = c_defaultWeaponsKickback[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->kickbackAnimation = c_defaultWeaponsKickbackAnimation[(WORD)weaponType];
 		}
 		break;
 
 	case WeaponHackTypes::NoSelfKickback:
 		// No self kickback was disabled
-		if (weapon->weaponCharacsPtr->targetKickback == c_defaultWeaponsTargetKickback[(WORD)weaponType])
+		if (weaponPtr->weaponCharacsPtr->targetKickback == c_defaultWeaponsTargetKickback[(WORD)weaponType])
 		{
 			// Enable no self kickback
-			weapon->weaponCharacsPtr->targetKickback = 0;
+			weaponPtr->weaponCharacsPtr->targetKickback = 0;
 		}
 		// No self kickback was enabled
 		else
 		{
 			// Disable no self kickback
-			weapon->weaponCharacsPtr->targetKickback = c_defaultWeaponsTargetKickback[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->targetKickback = c_defaultWeaponsTargetKickback[(WORD)weaponType];
 		}
 		break;
 
 	case WeaponHackTypes::SemiAuto:
 		// Semi auto was disabled
-		if (weapon->weaponCharacsPtr->isSemiAutomatic == c_defaultWeaponsIsSemiAutomatic[(WORD)weaponType])
+		if (weaponPtr->weaponCharacsPtr->isSemiAutomatic == c_defaultWeaponsIsSemiAutomatic[(WORD)weaponType])
 		{
 			// Enable semi auto
-			weapon->weaponCharacsPtr->isSemiAutomatic = 1;
+			weaponPtr->weaponCharacsPtr->isSemiAutomatic = 1;
 		}
 		// Semi auto kickback was enabled
 		else
 		{
 			// Disable semi auto
-			weapon->weaponCharacsPtr->isSemiAutomatic = c_defaultWeaponsIsSemiAutomatic[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->isSemiAutomatic = c_defaultWeaponsIsSemiAutomatic[(WORD)weaponType];
 		}
 		break;
 
@@ -221,9 +221,9 @@ bool Hacks::toggleWeaponHack(PlayerEntity* playerEntity, WeaponTypes weaponType,
 	if (!isValidEntity(playerEntity))
 		return false;
 
-	Weapon* weapon = getWeaponPtr(playerEntity, weaponType);
+	Weapon* weaponPtr = playerEntity->weaponsPtr[(int)weaponType];// getWeaponPtr(playerEntity, weaponType);
 
-	if (weapon == nullptr)
+	if (weaponPtr == nullptr)
 		return false;
 
 	switch (weaponHackType)
@@ -232,12 +232,12 @@ bool Hacks::toggleWeaponHack(PlayerEntity* playerEntity, WeaponTypes weaponType,
 		if (enable)
 		{
 			// Enable no spread
-			weapon->weaponCharacsPtr->firstShotsSpread = 0;
+			weaponPtr->weaponCharacsPtr->firstShotsSpread = 0;
 		}
 		else
 		{
 			// Disable no spread
-			weapon->weaponCharacsPtr->firstShotsSpread = c_defaultWeaponsSpread[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->firstShotsSpread = c_defaultWeaponsSpread[(WORD)weaponType];
 		}
 		break;
 
@@ -245,14 +245,14 @@ bool Hacks::toggleWeaponHack(PlayerEntity* playerEntity, WeaponTypes weaponType,
 		if (enable)
 		{
 			// Enable no recoil
-			weapon->weaponCharacsPtr->recoil = 0;
-			weapon->weaponCharacsPtr->recoilAnimation = 0;
+			weaponPtr->weaponCharacsPtr->recoil = 0;
+			weaponPtr->weaponCharacsPtr->recoilAnimation = 0;
 		}
 		else
 		{
 			// Disable no recoil
-			weapon->weaponCharacsPtr->recoil = c_defaultWeaponsRecoil[(WORD)weaponType];
-			weapon->weaponCharacsPtr->recoilAnimation = c_defaultWeaponsRecoilAnimation[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->recoil = c_defaultWeaponsRecoil[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->recoilAnimation = c_defaultWeaponsRecoilAnimation[(WORD)weaponType];
 		}
 		break;
 
@@ -260,14 +260,14 @@ bool Hacks::toggleWeaponHack(PlayerEntity* playerEntity, WeaponTypes weaponType,
 		if (enable)
 		{
 			// Enable no kickback
-			weapon->weaponCharacsPtr->kickback = 0;
-			weapon->weaponCharacsPtr->kickbackAnimation = 0;
+			weaponPtr->weaponCharacsPtr->kickback = 0;
+			weaponPtr->weaponCharacsPtr->kickbackAnimation = 0;
 		}
 		else
 		{
 			// Disable no kickback
-			weapon->weaponCharacsPtr->kickback = c_defaultWeaponsKickback[(WORD)weaponType];
-			weapon->weaponCharacsPtr->kickbackAnimation = c_defaultWeaponsKickbackAnimation[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->kickback = c_defaultWeaponsKickback[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->kickbackAnimation = c_defaultWeaponsKickbackAnimation[(WORD)weaponType];
 		}
 		break;
 
@@ -275,12 +275,12 @@ bool Hacks::toggleWeaponHack(PlayerEntity* playerEntity, WeaponTypes weaponType,
 		if (enable)
 		{
 			// Enable no self kickback
-			weapon->weaponCharacsPtr->targetKickback = 0;
+			weaponPtr->weaponCharacsPtr->targetKickback = 0;
 		}
 		else
 		{
 			// Disable no self kickback
-			weapon->weaponCharacsPtr->targetKickback = c_defaultWeaponsTargetKickback[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->targetKickback = c_defaultWeaponsTargetKickback[(WORD)weaponType];
 		}
 		break;
 
@@ -288,12 +288,12 @@ bool Hacks::toggleWeaponHack(PlayerEntity* playerEntity, WeaponTypes weaponType,
 		if (enable)
 		{
 			// Enable semi auto
-			weapon->weaponCharacsPtr->isSemiAutomatic = 1;
+			weaponPtr->weaponCharacsPtr->isSemiAutomatic = 1;
 		}
 		else
 		{
 			// Disable semi auto
-			weapon->weaponCharacsPtr->isSemiAutomatic = c_defaultWeaponsIsSemiAutomatic[(WORD)weaponType];
+			weaponPtr->weaponCharacsPtr->isSemiAutomatic = c_defaultWeaponsIsSemiAutomatic[(WORD)weaponType];
 		}
 		break;
 
@@ -311,9 +311,9 @@ bool Hacks::toggleAllWeaponsHack(PlayerEntity* playerEntity, WeaponHackTypes wea
 
 	for (int weaponType = 0; weaponType < (int)WeaponTypes::Akimbo; weaponType++)
 	{
-		Weapon* weapon = getWeaponPtr(playerEntity, (WeaponTypes)weaponType);
+		Weapon* weaponPtr = playerEntity->weaponsPtr[weaponType];// getWeaponPtr(playerEntity, (WeaponTypes)weaponType);
 
-		if (weapon == nullptr)
+		if (weaponPtr == nullptr)
 			return false;
 
 		switch (weaponHackType)
@@ -322,12 +322,12 @@ bool Hacks::toggleAllWeaponsHack(PlayerEntity* playerEntity, WeaponHackTypes wea
 			if (enable)
 			{
 				// Enable no spread
-				weapon->weaponCharacsPtr->firstShotsSpread = 0;
+				weaponPtr->weaponCharacsPtr->firstShotsSpread = 0;
 			}
 			else
 			{
 				// Disable no spread
-				weapon->weaponCharacsPtr->firstShotsSpread = c_defaultWeaponsSpread[weaponType];
+				weaponPtr->weaponCharacsPtr->firstShotsSpread = c_defaultWeaponsSpread[weaponType];
 			}
 			break;
 
@@ -335,14 +335,14 @@ bool Hacks::toggleAllWeaponsHack(PlayerEntity* playerEntity, WeaponHackTypes wea
 			if (enable)
 			{
 				// Enable no recoil
-				weapon->weaponCharacsPtr->recoil = 0;
-				weapon->weaponCharacsPtr->recoilAnimation = 0;
+				weaponPtr->weaponCharacsPtr->recoil = 0;
+				weaponPtr->weaponCharacsPtr->recoilAnimation = 0;
 			}
 			else
 			{
 				// Disable no recoil
-				weapon->weaponCharacsPtr->recoil = c_defaultWeaponsRecoil[weaponType];
-				weapon->weaponCharacsPtr->recoilAnimation = c_defaultWeaponsRecoilAnimation[weaponType];
+				weaponPtr->weaponCharacsPtr->recoil = c_defaultWeaponsRecoil[weaponType];
+				weaponPtr->weaponCharacsPtr->recoilAnimation = c_defaultWeaponsRecoilAnimation[weaponType];
 			}
 			break;
 
@@ -350,14 +350,14 @@ bool Hacks::toggleAllWeaponsHack(PlayerEntity* playerEntity, WeaponHackTypes wea
 			if (enable)
 			{
 				// Enable no kickback
-				weapon->weaponCharacsPtr->kickback = 0;
-				weapon->weaponCharacsPtr->kickbackAnimation = 0;
+				weaponPtr->weaponCharacsPtr->kickback = 0;
+				weaponPtr->weaponCharacsPtr->kickbackAnimation = 0;
 			}
 			else
 			{
 				// Disable no kickback
-				weapon->weaponCharacsPtr->kickback = c_defaultWeaponsKickback[weaponType];
-				weapon->weaponCharacsPtr->kickbackAnimation = c_defaultWeaponsKickbackAnimation[weaponType];
+				weaponPtr->weaponCharacsPtr->kickback = c_defaultWeaponsKickback[weaponType];
+				weaponPtr->weaponCharacsPtr->kickbackAnimation = c_defaultWeaponsKickbackAnimation[weaponType];
 			}
 			break;
 
@@ -365,12 +365,12 @@ bool Hacks::toggleAllWeaponsHack(PlayerEntity* playerEntity, WeaponHackTypes wea
 			if (enable)
 			{
 				// Enable no self kickback
-				weapon->weaponCharacsPtr->targetKickback = 0;
+				weaponPtr->weaponCharacsPtr->targetKickback = 0;
 			}
 			else
 			{
 				// Disable no self kickback
-				weapon->weaponCharacsPtr->targetKickback = c_defaultWeaponsTargetKickback[weaponType];
+				weaponPtr->weaponCharacsPtr->targetKickback = c_defaultWeaponsTargetKickback[weaponType];
 			}
 			break;
 
@@ -378,12 +378,12 @@ bool Hacks::toggleAllWeaponsHack(PlayerEntity* playerEntity, WeaponHackTypes wea
 			if (enable)
 			{
 				// Enable semi auto
-				weapon->weaponCharacsPtr->isSemiAutomatic = 1;
+				weaponPtr->weaponCharacsPtr->isSemiAutomatic = 1;
 			}
 			else
 			{
 				// Disable semi auto
-				weapon->weaponCharacsPtr->isSemiAutomatic = c_defaultWeaponsIsSemiAutomatic[weaponType];
+				weaponPtr->weaponCharacsPtr->isSemiAutomatic = c_defaultWeaponsIsSemiAutomatic[weaponType];
 			}
 			break;
 
@@ -400,9 +400,9 @@ bool Hacks::getWeaponHackState(PlayerEntity* playerEntity, WeaponTypes weaponTyp
 	if (!isValidEntity(playerEntity))
 		return false;
 
-	Weapon* weapon = getWeaponPtr(playerEntity, weaponType);
+	Weapon* weaponPtr = playerEntity->weaponsPtr[(int)weaponType];// getWeaponPtr(playerEntity, weaponType);
 
-	if (weapon == nullptr)
+	if (weaponPtr == nullptr)
 		return false;
 
 	bool state = false;
@@ -410,31 +410,31 @@ bool Hacks::getWeaponHackState(PlayerEntity* playerEntity, WeaponTypes weaponTyp
 	{
 	case WeaponHackTypes::NoSpread:
 		// No spread is enabled
-		if (weapon->weaponCharacsPtr->firstShotsSpread != c_defaultWeaponsSpread[(WORD)weaponType])
+		if (weaponPtr->weaponCharacsPtr->firstShotsSpread != c_defaultWeaponsSpread[(WORD)weaponType])
 			state = true;
 		break;
 
 	case WeaponHackTypes::NoRecoil:
 		// No recoil is enabled
-		if (weapon->weaponCharacsPtr->recoil != c_defaultWeaponsRecoil[(WORD)weaponType])
+		if (weaponPtr->weaponCharacsPtr->recoil != c_defaultWeaponsRecoil[(WORD)weaponType])
 			state = true;
 		break;
 
 	case WeaponHackTypes::NoKickback:
 		// No kickback is enabled
-		if (weapon->weaponCharacsPtr->kickback != c_defaultWeaponsKickback[(WORD)weaponType])
+		if (weaponPtr->weaponCharacsPtr->kickback != c_defaultWeaponsKickback[(WORD)weaponType])
 			state = true;
 		break;
 
 	case WeaponHackTypes::NoSelfKickback:
 		// No self kickback is enabled
-		if (weapon->weaponCharacsPtr->targetKickback != c_defaultWeaponsTargetKickback[(WORD)weaponType])
+		if (weaponPtr->weaponCharacsPtr->targetKickback != c_defaultWeaponsTargetKickback[(WORD)weaponType])
 			state = true;
 		break;
 
 	case WeaponHackTypes::SemiAuto:
 		// Semi auto is enabled
-		if (weapon->weaponCharacsPtr->isSemiAutomatic != 0)	//c_defaultWeaponsIsSemiAutomatic[(WORD)weaponType])
+		if (weaponPtr->weaponCharacsPtr->isSemiAutomatic != 0)	//c_defaultWeaponsIsSemiAutomatic[(WORD)weaponType])
 			state = true;
 
 	default:
