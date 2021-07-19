@@ -29,6 +29,8 @@ std::vector<PlayerEntity*> Hacks::getValidEntityList(PlayerEntity** entityList, 
 	if (entityList)
 	{
 		int entitiesFound = 0;
+		// Entities are not next to each others in the array
+		// So we have to check every entry of the array
 		for (int i = 1; entitiesFound < entityNumber && i < (MAX_NUMBER_OF_PLAYER - 1); i++)  // i = 1 because first 4 bytes are null; MAX_NUMBER_OF_PLAYER -1 because our own playerEntity isn't in the array
 		//for (int i = 1; i < (MAX_NUMBER_OF_PLAYER - 1); i++)  // i = 1 because first 4 bytes are null; MAX_NUMBER_OF_PLAYER -1 because our own playerEntity isn't in the array
 		{
@@ -49,6 +51,8 @@ bool Hacks::isValidEntity(PlayerEntity* playerEntity)
 {
 	if (playerEntity != nullptr)
 	{
+		// The try catch is to prevent try to dereference a not a pointer variable
+		// which would lead to an EXCEPTION_ACCESS_VIOLATION
 		__try
 		{
 			if (playerEntity->vTable == c_playerEntityType || playerEntity->vTable == c_botEntityType)

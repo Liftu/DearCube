@@ -16,11 +16,14 @@
     <Filter Include="pch">
       <UniqueIdentifier>{c88e700f-b6ea-4805-bcdc-adb79c3c75bd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="memory">
-      <UniqueIdentifier>{ef45096e-f6d5-4d1e-90e9-1977b0948f29}</UniqueIdentifier>
-    </Filter>
     <Filter Include="hacking">
       <UniqueIdentifier>{787b7154-b1a6-4fbf-a50c-f87c22537f7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hooking">
+      <UniqueIdentifier>{7d6f2bf9-e798-4749-9a63-c1f3846f4711}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game">
+      <UniqueIdentifier>{ef45096e-f6d5-4d1e-90e9-1977b0948f29}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -34,10 +37,13 @@
       <Filter>hacking</Filter>
     </ClInclude>
     <ClInclude Include="gameStructures.h">
-      <Filter>memory</Filter>
+      <Filter>game</Filter>
     </ClInclude>
     <ClInclude Include="gameVariables.h">
-      <Filter>memory</Filter>
+      <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="hook32.h">
+      <Filter>hooking</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -49,6 +55,9 @@
     </ClCompile>
     <ClCompile Include="hacks.cpp">
       <Filter>hacking</Filter>
+    </ClCompile>
+    <ClCompile Include="hook32.cpp">
+      <Filter>hooking</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
