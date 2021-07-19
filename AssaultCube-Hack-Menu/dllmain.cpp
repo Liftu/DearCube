@@ -1,24 +1,61 @@
 // dllmain.cpp : Définit le point d'entrée de l'application DLL.
 #include "pch.h"
 #include "hook32.h"
+#include "glDraw.h"
+#include "glText.h"
 #include "hacks.h"
 #include "gameVariables.h"
 #include "gameStructures.h"
 
+// Globals
+// Get module base address
+DWORD moduleBaseAddr = (DWORD)GetModuleHandle(L"ac_client.exe");
+
+
+
+// Hooking
 // Define a function pointer
 typedef BOOL(__stdcall* t_wglSwapBuffers)(HDC hDc);
-
 // Declare the function pointer variable
-t_wglSwapBuffers original_wglSwapBuffers;
-
+t_wglSwapBuffers gateway_wglSwapBuffers;
 // Define the hoooked function (this will be our mainloop)
+
+GL::Font glFont;
+const int FONT_HEIGHT = 15;
+const int FONT_WIDTH = 9;
+
+const char* example1 = "ESP Box";
+const char* example2 = "I'm inside fam";
+
+void draw()
+{
+    HDC currentHDC = wglGetCurrentDC();
+
+    if (!glFont.bBuilt || currentHDC != glFont.hDc)
+    {
+        glFont.build(FONT_HEIGHT);
+    }
+
+    GL::setupOrtho();
+
+    // Box
+    GL::drawOutline(300, 300, 200, 200, 1.0f, rgb::red);
+
+    // Example text 1
+    float textPointX = glFont.centerText(300, 200, strlen(example1) * FONT_WIDTH);
+    float textPointY = 300 - FONT_HEIGHT / 2;
+    glFont.print(textPointX, textPointY, rgb::green, "%s", example1);
+
+    // Example text 2
+    Vec3 insideTextPoint = glFont.centerText(300, 300 + 100, 200, 200, strlen(example2) * FONT_WIDTH, FONT_HEIGHT);
+    glFont.print(insideTextPoint.x, insideTextPoint.y, rgb::ligthGrey, "%s", example2);
+
+    GL::restoreGL();
+}
+
 BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
 {
     static bool enable = false;
-
-    // Get module base
-    DWORD moduleBaseAddr = (DWORD)GetModuleHandle(L"ac_client.exe");
-    /**/std::cout << "ac_client base address : 0x" << std::hex << moduleBaseAddr << std::endl;
 
     // Retrieve in-game objects
 
@@ -93,8 +130,10 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
             /**/std::cout << "Unable to toggle all hack." << std::endl;
     }
 
-    // Update screen
-    return original_wglSwapBuffers(hDc);
+    draw();
+
+    // Update screen by calling the original wglSwapBuffers function
+    return gateway_wglSwapBuffers(hDc);
 }
 
 DWORD WINAPI injectedThread(HMODULE hModule)
@@ -104,25 +143,27 @@ DWORD WINAPI injectedThread(HMODULE hModule)
     /**/FILE* con;
     /**/freopen_s(&con, "CONOUT$", "w", stdout);
     
+    /**/std::cout << "ac_client base address : 0x" << std::hex << moduleBaseAddr << std::endl;
+
     /**/std::cout << "Hack loop : " << std::endl;
 
     // Hooking
-    // This function seems to be call at every screen update
-    original_wglSwapBuffers = (t_wglSwapBuffers)Hook32::getFunctionAddr("opengl32.dll", "wglSwapBuffers");
-    if (original_wglSwapBuffers)
-        // set our function pointer to the gateway address so our hooked function can call the gateway on return call
-        original_wglSwapBuffers = (t_wglSwapBuffers)Hook32::trampolineHook32(original_wglSwapBuffers, hooked_wglSwapBuffers, 5);
-    /**/else
-        /**/std::cout << "Unable to hook opengl wglSwapBuffers!" << std::endl;
-
-
+    // the OpenGL SwapBuffers function is called at every screen update
+    Hook32 swapBuffersHook32("opengl32.dll", "wglSwapBuffers", hooked_wglSwapBuffers, &gateway_wglSwapBuffers, 5);
+    swapBuffersHook32.enable();
+    
+    // END key to terminate 
+    while (!(GetAsyncKeyState(VK_END) & 1))
+        Sleep(5);
+    swapBuffersHook32.disable();
 
     // Cleanup & exit (WHEN UNHOOKING IMPLEMENTED)
-    ///**/std::cout << "Exiting..." << std::endl;
-    ///**/if (con)
-    ///**/    fclose(con);
-    ///**/FreeConsole();
-    //FreeLibraryAndExitThread(hModule, EXIT_SUCCESS);
+    /**/std::cout << "Exiting..." << std::endl;
+    /**/if (con)
+    /**/    fclose(con);
+    /**/FreeConsole();
+    // SOMETIMES THE WHOLE PROCCESS CRACHES WHEN CALLING THIS
+    FreeLibraryAndExitThread(hModule, EXIT_SUCCESS);
 
     return 0;
 }

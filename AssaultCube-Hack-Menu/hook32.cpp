@@ -7,7 +7,7 @@ Hook32::Hook32(LPVOID srcAddr, LPVOID dstAddr, LPVOID ptrToGatewayFuncPtr, SIZE_
 	this->dstAddr = dstAddr;
 	this->ptrToGatewayFuncPtr = ptrToGatewayFuncPtr;
 
-	// len as to be the minimum size of the complete 
+	// len as to be the minimum size of the complete
 	// intructions opcodes that will be override
 	// it shouldn't take more than 16 bytes
 	// Minimum jump size is 5 bytes in 32 bits
@@ -16,6 +16,7 @@ Hook32::Hook32(LPVOID srcAddr, LPVOID dstAddr, LPVOID ptrToGatewayFuncPtr, SIZE_
 	else
 		this->len = len;
 
+	memset(this->originalBytes, 0, MAX_LEN);
 	this->bStatus = false;
 }
 
@@ -23,7 +24,24 @@ Hook32::Hook32(LPCSTR moduleName, LPCSTR functionName, LPVOID dstAddr, LPVOID pt
 {
 	LPVOID srcAddr = getFunctionAddr(moduleName, functionName);
 	if (srcAddr)
-		Hook32(srcAddr, dstAddr, ptrToGatewayFuncPtr, len);
+		//Hook32(srcAddr, dstAddr, ptrToGatewayFuncPtr, len);	// Cannot do this...
+	{
+		this->srcAddr = srcAddr;
+		this->dstAddr = dstAddr;
+		this->ptrToGatewayFuncPtr = ptrToGatewayFuncPtr;
+
+		// len as to be the minimum size of the complete
+		// intructions opcodes that will be override
+		// it shouldn't take more than 16 bytes
+		// Minimum jump size is 5 bytes in 32 bits
+		if (len < MIN_LEN || len > MAX_LEADBYTES)
+			throw(EXCEPTION_HOOK_INCORRECT_LEN);
+		else
+			this->len = len;
+
+		memset(this->originalBytes, 0, MAX_LEN);
+		this->bStatus = false;
+	}
 	else
 		throw(EXCEPTION_HOOK_INCORRECT_MODULE_OR_FUNCTION_NAME);
 }

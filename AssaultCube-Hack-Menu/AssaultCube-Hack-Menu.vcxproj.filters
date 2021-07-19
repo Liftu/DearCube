@@ -25,6 +25,9 @@
     <Filter Include="game">
       <UniqueIdentifier>{ef45096e-f6d5-4d1e-90e9-1977b0948f29}</UniqueIdentifier>
     </Filter>
+    <Filter Include="opengl">
+      <UniqueIdentifier>{a373c8ed-5e1d-4a56-ae1a-4a55f4d815fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -45,6 +48,12 @@
     <ClInclude Include="hook32.h">
       <Filter>hooking</Filter>
     </ClInclude>
+    <ClInclude Include="glText.h">
+      <Filter>opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="glDraw.h">
+      <Filter>opengl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -58,6 +67,12 @@
     </ClCompile>
     <ClCompile Include="hook32.cpp">
       <Filter>hooking</Filter>
+    </ClCompile>
+    <ClCompile Include="glText.cpp">
+      <Filter>opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="glDraw.cpp">
+      <Filter>opengl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
