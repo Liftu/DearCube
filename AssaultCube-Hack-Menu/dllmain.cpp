@@ -38,17 +38,17 @@ void draw()
 
     GL::setupOrtho();
 
-    // Box
-    GL::drawOutline(300, 300, 200, 200, 1.0f, rgb::red);
+    //// Box
+    //GL::drawOutline(300, 300, 200, 200, 1.0f, rgb::red);
 
-    // Example text 1
-    float textPointX = glFont.centerText(300, 200, strlen(example1) * FONT_WIDTH);
-    float textPointY = 300 - FONT_HEIGHT / 2;
-    glFont.print(textPointX, textPointY, rgb::green, "%s", example1);
+    //// Example text 1
+    //float textPointX = glFont.centerText(300, 200, strlen(example1) * FONT_WIDTH);
+    //float textPointY = 300 - FONT_HEIGHT / 2;
+    //glFont.print(textPointX, textPointY, rgb::green, "%s", example1);
 
-    // Example text 2
-    Vec3 insideTextPoint = glFont.centerText(300, 300 + 100, 200, 200, strlen(example2) * FONT_WIDTH, FONT_HEIGHT);
-    glFont.print(insideTextPoint.x, insideTextPoint.y, rgb::ligthGrey, "%s", example2);
+    //// Example text 2
+    //Vec3 insideTextPoint = glFont.centerText(300, 300 + 100, 200, 200, strlen(example2) * FONT_WIDTH, FONT_HEIGHT);
+    //glFont.print(insideTextPoint.x, insideTextPoint.y, rgb::ligthGrey, "%s", example2);
 
     GL::restoreGL();
 }
