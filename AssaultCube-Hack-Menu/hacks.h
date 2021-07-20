@@ -1,6 +1,8 @@
 #pragma once
 
-#include "pch.h"
+#include <Windows.h>
+#include <vector>
+
 #include "gameStructures.h"
 #include "gameVariables.h"
 

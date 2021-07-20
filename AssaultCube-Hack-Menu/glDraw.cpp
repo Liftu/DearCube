@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "glDraw.h"
 
 void GL::setupOrtho()

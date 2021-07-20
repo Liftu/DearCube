@@ -1,8 +1,4 @@
-#include "pch.h" // WHY ???
 #include "hacks.h"
-
-#include "gameStructures.h"
-#include "gameVariables.h"
 
 // Entities stuff
 

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Hook32.h"
 
 Hook32::Hook32(LPVOID srcAddr, LPVOID dstAddr, LPVOID ptrToGatewayFuncPtr, SIZE_T len)

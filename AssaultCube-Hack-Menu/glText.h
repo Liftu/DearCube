@@ -1,6 +1,7 @@
 #pragma once
 #pragma comment(lib, "Opengl32.lib")
-#include "pch.h"
+
+#include <Windows.h>
 #include <stdio.h>
 #include <gl/GL.h>
 

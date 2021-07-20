@@ -1,7 +1,6 @@
 #pragma once
 
-//#include <iostream>
-#include "pch.h"
+#include <iostream>
 
 struct Vector2
 {

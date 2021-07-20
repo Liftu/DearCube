@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "glText.h"
 
 void GL::Font::build(int height)

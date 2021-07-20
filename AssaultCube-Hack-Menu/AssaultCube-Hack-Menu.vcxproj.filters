@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="pch">
-      <UniqueIdentifier>{c88e700f-b6ea-4805-bcdc-adb79c3c75bd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="hacking">
       <UniqueIdentifier>{787b7154-b1a6-4fbf-a50c-f87c22537f7f}</UniqueIdentifier>
     </Filter>
@@ -28,14 +25,14 @@
     <Filter Include="opengl">
       <UniqueIdentifier>{a373c8ed-5e1d-4a56-ae1a-4a55f4d815fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{e77c76e5-b2ab-4726-9a50-71dec8e2a6ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="menu">
+      <UniqueIdentifier>{fd74dcaf-f16b-4dd9-b212-b8e409ba8935}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
-      <Filter>pch</Filter>
-    </ClInclude>
-    <ClInclude Include="framework.h">
-      <Filter>pch</Filter>
-    </ClInclude>
     <ClInclude Include="hacks.h">
       <Filter>hacking</Filter>
     </ClInclude>
@@ -54,13 +51,28 @@
     <ClInclude Include="glDraw.h">
       <Filter>opengl</Filter>
     </ClInclude>
+    <ClInclude Include="Menu.h">
+      <Filter>menu</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\imgui\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\imgui\imgui_internal.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\imgui\backends\imgui_impl_opengl2.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\imgui\backends\imgui_impl_win32.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\imgui\imgui.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
       <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp">
-      <Filter>pch</Filter>
     </ClCompile>
     <ClCompile Include="hacks.cpp">
       <Filter>hacking</Filter>
@@ -73,6 +85,30 @@
     </ClCompile>
     <ClCompile Include="glDraw.cpp">
       <Filter>opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>menu</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui_demo.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\backends\imgui_impl_opengl2.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\backends\imgui_impl_win32.cpp">
+      <Filter>imgui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

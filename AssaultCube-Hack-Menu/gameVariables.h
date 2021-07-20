@@ -1,6 +1,8 @@
 #pragma once
 
-#include "pch.h"
+#include <Windows.h>
+
+#include "gameStructures.h"
 
 #define MAX_NUMBER_OF_PLAYER 32
 

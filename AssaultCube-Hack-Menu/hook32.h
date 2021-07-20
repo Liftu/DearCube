@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pch.h"
+#include <Windows.h>
 
 #define EXCEPTION_HOOK_INCORRECT_LEN						0x0
 #define EXCEPTION_HOOK_INCORRECT_MODULE_OR_FUNCTION_NAME	0x1
