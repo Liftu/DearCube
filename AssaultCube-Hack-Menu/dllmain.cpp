@@ -58,18 +58,19 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     static bool enable = false;
 
     // Retrieve in-game objects
+    GameObjects* gameObjects = Hacks::getGameObjectsPtr(moduleBaseAddr);
+    PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
+    EntityVector& playerEntityVector = gameObjects->playerEntityVector;
+    // Declaration with & operator so we do not copy the content, 
+    // instead we get a reference witouh having to declare a pointer.
 
-    // Get my player entity ptr
-    PlayerEntity* myPlayerEntity = Hacks::getMyPlayerEntity(moduleBaseAddr);
-    /**/std::cout << std::hex << "My player entity address : 0x" << (DWORD*)myPlayerEntity << std::endl;
-    myPlayerEntity->health = 1337;
+    /**/std::cout << std::hex << "My player entity address : 0x" << (DWORD*)myPlayerEntityPtr << std::endl;
 
-    // Get entity list as a vector of PlayerEntity pointers
-    PlayerEntity** entityList = Hacks::getPlayerEntityList(moduleBaseAddr);
-    DWORD numberOfPlayer = Hacks::getNumberOfPlayer(moduleBaseAddr);
-    /**/std::cout << std::dec << numberOfPlayer << " Players :" << std::endl;
+    /**/std::cout << std::dec << playerEntityVector.length << " Players :" << std::endl;
     /**///std::cout << "Players :" << std::endl;
-    std::vector<PlayerEntity*> validEntityList = Hacks::getValidEntityList(entityList, numberOfPlayer);
+    std::vector<PlayerEntity*> validEntityList = Hacks::getValidEntityList(&playerEntityVector);
+
+    myPlayerEntityPtr->health = 1337;
 
     // Key inputs
     if (GetAsyncKeyState(VK_END) & 1)
@@ -84,7 +85,7 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     else if (GetAsyncKeyState(VK_F1) & 1)
     {
         ///**/std::cout << "Showing/hide menu" << std::endl; 
-        if (Hacks::toggleWeaponHack(myPlayerEntity, Hacks::getCurrentWeaponType(myPlayerEntity), Hacks::WeaponHackTypes::NoSpread))
+        if (Hacks::toggleWeaponHack(myPlayerEntityPtr, Hacks::getCurrentWeaponType(myPlayerEntityPtr), Hacks::WeaponHackTypes::NoSpread))
             /**/std::cout << "Toggled no spread." << std::endl;
         /**/else
             /**/std::cout << "Unable to toggle no spread." << std::endl;
@@ -92,7 +93,7 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     else if (GetAsyncKeyState(VK_F2) & 1)
     {
         ///**/std::cout << "Showing/hide menu" << std::endl; 
-        if (Hacks::toggleWeaponHack(myPlayerEntity, Hacks::getCurrentWeaponType(myPlayerEntity), Hacks::WeaponHackTypes::NoRecoil))
+        if (Hacks::toggleWeaponHack(myPlayerEntityPtr, Hacks::getCurrentWeaponType(myPlayerEntityPtr), Hacks::WeaponHackTypes::NoRecoil))
             /**/std::cout << "Toggled no recoil." << std::endl;
         /**/else
             /**/std::cout << "Unable to toggle no recoil." << std::endl;
@@ -100,7 +101,7 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     else if (GetAsyncKeyState(VK_F3) & 1)
     {
         ///**/std::cout << "Showing/hide menu" << std::endl; 
-        if (Hacks::toggleWeaponHack(myPlayerEntity, Hacks::getCurrentWeaponType(myPlayerEntity), Hacks::WeaponHackTypes::NoKickback))
+        if (Hacks::toggleWeaponHack(myPlayerEntityPtr, Hacks::getCurrentWeaponType(myPlayerEntityPtr), Hacks::WeaponHackTypes::NoKickback))
             /**/std::cout << "Toggled no kickback." << std::endl;
         /**/else
             /**/std::cout << "Unable to toggle kickback." << std::endl;
@@ -108,7 +109,7 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     else if (GetAsyncKeyState(VK_F4) & 1)
     {
         ///**/std::cout << "Showing/hide menu" << std::endl; 
-        if (Hacks::toggleWeaponHack(myPlayerEntity, Hacks::getCurrentWeaponType(myPlayerEntity), Hacks::WeaponHackTypes::NoSelfKickback))
+        if (Hacks::toggleWeaponHack(myPlayerEntityPtr, Hacks::getCurrentWeaponType(myPlayerEntityPtr), Hacks::WeaponHackTypes::NoSelfKickback))
             /**/std::cout << "Toggled no self kickback." << std::endl;
         /**/else
             /**/std::cout << "Unable to toggle no self kickback." << std::endl;
@@ -116,7 +117,7 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     else if (GetAsyncKeyState(VK_F5) & 1)
     {
         ///**/std::cout << "Showing/hide menu" << std::endl; 
-        if (Hacks::toggleWeaponHack(myPlayerEntity, Hacks::getCurrentWeaponType(myPlayerEntity), Hacks::WeaponHackTypes::SemiAuto))
+        if (Hacks::toggleWeaponHack(myPlayerEntityPtr, Hacks::getCurrentWeaponType(myPlayerEntityPtr), Hacks::WeaponHackTypes::SemiAuto))
             /**/std::cout << "Toggled semi auto." << std::endl;
         /**/else
             /**/std::cout << "Unable to toggle semi auto." << std::endl;
@@ -125,7 +126,7 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     {
         enable = !enable;
         ///**/std::cout << "Showing/hide menu" << std::endl; 
-        if (Hacks::toggleAllWeaponsHack(myPlayerEntity, Hacks::WeaponHackTypes::NoRecoil, enable))
+        if (Hacks::toggleAllWeaponsHack(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoRecoil, enable))
             /**/std::cout << "Toggled all hack." << std::endl;
         /**/else
             /**/std::cout << "Unable to toggle all hack." << std::endl;

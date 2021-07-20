@@ -6,39 +6,47 @@
 
 // Entities stuff
 
-PlayerEntity* Hacks::getMyPlayerEntity(DWORD moduleBaseAddr)
+GameObjects* Hacks::getGameObjectsPtr(DWORD moduleBaseAddr)
 {
-	// Still don't know how to do it with a reinterpret_cast
-	//PlayerEntityClass* myPlayerEntity = reinterpret_cast<PlayerEntityClass*>(moduleBaseAddr + o_myPlayerEntityPtr);
-	return *(PlayerEntity**)(moduleBaseAddr + o_myPlayerEntityPtr);
+	return reinterpret_cast<GameObjects*>(moduleBaseAddr + o_gameObjects);
 }
 
-PlayerEntity** Hacks::getPlayerEntityList(DWORD moduleBaseAddr)
+PlayerEntity* Hacks::getMyPlayerEntityPtr(DWORD moduleBaseAddr)
 {
-	return *(PlayerEntity***)(moduleBaseAddr + o_entityListPtr);
+	return getGameObjectsPtr(moduleBaseAddr)->myPlayerEntityPtr;
+}
+
+EntityVector* Hacks::getPlayerEntityVectorPtr(DWORD moduleBaseAddr)
+{
+	return &getGameObjectsPtr(moduleBaseAddr)->playerEntityVector;
 }
 
 int Hacks::getNumberOfPlayer(DWORD moduleBaseAddr)
 {
-	return (*(int*)(moduleBaseAddr + o_entityListSize));
+	return getGameObjectsPtr(moduleBaseAddr)->playerEntityVector.length;
 }
 
-std::vector<PlayerEntity*> Hacks::getValidEntityList(PlayerEntity** entityList, int entityNumber)
+std::vector<PlayerEntity*> Hacks::getValidEntityList(EntityVector* playerEntityVector)
 {
 	std::vector<PlayerEntity*> validEntityList;
-	if (entityList)
+	// enittyListPtr is a pointer on an array of pointers of PlayerEntity
+	if (playerEntityVector && playerEntityVector->entityListPtr)
 	{
 		int entitiesFound = 0;
 		// Entities are not next to each others in the array
 		// So we have to check every entry of the array
-		for (int i = 1; entitiesFound < entityNumber && i < (MAX_NUMBER_OF_PLAYER - 1); i++)  // i = 1 because first 4 bytes are null; MAX_NUMBER_OF_PLAYER -1 because our own playerEntity isn't in the array
+		// capacity is the size of the allocated array
+		for (int i = 0; i < playerEntityVector->length; i++)
+		//for (int i = 0; entitiesFound < playerEntityVector->length && i < playerEntityVector->capacity; i++)
 		//for (int i = 1; i < (MAX_NUMBER_OF_PLAYER - 1); i++)  // i = 1 because first 4 bytes are null; MAX_NUMBER_OF_PLAYER -1 because our own playerEntity isn't in the array
 		{
 			///**/std::cout << "[DEBUG] Looking at index " << i << std::endl;
-			if (isValidEntity(entityList[i]))
+			// Pointer arithmetic is messing up how we access our entityList array
+			// Probably the problem comes from how we declared our enityListPtr array.
+			if (isValidEntity((*playerEntityVector->entityListPtr)[i]))
 			{
 				entitiesFound++;
-				validEntityList.push_back(entityList[i]);
+				validEntityList.push_back((*playerEntityVector->entityListPtr)[i]);
 				/**/std::cout << "Found \"" << validEntityList.back()->name << "\"" << std::endl;
 			}
 		}
@@ -53,6 +61,13 @@ bool Hacks::isValidEntity(PlayerEntity* playerEntity)
 	{
 		// The try catch is to prevent try to dereference a not a pointer variable
 		// which would lead to an EXCEPTION_ACCESS_VIOLATION
+		// May want to use IsBadReadPtr() :
+		//if (pPointer && HIWORD(pPointer))
+		//{
+		//	if (!IsBadReadPtr(pPointer, sizeof(DWORD_PTR)))
+		//		return true;
+		//}
+		//return false;
 		__try
 		{
 			if (playerEntity->vTable == c_playerEntityType || playerEntity->vTable == c_botEntityType)

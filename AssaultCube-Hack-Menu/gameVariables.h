@@ -4,9 +4,12 @@
 
 #define MAX_NUMBER_OF_PLAYER 32
 
-const DWORD o_myPlayerEntityPtr	= 0x0010F4F4;
-const DWORD o_entityListPtr		= 0x0010F4F8;
-const DWORD o_entityListSize	= 0x0010F500;
+// o_ for offsets
+// c_ for constants
+
+const DWORD o_gameObjects			= 0x0010F4F4;
+const DWORD o_playerEntityVectorPtr	= 0x0010F4F8;
+//const DWORD o_entityListSize		= 0x0010F500;
 
 const DWORD c_playerEntityType	= 0x004E4A98;
 const DWORD c_botEntityType		= 0x004E4AC0;

@@ -70,10 +70,28 @@ enum class SpectatingModes : int32_t
 	DeathCam = 1,
 	FirstPersonView = 2,
 	ThirdPersonView = 3,
-	ThirdPeronViewTransparency = 4,
-	FreeCam = 5,
+	ThirdPersonViewTransparency = 4,
+	FlyCam = 5,
 	Overview = 6,
 	SM_NUM = 7
+};
+
+enum class EntityTypes : int8_t
+{
+	Player = 0,
+	Bot = 1,
+	Camera = 2,
+	Bounce = 3
+};
+
+enum class States : int8_t
+{
+	Alive = 0,
+	Dead = 1,
+	Spawning = 2,
+	Lagged = 3,
+	Editing = 4,
+	Spectate = 5
 };
 
 class PlayerEntity
@@ -112,8 +130,8 @@ public:
 	int32_t lastWaterSplash; //0x007C
 	int8_t moveForwardBackward; //0x0080
 	int8_t moveRightLeft; //0x0081
-	uint8_t state; //0x0082
-	uint8_t type; //0x0083
+	States state; //0x0082
+	EntityTypes type; //0x0083
 	float eyeHeigthVel; //0x0084
 	int32_t lastPos; //0x0088
 	bool isPressingLeft; //0x008C
@@ -217,25 +235,19 @@ public:
 }; //Size: 0x012A
 static_assert(sizeof(WeaponCharacs) == 0x12A);
 
-class EntityListPtr
+class EntityVector
 {
 public:
 	class PlayerEntity* (*entityListPtr)[32]; //0x0000
-}; //Size: 0x0004
-static_assert(sizeof(EntityListPtr) == 0x4);
+	int32_t capacity; //0x0004
+	int32_t length; //0x0008
+}; //Size: 0x000C
+static_assert(sizeof(EntityVector) == 0xC);
 
-class EntityList
+class GameObjects
 {
 public:
-	char pad_0000[4]; //0x0000
-	class PlayerEntity* entityList[32]; //0x0004
-	char pad_0084[12]; //0x0084
-}; //Size: 0x0090
-static_assert(sizeof(EntityList) == 0x90);
-
-class N0000068F
-{
-public:
-	char pad_0000[68]; //0x0000
-}; //Size: 0x0044
-static_assert(sizeof(N0000068F) == 0x44);
+	class PlayerEntity* myPlayerEntityPtr; //0x0000
+	class EntityVector playerEntityVector; //0x0004
+}; //Size: 0x0010
+static_assert(sizeof(GameObjects) == 0x10);

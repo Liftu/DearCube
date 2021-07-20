@@ -7,10 +7,11 @@
 namespace Hacks
 {
 	// Entities stuff
-	PlayerEntity* getMyPlayerEntity(DWORD moduleBaseAddr);
-	PlayerEntity** getPlayerEntityList(DWORD moduleBaseAddr);
+	GameObjects* getGameObjectsPtr(DWORD moduleBaseAddr);
+	PlayerEntity* getMyPlayerEntityPtr(DWORD moduleBaseAddr);
+	EntityVector* getPlayerEntityVectorPtr(DWORD moduleBaseAddr);
 	int getNumberOfPlayer(DWORD moduleBaseAddr);
-	std::vector<PlayerEntity*> getValidEntityList(PlayerEntity** entityList, int entityNumber);
+	std::vector<PlayerEntity*> getValidEntityList(EntityVector* playerEntityVector);
 	bool isValidEntity(PlayerEntity* playerEntity);
 
 	// Weapons stuff
