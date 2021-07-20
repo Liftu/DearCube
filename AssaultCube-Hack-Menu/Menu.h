@@ -13,14 +13,24 @@
 #define SDL_DISABLE  0
 #define SDL_ENABLE   1
 
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+// Window WndProc hooking
+LRESULT __stdcall WndProc(const HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+class Menu;
+
+extern Menu* menu;
+
 class Menu
 {
 private:
+	HWND hwnd;
 	bool bRunning = false;
 	bool bShow = false;
 	int counter = 0;
 
-	// SDL definitions to manage the cursor
+	// SDL definitions for cursor display
 	typedef enum {
 		SDL_GRAB_QUERY,
 		SDL_GRAB_OFF,
@@ -37,7 +47,10 @@ public:
 
 	void drawMenu();
 	void render();
-	void init(HWND hwnd);
+	void init();
 	void shutdown();
+
+	bool isShown() { return this->bShow; }
+	bool isRunning() { return this->bRunning; }
 };
 

@@ -19,12 +19,13 @@ DWORD moduleBaseAddr = (DWORD)GetModuleHandle(L"ac_client.exe");
 Menu* menu;
 
 
-// Hooking
+// OpenGL wglSwapBuffers hooking
 // Define a function pointer
 typedef BOOL(__stdcall* t_wglSwapBuffers)(HDC hDc);
 // Declare the function pointer variable
 t_wglSwapBuffers gateway_wglSwapBuffers;
 // Define the hoooked function (this will be our mainloop)
+
 
 //GL::Font glFont;
 //const int FONT_HEIGHT = 15;
@@ -58,6 +59,7 @@ t_wglSwapBuffers gateway_wglSwapBuffers;
 //
 //    GL::restoreGL();
 //}
+
 
 BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
 {
@@ -156,7 +158,10 @@ DWORD WINAPI injectedThread(HMODULE hModule)
     ///**/std::cout << "Hack loop : " << std::endl;
 
     // Menu setup
-    menu = new Menu(FindWindowA(NULL, "AssaultCube"));
+
+    //oWndProc = (WNDPROC)SetWindowLongPtr(window, -4, (LONG_PTR)WndProc);
+    HWND hwnd = FindWindowA(NULL, "AssaultCube");
+    menu = new Menu(hwnd);
 
     // Hooking
     // the OpenGL SwapBuffers function is called at every screen update
@@ -164,17 +169,25 @@ DWORD WINAPI injectedThread(HMODULE hModule)
     swapBuffersHook32.enable();
     
     // END key to terminate 
-    while (!(GetAsyncKeyState(VK_END) & 1))
+    //while (!(GetAsyncKeyState(VK_END) & 1))
+    // If menu isn't running, then we unhook and exit.
+    while (menu->isRunning())
         Sleep(5);
     swapBuffersHook32.disable();
+
 
     // Cleanup & exit (WHEN UNHOOKING IMPLEMENTED)
     ///**/std::cout << "Exiting..." << std::endl;
     ///**/if (con)
     ///**/    fclose(con);
     ///**/FreeConsole();
+    /// 
     // SOMETIMES THE WHOLE PROCCESS CRACHES WHEN CALLING THIS
     FreeLibraryAndExitThread(hModule, EXIT_SUCCESS);
+    // Just to debug when we have a crash on exit.
+    // If we don't have the crash without freeing the library,
+    // then it probably means that the crash was caused by a hooking.
+    //ExitThread(EXIT_SUCCESS);
 
     return 0;
 }

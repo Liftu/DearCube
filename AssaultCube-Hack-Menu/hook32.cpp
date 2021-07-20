@@ -6,7 +6,7 @@ Hook32::Hook32(LPVOID srcAddr, LPVOID dstAddr, LPVOID ptrToGatewayFuncPtr, SIZE_
 	this->dstAddr = dstAddr;
 	this->ptrToGatewayFuncPtr = ptrToGatewayFuncPtr;
 
-	// len as to be the minimum size of the complete
+	// len has to be the minimum size of the complete
 	// intructions opcodes that will be override
 	// it shouldn't take more than 16 bytes
 	// Minimum jump size is 5 bytes in 32 bits
@@ -29,7 +29,7 @@ Hook32::Hook32(LPCSTR moduleName, LPCSTR functionName, LPVOID dstAddr, LPVOID pt
 		this->dstAddr = dstAddr;
 		this->ptrToGatewayFuncPtr = ptrToGatewayFuncPtr;
 
-		// len as to be the minimum size of the complete
+		// len has to be the minimum size of the complete
 		// intructions opcodes that will be override
 		// it shouldn't take more than 16 bytes
 		// Minimum jump size is 5 bytes in 32 bits
@@ -100,7 +100,7 @@ LPVOID Hook32::getFunctionAddr(LPCSTR moduleName, LPCSTR functionName)
 
 bool Hook32::detour32(LPVOID srcAddr, LPVOID dstAddr, const SIZE_T len)
 {
-	// len as to be the minimum size of the complete 
+	// len has to be the minimum size of the complete 
 	// intructions opcodes that will be override
 	// it shouldn't take more than 16 bytes
 	// Minimum jump size is 5 bytes in 32 bits
