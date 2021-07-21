@@ -1,26 +1,26 @@
 #pragma once
 
 #include <Windows.h>
-/**/#include <iostream>
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_opengl2.h"
 #include "hook32.h"
+#include "hacks.h"
 
-#define SDL_QUERY   -1
-#define SDL_IGNORE   0
 #define SDL_DISABLE  0
 #define SDL_ENABLE   1
 
+// Version
+extern const char DEARCUBE_VERSION[];
+
+// For cursor display
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+class Menu;
+extern Menu* menu;
 // Window WndProc hooking
 LRESULT __stdcall WndProc(const HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-class Menu;
-
-extern Menu* menu;
 
 class Menu
 {
@@ -28,7 +28,6 @@ private:
 	HWND hwnd;
 	bool bRunning = false;
 	bool bShow = false;
-	int counter = 0;
 
 	// SDL definitions for cursor display
 	typedef enum {
@@ -45,11 +44,14 @@ public:
 	Menu(HWND hwnd);
 	~Menu();
 
-	void drawMenu();
-	void render();
+	void drawMenu(GameObjects* gameObjects);
+	void render(GameObjects* gameObjects);
 	void init();
 	void shutdown();
 
+	void helpMarker(const char* desc);
+
+	void toggleMenu() { this->bShow = !this->bShow; }
 	bool isShown() { return this->bShow; }
 	bool isRunning() { return this->bRunning; }
 };

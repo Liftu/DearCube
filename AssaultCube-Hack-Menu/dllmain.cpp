@@ -13,6 +13,8 @@
 #include "hacks.h"
 
 // Globals
+// // Version
+const char DEARCUBE_VERSION[] = "1.0";
 // Get module base address
 DWORD moduleBaseAddr = (DWORD)GetModuleHandle(L"ac_client.exe");
 // The menu
@@ -72,16 +74,10 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     // Declaration with & operator so we do not copy the content, 
     // instead we get a reference witouh having to declare a pointer.
 
-    ///**/std::cout << std::hex << "My player entity address : 0x" << (DWORD*)myPlayerEntityPtr << std::endl;
-
-    ///**/std::cout << std::dec << playerEntityVector.length << " Players :" << std::endl;
-    ///**/std::cout << "Players :" << std::endl;
-    std::vector<PlayerEntity*> validEntityList = Hacks::getValidEntityList(&playerEntityVector);
-
-    myPlayerEntityPtr->health = 1337;
+    //std::vector<PlayerEntity*> validEntityList = Hacks::getValidEntityList(&playerEntityVector);
 
     // Menu
-    menu->render();
+    menu->render(gameObjects);
 
     // Key inputs
     if (GetAsyncKeyState(VK_END) & 1)
@@ -89,56 +85,6 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
         menu->shutdown();
         // Unhooking
     }
-    // This will be replaced by an ImGui menu
-    //else if (GetAsyncKeyState(VK_F1) & 1)
-    //{
-    //    ///**/std::cout << "Showing/hide menu" << std::endl; 
-    //    if (Hacks::toggleWeaponHack(myPlayerEntityPtr, Hacks::getCurrentWeaponType(myPlayerEntityPtr), Hacks::WeaponHackTypes::NoSpread))
-    //        /**/std::cout << "Toggled no spread." << std::endl;
-    //    /**/else
-    //        /**/std::cout << "Unable to toggle no spread." << std::endl;
-    //}
-    //else if (GetAsyncKeyState(VK_F2) & 1)
-    //{
-    //    ///**/std::cout << "Showing/hide menu" << std::endl; 
-    //    if (Hacks::toggleWeaponHack(myPlayerEntityPtr, Hacks::getCurrentWeaponType(myPlayerEntityPtr), Hacks::WeaponHackTypes::NoRecoil))
-    //        /**/std::cout << "Toggled no recoil." << std::endl;
-    //    /**/else
-    //        /**/std::cout << "Unable to toggle no recoil." << std::endl;
-    //}
-    //else if (GetAsyncKeyState(VK_F3) & 1)
-    //{
-    //    ///**/std::cout << "Showing/hide menu" << std::endl; 
-    //    if (Hacks::toggleWeaponHack(myPlayerEntityPtr, Hacks::getCurrentWeaponType(myPlayerEntityPtr), Hacks::WeaponHackTypes::NoKickback))
-    //        /**/std::cout << "Toggled no kickback." << std::endl;
-    //    /**/else
-    //        /**/std::cout << "Unable to toggle kickback." << std::endl;
-    //}
-    //else if (GetAsyncKeyState(VK_F4) & 1)
-    //{
-    //    ///**/std::cout << "Showing/hide menu" << std::endl; 
-    //    if (Hacks::toggleWeaponHack(myPlayerEntityPtr, Hacks::getCurrentWeaponType(myPlayerEntityPtr), Hacks::WeaponHackTypes::NoSelfKickback))
-    //        /**/std::cout << "Toggled no self kickback." << std::endl;
-    //    /**/else
-    //        /**/std::cout << "Unable to toggle no self kickback." << std::endl;
-    //}
-    //else if (GetAsyncKeyState(VK_F5) & 1)
-    //{
-    //    ///**/std::cout << "Showing/hide menu" << std::endl; 
-    //    if (Hacks::toggleWeaponHack(myPlayerEntityPtr, Hacks::getCurrentWeaponType(myPlayerEntityPtr), Hacks::WeaponHackTypes::SemiAuto))
-    //        /**/std::cout << "Toggled semi auto." << std::endl;
-    //    /**/else
-    //        /**/std::cout << "Unable to toggle semi auto." << std::endl;
-    //}
-    //else if (GetAsyncKeyState(VK_F6) & 1)
-    //{
-    //    enable = !enable;
-    //    ///**/std::cout << "Showing/hide menu" << std::endl; 
-    //    if (Hacks::toggleAllWeaponsHack(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoRecoil, enable))
-    //        /**/std::cout << "Toggled all hack." << std::endl;
-    //    /**/else
-    //        /**/std::cout << "Unable to toggle all hack." << std::endl;
-    //}
 
     //draw();
 
@@ -158,9 +104,17 @@ DWORD WINAPI injectedThread(HMODULE hModule)
     ///**/std::cout << "Hack loop : " << std::endl;
 
     // Menu setup
-
-    //oWndProc = (WNDPROC)SetWindowLongPtr(window, -4, (LONG_PTR)WndProc);
-    HWND hwnd = FindWindowA(NULL, "AssaultCube");
+    char windowTitle[] = "AssaultCube";
+    HWND hwnd = FindWindowA(NULL, windowTitle);
+    if (!hwnd)
+    {
+        char message[256];
+        sprintf_s(message, 256, 
+            "DearCube was not able to retrieve the window handle for \"%s\". Ensure you injected the DLL into the right process.\nIf this error persists, please contact the developer on github.", 
+            windowTitle);
+        MessageBoxA(NULL, message, "Unable to retrieve the window handle", MB_OK | MB_ICONERROR);
+        FreeLibraryAndExitThread(hModule, EXIT_FAILURE);
+    }
     menu = new Menu(hwnd);
 
     // Hooking
@@ -173,15 +127,14 @@ DWORD WINAPI injectedThread(HMODULE hModule)
     // If menu isn't running, then we unhook and exit.
     while (menu->isRunning())
         Sleep(5);
-    swapBuffersHook32.disable();
-
 
     // Cleanup & exit (WHEN UNHOOKING IMPLEMENTED)
-    ///**/std::cout << "Exiting..." << std::endl;
     ///**/if (con)
     ///**/    fclose(con);
     ///**/FreeConsole();
-    /// 
+    // Unhook
+    swapBuffersHook32.disable();
+    // Exit
     // SOMETIMES THE WHOLE PROCCESS CRACHES WHEN CALLING THIS
     FreeLibraryAndExitThread(hModule, EXIT_SUCCESS);
     // Just to debug when we have a crash on exit.

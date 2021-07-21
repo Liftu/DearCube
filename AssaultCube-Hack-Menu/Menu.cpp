@@ -6,7 +6,16 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 {
 	// If the menu is hidden, then pass the event to the original window WndProc.
 	if (!menu->isShown())
+	{
+		// Weirdly it doesn't work if I don't do "this->bShow = !this->bShow;" in the render function ?????
+		//switch (wParam)
+		//{
+		//case VK_INSERT:
+		//	menu->toggleMenu();
+		//	break;
+		//}
 		return CallWindowProc(original_WndProc, hWnd, msg, wParam, lParam);
+	}
 	// If the menu is displayed on screen, interpret cursor event.
 	else
 	{
@@ -71,32 +80,187 @@ Menu::~Menu()
 	}
 }
 
-void Menu::drawMenu()
+void Menu::drawMenu(GameObjects* gameObjects)
 {
-	if (this->bShow)
+	// Main window
+	ImGui::Begin("DearCube", &this->bShow, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
+
+	// Tabs
+	if (ImGui::BeginTabBar("MainTabBar"))
 	{
-		// Intercept cursor
-		_SDL_WM_GrabInput(SDL_GrabMode(2));
-		// Thought it would be needed to show the cursor, but it juste made the game laggy.
-		//_SDL_ShowCursor(SDL_ENABLE);
+		PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
+		//// If local player entity is found, then we can draw the different hack tabs
+		if (Hacks::isValidEntity(myPlayerEntityPtr))
+		{
+			// HUD
+			//if (ImGui::BeginTabItem("HUD"))
+			//{
+			//	ImGui::Text("This is the HUD tab!");
+			//	// Custom cursor
 
-		ImGui::Begin("Hack menu", &this->bShow, ImGuiWindowFlags_NoSavedSettings);
+			//	ImGui::EndTabItem();
+			//}
 
-		if (ImGui::Button("Click me !"))
-			this->counter++;
-		ImGui::Text("%i", this->counter);
+			// ESP (may put in inside HUD tab)
+			//if (ImGui::BeginTabItem("ESP"))
+			//{
+			//	ImGui::Text("This is the ESP tab!");
+			// 
+			//	ImGui::EndTabItem();
+			//}
+			 
+			//// Aimbot
+			//if (ImGui::BeginTabItem("Aimbot"))
+			//{
+			//	ImGui::Text("This is the Aimbot tab!");
 
-		ImGui::End();
+			//	ImGui::EndTabItem();
+			//}
+
+			// Weapons
+			if (ImGui::BeginTabItem("Weapons"))
+			{
+				// As "All weapons" is the 0th element in the array, all the
+				// weapon index are shifted of 1 compared to the WeaponTypes enum.
+				static const char* weaponNames[] = { "All weapons", "Knife", "Pistol", "Carabine", "Shotgun", "Subgun", "Sniper", "Assault", "Cpistol", "Grenade", "Akimbo" };
+				static int currentWeaponIndex = (int)Hacks::getCurrentWeaponType(myPlayerEntityPtr) + 1;	// first time : display current weapon, then display last selected //0;
+				ImGui::Combo("##ComboWeapons", &currentWeaponIndex, weaponNames, (int)WeaponTypes::SIZE + 1);
+
+				// Size here is totally hardcoded and found by manual dcothomy.
+				ImGui::BeginChild("ChildWeapons", ImVec2(0, 105.0f), true);
+
+				// If "All weapons"
+				if (currentWeaponIndex == 0)
+				{
+					static bool noSpread = false;
+					static bool noRecoil= false;
+					static bool noKickback = false;
+					static bool fullAuto = false;
+
+					// No spread
+					if (ImGui::Checkbox("No spread", &noSpread))
+					{
+						Hacks::toggleAllWeaponsHack(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoSpread, noSpread);
+					}
+					ImGui::SameLine(); helpMarker("The no spread feature will only apply to the 2/3 shots.\n The following shots will keep getting a bit of spreading.");
+
+					// No recoil
+					if (ImGui::Checkbox("No recoil", &noRecoil))
+					{
+						Hacks::toggleAllWeaponsHack(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoRecoil, noRecoil);
+					}
+					//ImGui::SameLine(); helpMarker("The no recoil feature will prevent your weapon from rising up when shooting.");
+
+					// No kickback
+					if (ImGui::Checkbox("No kickback", &noKickback))
+					{
+						Hacks::toggleAllWeaponsHack(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoKickback, noKickback);
+					}
+					ImGui::SameLine(); helpMarker("The no kickback feature will prevent yourself from moving when shooting.");
+
+					// Full auto
+					if (ImGui::Checkbox("Full-auto weapons", &fullAuto))
+					{
+						Hacks::toggleAllWeaponsHack(myPlayerEntityPtr, Hacks::WeaponHackTypes::FullAuto, fullAuto);
+					}
+					ImGui::SameLine(); helpMarker("The full-auto feature only applies to semi auto weapons");
+				}
+				// Else : specific weapon
+				else
+				{
+					WeaponTypes currentWeaponType = WeaponTypes(currentWeaponIndex - 1);
+
+					// No spread
+					int spread = Hacks::getWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::NoSpread);
+					if (ImGui::SliderInt("No spread", &spread, 0, c_defaultWeaponsSpread[(int)currentWeaponType]))
+					{
+						//ImGui::Text("%d", spread);
+						Hacks::setWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::NoSpread, spread);
+					}
+					ImGui::SameLine(); helpMarker("The no spread feature will only apply to the 2/3 shots.\n The following shots will keep getting a bit of spreading.");
+
+					// No recoil
+					int recoil = Hacks::getWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::NoRecoil);
+					if (ImGui::SliderInt("No recoil", &recoil, 0, c_defaultWeaponsRecoil[(int)currentWeaponType]))
+					{
+						Hacks::setWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::NoRecoil, recoil);
+					}
+					//ImGui::SameLine(); helpMarker("The no recoil feature will prevent your weapon from rising up when shooting.");
+
+					// No kickback
+					int kickback = Hacks::getWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::NoKickback);
+					if (ImGui::SliderInt("No kickback", &kickback, 0, c_defaultWeaponsKickback[(int)currentWeaponType]))
+					{
+						Hacks::setWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::NoKickback, kickback);
+					}
+					ImGui::SameLine(); helpMarker("The no kickback feature will prevent yourself from moving when shooting.");
+
+					// Full auto
+					// TODO : We may want to disable this feature for already full-auto weapons when the ImGui feature will be out (https://github.com/ocornut/imgui/issues/211)
+					bool fullAuto = (bool)Hacks::getWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::FullAuto);
+					if (ImGui::Checkbox("Full-auto", &fullAuto))
+					{
+						Hacks::toggleWeaponHack(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::FullAuto, fullAuto);
+					}
+					ImGui::SameLine(); helpMarker("The full-auto feature only applies to semi auto weapons");
+				}
+
+				ImGui::EndChild();
+
+				// No self kickback
+				static bool noSelfKickback = false;
+				if (ImGui::Checkbox("No self kickback", &noSelfKickback))
+				{
+					Hacks::toggleAllWeaponsHack(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoSelfKickback, noSelfKickback);
+				}
+				ImGui::SameLine(); helpMarker("The no self kickback feature will prevent yourself from moving when getting shot.");
+
+				ImGui::EndTabItem();
+			}
+		}
+		// Else : local player entity no found
+		else
+		{
+			if (ImGui::BeginTabItem("Warning"))
+			{
+				ImGui::TextWrapped("The local player entity coud not be found.");
+				ImGui::TextWrapped("Therefore, the hacks cannot be run.");
+
+				ImGui::EndTabItem();
+			}
+		}
+
+		//// Presets
+		//if (ImGui::BeginTabItem("Presets"))
+		//{
+		//	ImGui::Text("Maybe if I manage to do all the remaining features fisrt.");
+
+		//	ImGui::EndTabItem();
+		//}
+
+		// About
+		if (ImGui::BeginTabItem("About"))
+		{
+			ImGui::TextWrapped("DearCube %s", DEARCUBE_VERSION);
+			ImGui::Separator();
+
+			ImGui::TextWrapped("By Liftu and a lot of help from all the Guided Hacking community.");
+			ImGui::TextWrapped("Special thanks to Rake and all the effort he has put into it.");
+			ImGui::TextWrapped("DearCube is licensed under the MIT License, see LICENSE for more information.");
+			ImGui::Separator();
+
+			ImGui::TextWrapped("DearCube uses Dear ImGui %s to draw this menu.", ImGui::GetVersion());
+
+			ImGui::EndTabItem();
+		}
+
+		ImGui::EndTabBar();
 	}
-	else
-	{
-		// Restore cursor
-		_SDL_WM_GrabInput(SDL_GrabMode(1));
-		//_SDL_ShowCursor(SDL_DISABLE);
-	}
+
+	ImGui::End();
 }
 
-void Menu::render()
+void Menu::render(GameObjects* gameObjects)
 {
 	if (!this->bRunning)
 		return;
@@ -106,13 +270,25 @@ void Menu::render()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	// Actual menu code
 	if (GetAsyncKeyState(VK_INSERT) & 1)
-	{
 		this->bShow = !this->bShow;
-	}
 
-	this->drawMenu();
+	if (this->bShow)
+	{
+		// Intercept cursor
+		_SDL_WM_GrabInput(SDL_GrabMode(2));
+		// Thought it would be needed to show the cursor, but it juste made the game laggy.
+		//_SDL_ShowCursor(SDL_ENABLE);
+
+		// Actual menu code
+		this->drawMenu(gameObjects);
+	}
+	else
+	{
+		// Restore cursor
+		_SDL_WM_GrabInput(SDL_GrabMode(1));
+		//_SDL_ShowCursor(SDL_DISABLE);
+	}
 
 	// Rendering
 	ImGui::EndFrame();
@@ -134,6 +310,11 @@ void Menu::init()
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsClassic();
+	ImGuiStyle &style = ImGui::GetStyle();
+	style.WindowRounding = 3.0f;
+	style.ChildRounding = 3.0f;
+	style.FrameRounding = 3.0f;
+	style.GrabRounding = 3.0f;
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(this->hwnd);
@@ -152,4 +333,19 @@ void Menu::shutdown()
 	ImGui::DestroyContext();
 
 	this->bRunning = false;
+}
+
+// Helper to display a little (?) mark which shows a tooltip when hovered.
+// This is directly copied from ImGui's imgui_demo.cpp
+void Menu::helpMarker(const char* desc)
+{
+	ImGui::TextDisabled("(?)");
+	if (ImGui::IsItemHovered())
+	{
+		ImGui::BeginTooltip();
+		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+		ImGui::TextUnformatted(desc);
+		ImGui::PopTextWrapPos();
+		ImGui::EndTooltip();
+	}
 }

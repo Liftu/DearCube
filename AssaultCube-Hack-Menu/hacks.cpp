@@ -197,7 +197,7 @@ bool Hacks::toggleWeaponHack(PlayerEntity* playerEntity, WeaponTypes weaponType,
 			// Enable no self kickback
 			weaponPtr->weaponCharacsPtr->targetKickback = 0;
 		}
-		// No self kickback was enabled
+		// No self was enabled
 		else
 		{
 			// Disable no self kickback
@@ -205,18 +205,18 @@ bool Hacks::toggleWeaponHack(PlayerEntity* playerEntity, WeaponTypes weaponType,
 		}
 		break;
 
-	case WeaponHackTypes::SemiAuto:
-		// Semi auto was disabled
-		if (weaponPtr->weaponCharacsPtr->isSemiAutomatic == c_defaultWeaponsIsSemiAutomatic[(WORD)weaponType])
+	case WeaponHackTypes::FullAuto:
+		// Full auto was disabled
+		if (weaponPtr->weaponCharacsPtr->isFullAuto == c_defaultWeaponsIsFullAuto[(WORD)weaponType])
 		{
-			// Enable semi auto
-			weaponPtr->weaponCharacsPtr->isSemiAutomatic = 1;
+			// Enable full auto
+			weaponPtr->weaponCharacsPtr->isFullAuto = 1;
 		}
-		// Semi auto kickback was enabled
+		// Full auto was enabled
 		else
 		{
-			// Disable semi auto
-			weaponPtr->weaponCharacsPtr->isSemiAutomatic = c_defaultWeaponsIsSemiAutomatic[(WORD)weaponType];
+			// Disable full auto
+			weaponPtr->weaponCharacsPtr->isFullAuto = c_defaultWeaponsIsFullAuto[(WORD)weaponType];
 		}
 		break;
 
@@ -295,16 +295,16 @@ bool Hacks::toggleWeaponHack(PlayerEntity* playerEntity, WeaponTypes weaponType,
 		}
 		break;
 
-	case WeaponHackTypes::SemiAuto:
+	case WeaponHackTypes::FullAuto:
 		if (enable)
 		{
-			// Enable semi auto
-			weaponPtr->weaponCharacsPtr->isSemiAutomatic = 1;
+			// Enable full auto
+			weaponPtr->weaponCharacsPtr->isFullAuto = 1;
 		}
 		else
 		{
-			// Disable semi auto
-			weaponPtr->weaponCharacsPtr->isSemiAutomatic = c_defaultWeaponsIsSemiAutomatic[(WORD)weaponType];
+			// Disable full auto
+			weaponPtr->weaponCharacsPtr->isFullAuto = c_defaultWeaponsIsFullAuto[(WORD)weaponType];
 		}
 		break;
 
@@ -320,7 +320,7 @@ bool Hacks::toggleAllWeaponsHack(PlayerEntity* playerEntity, WeaponHackTypes wea
 	if (!isValidEntity(playerEntity))
 		return false;
 
-	for (int weaponType = 0; weaponType < (int)WeaponTypes::Akimbo; weaponType++)
+	for (int weaponType = 0; weaponType < (int)WeaponTypes::SIZE; weaponType++)
 	{
 		Weapon* weaponPtr = playerEntity->weaponsPtr[weaponType];// getWeaponPtr(playerEntity, (WeaponTypes)weaponType);
 
@@ -385,16 +385,16 @@ bool Hacks::toggleAllWeaponsHack(PlayerEntity* playerEntity, WeaponHackTypes wea
 			}
 			break;
 
-		case WeaponHackTypes::SemiAuto:
+		case WeaponHackTypes::FullAuto:
 			if (enable)
 			{
-				// Enable semi auto
-				weaponPtr->weaponCharacsPtr->isSemiAutomatic = 1;
+				// Enable full auto
+				weaponPtr->weaponCharacsPtr->isFullAuto = 1;
 			}
 			else
 			{
-				// Disable semi auto
-				weaponPtr->weaponCharacsPtr->isSemiAutomatic = c_defaultWeaponsIsSemiAutomatic[weaponType];
+				// Disable full auto
+				weaponPtr->weaponCharacsPtr->isFullAuto = c_defaultWeaponsIsFullAuto[weaponType];
 			}
 			break;
 
@@ -417,6 +417,7 @@ bool Hacks::getWeaponHackState(PlayerEntity* playerEntity, WeaponTypes weaponTyp
 		return false;
 
 	bool state = false;
+
 	switch (weaponHackType)
 	{
 	case WeaponHackTypes::NoSpread:
@@ -443,14 +444,134 @@ bool Hacks::getWeaponHackState(PlayerEntity* playerEntity, WeaponTypes weaponTyp
 			state = true;
 		break;
 
-	case WeaponHackTypes::SemiAuto:
-		// Semi auto is enabled
-		if (weaponPtr->weaponCharacsPtr->isSemiAutomatic != 0)	//c_defaultWeaponsIsSemiAutomatic[(WORD)weaponType])
+	case WeaponHackTypes::FullAuto:
+		// Full auto is enabled
+		if (weaponPtr->weaponCharacsPtr->isFullAuto != 0)	//c_defaultWeaponsIsFullAuto[(WORD)weaponType])
 			state = true;
+		break;
 
 	default:
 		return false;
 	}
 
 	return state;
+}
+
+int16_t Hacks::getWeaponHackValue(PlayerEntity* playerEntity, WeaponTypes weaponType, WeaponHackTypes weaponHackType)
+{
+	if (!isValidEntity(playerEntity))
+		return false;
+
+	Weapon* weaponPtr = playerEntity->weaponsPtr[(int)weaponType];// getWeaponPtr(playerEntity, weaponType);
+
+	if (weaponPtr == nullptr)
+		return false;
+
+	int16_t value = -1;
+
+	switch (weaponHackType)
+	{
+	case WeaponHackTypes::NoSpread:
+		value = weaponPtr->weaponCharacsPtr->firstShotsSpread;
+		break;
+
+	case WeaponHackTypes::NoRecoil:
+		value = weaponPtr->weaponCharacsPtr->recoil;
+		break;
+
+	case WeaponHackTypes::NoKickback:
+		value = weaponPtr->weaponCharacsPtr->kickback;
+		break;
+
+	case WeaponHackTypes::NoSelfKickback:
+		value = weaponPtr->weaponCharacsPtr->targetKickback;
+		break;
+
+	case WeaponHackTypes::FullAuto:
+		value = weaponPtr->weaponCharacsPtr->isFullAuto;
+		break;
+
+	default:
+		return -1;
+	}
+
+	return value;
+}
+
+bool Hacks::setWeaponHackValue(PlayerEntity* playerEntity, WeaponTypes weaponType, WeaponHackTypes weaponHackType, int16_t value)
+{
+	if (!isValidEntity(playerEntity))
+		return false;
+
+	Weapon* weaponPtr = playerEntity->weaponsPtr[(int)weaponType];// getWeaponPtr(playerEntity, weaponType);
+
+	if (weaponPtr == nullptr)
+		return false;
+
+	bool result = false;
+
+	switch (weaponHackType)
+	{
+	case WeaponHackTypes::NoSpread:
+		weaponPtr->weaponCharacsPtr->firstShotsSpread = value;
+		result = true;
+		break;
+
+	case WeaponHackTypes::NoRecoil:
+		weaponPtr->weaponCharacsPtr->recoil = value;
+		// Set the recoil animation value relative to the recoil value
+		weaponPtr->weaponCharacsPtr->recoilAnimation = (value / c_defaultWeaponsRecoil[(int)weaponType]) * c_defaultWeaponsRecoilAnimation[(int)weaponType];
+		result = true;
+		break;
+
+	case WeaponHackTypes::NoKickback:
+		weaponPtr->weaponCharacsPtr->kickback = value;
+		// Set the kickback animation value relative to the kickback value
+		weaponPtr->weaponCharacsPtr->kickbackAnimation = (value / c_defaultWeaponsKickback[(int)weaponType]) * c_defaultWeaponsKickbackAnimation[(int)weaponType];
+		result = true;
+		break;
+
+	case WeaponHackTypes::NoSelfKickback:
+		weaponPtr->weaponCharacsPtr->targetKickback = value;
+		result = true;
+		break;
+
+	case WeaponHackTypes::FullAuto:
+		weaponPtr->weaponCharacsPtr->isFullAuto = value;
+		result = true;
+		break;
+
+	default:
+		return false;
+	}
+
+	return value;
+}
+
+int16_t Hacks::getDefaultWeaponHackValue(WeaponTypes weaponType, WeaponHackTypes weaponHackType)
+{
+	int16_t value = -1;
+	switch (weaponHackType)
+	{
+	case WeaponHackTypes::NoSpread:
+		value = c_defaultWeaponsSpread[(int)weaponType];
+		break;
+
+	case WeaponHackTypes::NoRecoil:
+		value = c_defaultWeaponsRecoil[(int)weaponType];
+		break;
+
+	case WeaponHackTypes::NoKickback:
+		value = c_defaultWeaponsKickback[(int)weaponType];
+		break;
+
+	case WeaponHackTypes::NoSelfKickback:
+		value = c_defaultWeaponsTargetKickback[(int)weaponType];
+		break;
+
+	case WeaponHackTypes::FullAuto:
+		value = c_defaultWeaponsIsFullAuto[(int)weaponType];
+		break;
+	}
+	return value;
 }

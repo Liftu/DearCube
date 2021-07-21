@@ -214,23 +214,23 @@ public:
 	char pad_0010[244]; //0x0010
 	Sounds soundShot; //0x0104
 	Sounds soundReload; //0x0106
-	uint16_t reloadTimerMs; //0x0108
-	uint16_t shotTimerMs; //0x010A
-	uint16_t closeRangeDamage; //0x010C
-	uint16_t N00000CA9; //0x010E
-	uint16_t N00000AB0; //0x0110
-	uint16_t N00000CAC; //0x0112
-	uint16_t firstShotsSpread; //0x0114
-	uint16_t kickback; //0x0116
-	uint16_t MaxAmmoPerMagazine; //0x0118
-	uint16_t recoilAnimation; //0x011A
-	uint16_t kickbackAnimation; //0x011C
-	uint16_t N00000CB5; //0x011E
-	uint16_t unknown; //0x0120
-	uint16_t recoil; //0x0122
-	uint16_t N00000AB5; //0x0124
-	uint16_t targetKickback; //0x0126
-	uint16_t isSemiAutomatic; //0x0128
+	int16_t reloadTimerMs; //0x0108
+	int16_t shotTimerMs; //0x010A
+	int16_t closeRangeDamage; //0x010C
+	int16_t N00000CA9; //0x010E
+	int16_t N00000AB0; //0x0110
+	int16_t N00000CAC; //0x0112
+	int16_t firstShotsSpread; //0x0114
+	int16_t kickback; //0x0116
+	int16_t MaxAmmoPerMagazine; //0x0118
+	int16_t recoilAnimation; //0x011A
+	int16_t kickbackAnimation; //0x011C
+	int16_t N00000CB5; //0x011E
+	int16_t unknown; //0x0120
+	int16_t recoil; //0x0122
+	int16_t N00000AB5; //0x0124
+	int16_t targetKickback; //0x0126
+	int16_t isFullAuto; //0x0128
 }; //Size: 0x012A
 static_assert(sizeof(WeaponCharacs) == 0x12A);
 
