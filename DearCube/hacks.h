@@ -34,5 +34,6 @@ namespace Hacks
 	bool getWeaponHackState(PlayerEntity* playerEntity, WeaponTypes weaponType, WeaponHackTypes weaponHackType);
 	int16_t getWeaponHackValue(PlayerEntity* playerEntity, WeaponTypes weaponType, WeaponHackTypes weaponHackType);
 	bool setWeaponHackValue(PlayerEntity* playerEntity, WeaponTypes weaponType, WeaponHackTypes weaponHackType, int16_t value);
+	bool setAllWeaponsHackValue(PlayerEntity* playerEntity, WeaponHackTypes weaponHackType, int16_t value);
 	int16_t getDefaultWeaponHackValue(WeaponTypes weaponType, WeaponHackTypes weaponHackType);
 }

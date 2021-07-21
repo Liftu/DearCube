@@ -520,14 +520,14 @@ bool Hacks::setWeaponHackValue(PlayerEntity* playerEntity, WeaponTypes weaponTyp
 	case WeaponHackTypes::NoRecoil:
 		weaponPtr->weaponCharacsPtr->recoil = value;
 		// Set the recoil animation value relative to the recoil value
-		weaponPtr->weaponCharacsPtr->recoilAnimation = (value / c_defaultWeaponsRecoil[(int)weaponType]) * c_defaultWeaponsRecoilAnimation[(int)weaponType];
+		weaponPtr->weaponCharacsPtr->recoilAnimation = (value / (float)c_defaultWeaponsRecoil[(int)weaponType]) * c_defaultWeaponsRecoilAnimation[(int)weaponType];
 		result = true;
 		break;
 
 	case WeaponHackTypes::NoKickback:
 		weaponPtr->weaponCharacsPtr->kickback = value;
 		// Set the kickback animation value relative to the kickback value
-		weaponPtr->weaponCharacsPtr->kickbackAnimation = (value / c_defaultWeaponsKickback[(int)weaponType]) * c_defaultWeaponsKickbackAnimation[(int)weaponType];
+		weaponPtr->weaponCharacsPtr->kickbackAnimation = (value / (float)c_defaultWeaponsKickback[(int)weaponType]) * c_defaultWeaponsKickbackAnimation[(int)weaponType];
 		result = true;
 		break;
 
@@ -545,6 +545,48 @@ bool Hacks::setWeaponHackValue(PlayerEntity* playerEntity, WeaponTypes weaponTyp
 		return false;
 	}
 
+	return value;
+}
+
+bool Hacks::setAllWeaponsHackValue(PlayerEntity* playerEntity, WeaponHackTypes weaponHackType, int16_t value)
+{
+	if (!isValidEntity(playerEntity))
+		return false;
+
+	for (int weaponType = 0; weaponType < (int)WeaponTypes::SIZE; weaponType++)
+	{
+		Weapon* weaponPtr = playerEntity->weaponsPtr[weaponType];// getWeaponPtr(playerEntity, (WeaponTypes)weaponType);
+
+		if (weaponPtr == nullptr)
+			return false;
+
+		switch (weaponHackType)
+		{
+		case WeaponHackTypes::NoSpread:
+			weaponPtr->weaponCharacsPtr->firstShotsSpread = (value / 100.0f) * c_defaultWeaponsSpread[(int)weaponType];
+			break;
+
+		case WeaponHackTypes::NoRecoil:
+			weaponPtr->weaponCharacsPtr->recoil = (value / 100.0f) * c_defaultWeaponsRecoil[(int)weaponType];
+			// Set the recoil animation value relative to the recoil value
+			weaponPtr->weaponCharacsPtr->recoilAnimation = (value / 100.0f) * c_defaultWeaponsRecoilAnimation[(int)weaponType];
+			break;
+
+		case WeaponHackTypes::NoKickback:
+			weaponPtr->weaponCharacsPtr->kickback = (value / 100.0f) * c_defaultWeaponsKickback[(int)weaponType];
+			// Set the kickback animation value relative to the kickback value
+			weaponPtr->weaponCharacsPtr->kickbackAnimation = (value / 100.0f) * c_defaultWeaponsKickbackAnimation[(int)weaponType];
+			break;
+
+		case WeaponHackTypes::NoSelfKickback:
+			weaponPtr->weaponCharacsPtr->targetKickback = (value / 100.0f) * c_defaultWeaponsTargetKickback[(int)weaponType];
+			break;
+
+		case WeaponHackTypes::FullAuto:
+			weaponPtr->weaponCharacsPtr->isFullAuto = (value / 100.0f) * c_defaultWeaponsIsFullAuto[(int)weaponType];
+			break;
+		}
+	}
 	return value;
 }
 

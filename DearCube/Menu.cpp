@@ -132,29 +132,29 @@ void Menu::drawMenu(GameObjects* gameObjects)
 				// If "All weapons"
 				if (currentWeaponIndex == 0)
 				{
-					static bool noSpread = false;
-					static bool noRecoil= false;
-					static bool noKickback = false;
+					static int noSpread = 100;
+					static int noRecoil = 100;
+					static int noKickback = 100;
 					static bool fullAuto = false;
-
+					 
 					// No spread
-					if (ImGui::Checkbox("No spread", &noSpread))
+					if (ImGui::SliderInt("No spread", &noSpread, 0, 100, "%d%%"))
 					{
-						Hacks::toggleAllWeaponsHack(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoSpread, noSpread);
+						Hacks::setAllWeaponsHackValue(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoSpread, noSpread);
 					}
 					ImGui::SameLine(); helpMarker("The no spread feature will only apply to the 2/3 shots.\n The following shots will keep getting a bit of spreading.");
 
 					// No recoil
-					if (ImGui::Checkbox("No recoil", &noRecoil))
+					if (ImGui::SliderInt("No recoil", &noRecoil, 0, 100, "%d%%"))
 					{
-						Hacks::toggleAllWeaponsHack(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoRecoil, noRecoil);
+						Hacks::setAllWeaponsHackValue(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoRecoil, noRecoil);
 					}
 					//ImGui::SameLine(); helpMarker("The no recoil feature will prevent your weapon from rising up when shooting.");
 
 					// No kickback
-					if (ImGui::Checkbox("No kickback", &noKickback))
+					if (ImGui::SliderInt("No kickback", &noKickback, 0, 100, "%d%%"))
 					{
-						Hacks::toggleAllWeaponsHack(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoKickback, noKickback);
+						Hacks::setAllWeaponsHackValue(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoKickback, noKickback);
 					}
 					ImGui::SameLine(); helpMarker("The no kickback feature will prevent yourself from moving when shooting.");
 
