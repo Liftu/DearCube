@@ -2,5 +2,5 @@
 	path = AssaultCube-Hack-Menu/imgui
 	url = git@github.com:ocornut/imgui.git
 [submodule "AssaultCube-Hack-Menu/libs/imgui"]
-	path = AssaultCube-Hack-Menu/libs/imgui
+	path = DearCube/libs/imgui
 	url = git@github.com:ocornut/imgui.git
