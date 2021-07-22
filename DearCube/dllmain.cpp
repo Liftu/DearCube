@@ -8,7 +8,7 @@
 #include "Menu.h"
 #include "glDraw.h"
 #include "glText.h"
-#include "gameVariables.h"
+//#include "gameVariables.h"
 #include "gameStructures.h"
 #include "hacks.h"
 
@@ -65,7 +65,12 @@ t_wglSwapBuffers gateway_wglSwapBuffers;
 
 BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
 {
-    static bool enable = false;
+    // Key inputs
+    // Check if user want to shutdown menu
+    if (GetAsyncKeyState(VK_END) & 1)
+    {
+        menu->shutdown();
+    }
 
     // Retrieve in-game objects
     GameObjects* gameObjects = Hacks::getGameObjectsPtr(moduleBaseAddr);
@@ -74,35 +79,23 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     // Declaration with & operator so we do not copy the content, 
     // instead we get a reference witouh having to declare a pointer.
 
-    //std::vector<PlayerEntity*> validEntityList = Hacks::getValidEntityList(&playerEntityVector);
-
-    // Menu
+    // Draw menu
     menu->render(gameObjects);
 
-    // Key inputs
-    if (GetAsyncKeyState(VK_END) & 1)
+    // Maybe call hacks that are external to the menu like aimbot if enbale
+    if (menu->isAimbotEnabled())
     {
-        menu->shutdown();
-        // Unhooking
+        Hacks::aimbot(gameObjects);
     }
 
     //draw();
 
-    // Update screen by calling the original wglSwapBuffers function
+    // Update screen by calling the original opengl wglSwapBuffers function
     return gateway_wglSwapBuffers(hDc);
 }
 
 DWORD WINAPI injectedThread(HMODULE hModule)
 {
-    // Create consloe for debugging purpose
-    ///**/AllocConsole();
-    ///**/FILE* con;
-    ///**/freopen_s(&con, "CONOUT$", "w", stdout);
-    //
-    ///**/std::cout << "ac_client base address : 0x" << std::hex << moduleBaseAddr << std::endl;
-
-    ///**/std::cout << "Hack loop : " << std::endl;
-
     // Menu setup
     char windowTitle[] = "AssaultCube";
     HWND hwnd = FindWindowA(NULL, windowTitle);
@@ -122,16 +115,11 @@ DWORD WINAPI injectedThread(HMODULE hModule)
     Hook32 swapBuffersHook32("opengl32.dll", "wglSwapBuffers", hooked_wglSwapBuffers, &gateway_wglSwapBuffers, 5);
     swapBuffersHook32.enable();
     
-    // END key to terminate 
-    //while (!(GetAsyncKeyState(VK_END) & 1))
-    // If menu isn't running, then we unhook and exit.
+    // If menu isn't running, then we can exit.
     while (menu->isRunning())
         Sleep(5);
 
     // Cleanup & exit (WHEN UNHOOKING IMPLEMENTED)
-    ///**/if (con)
-    ///**/    fclose(con);
-    ///**/FreeConsole();
     // Unhook
     swapBuffersHook32.disable();
     // Exit

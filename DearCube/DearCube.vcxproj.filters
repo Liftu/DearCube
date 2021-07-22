@@ -31,6 +31,9 @@
     <Filter Include="menu">
       <UniqueIdentifier>{fd74dcaf-f16b-4dd9-b212-b8e409ba8935}</UniqueIdentifier>
     </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{092f66f7-0ff2-44db-825c-d9662a5d40c8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="hacks.h">
@@ -68,6 +71,9 @@
     </ClInclude>
     <ClInclude Include="libs\imgui\imgui.h">
       <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="geom.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

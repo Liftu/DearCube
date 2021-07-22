@@ -2,15 +2,7 @@
 
 #include <iostream>
 
-struct Vector2
-{
-	float x, y;
-};
-
-struct Vector3
-{
-	float x, y, z;
-};
+#include "geom.h"
 
 // Created with ReClass.NET 1.2 by KN4CK3R
 
@@ -91,6 +83,32 @@ enum class States : int8_t
 	Lagged = 3,
 	Editing = 4,
 	Spectate = 5
+};
+
+enum class GameModes : int32_t
+{
+	TDM = 0,
+	coop = 1,
+	DM = 2,
+	SURV = 3,
+	TSURV = 4,
+	CTF = 5,
+	PF = 6,
+	BTDM = 7,
+	BDM = 8,
+	LSS = 9,
+	OSOK = 10,
+	TOSOK = 11,
+	BOSOK = 12,
+	HTF = 13,
+	TKTF = 14,
+	KTF = 15,
+	TPF = 16,
+	TLSS = 17,
+	BPF = 18,
+	BLSS = 19,
+	BTSURV = 20,
+	BTOSOK = 21
 };
 
 class PlayerEntity
@@ -246,7 +264,9 @@ static_assert(sizeof(EntityVector) == 0xC);
 class GameObjects
 {
 public:
-	class PlayerEntity* myPlayerEntityPtr; //0x0000
-	class EntityVector playerEntityVector; //0x0004
-}; //Size: 0x0010
-static_assert(sizeof(GameObjects) == 0x10);
+	GameModes gameMode; //0x0000
+	char pad_0004[84]; //0x0004
+	class PlayerEntity* myPlayerEntityPtr; //0x0058
+	class EntityVector playerEntityVector; //0x005C
+}; //Size: 0x0068
+static_assert(sizeof(GameObjects) == 0x68);

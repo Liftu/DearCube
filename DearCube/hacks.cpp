@@ -7,20 +7,20 @@ GameObjects* Hacks::getGameObjectsPtr(DWORD moduleBaseAddr)
 	return reinterpret_cast<GameObjects*>(moduleBaseAddr + o_gameObjects);
 }
 
-PlayerEntity* Hacks::getMyPlayerEntityPtr(DWORD moduleBaseAddr)
-{
-	return getGameObjectsPtr(moduleBaseAddr)->myPlayerEntityPtr;
-}
+//PlayerEntity* Hacks::getMyPlayerEntityPtr(DWORD moduleBaseAddr)
+//{
+//	return getGameObjectsPtr(moduleBaseAddr)->myPlayerEntityPtr;
+//}
 
-EntityVector* Hacks::getPlayerEntityVectorPtr(DWORD moduleBaseAddr)
-{
-	return &getGameObjectsPtr(moduleBaseAddr)->playerEntityVector;
-}
+//EntityVector* Hacks::getPlayerEntityVectorPtr(DWORD moduleBaseAddr)
+//{
+//	return &getGameObjectsPtr(moduleBaseAddr)->playerEntityVector;
+//}
 
-int Hacks::getNumberOfPlayer(DWORD moduleBaseAddr)
-{
-	return getGameObjectsPtr(moduleBaseAddr)->playerEntityVector.length;
-}
+//int Hacks::getNumberOfPlayer(DWORD moduleBaseAddr)
+//{
+//	return getGameObjectsPtr(moduleBaseAddr)->playerEntityVector.length;
+//}
 
 std::vector<PlayerEntity*> Hacks::getValidEntityList(EntityVector* playerEntityVector)
 {
@@ -28,27 +28,53 @@ std::vector<PlayerEntity*> Hacks::getValidEntityList(EntityVector* playerEntityV
 	// enittyListPtr is a pointer on an array of pointers of PlayerEntity
 	if (playerEntityVector && playerEntityVector->entityListPtr)
 	{
-		int entitiesFound = 0;
 		// Entities are not next to each others in the array
 		// So we have to check every entry of the array
 		// capacity is the size of the allocated array
 		for (int i = 0; i < playerEntityVector->length; i++)
-		//for (int i = 0; entitiesFound < playerEntityVector->length && i < playerEntityVector->capacity; i++)
-		//for (int i = 1; i < (MAX_NUMBER_OF_PLAYER - 1); i++)  // i = 1 because first 4 bytes are null; MAX_NUMBER_OF_PLAYER -1 because our own playerEntity isn't in the array
+			//for (int i = 0; entitiesFound < playerEntityVector->length && i < playerEntityVector->capacity; i++)
+			//for (int i = 1; i < (MAX_NUMBER_OF_PLAYER - 1); i++)  // i = 1 because first 4 bytes are null; MAX_NUMBER_OF_PLAYER -1 because our own playerEntity isn't in the array
 		{
 			///**/std::cout << "[DEBUG] Looking at index " << i << std::endl;
 			// Pointer arithmetic is messing up how we access our entityList array
 			// Probably the problem comes from how we declared our enityListPtr array.
 			if (isValidEntity((*playerEntityVector->entityListPtr)[i]))
-			{
-				entitiesFound++;
 				validEntityList.push_back((*playerEntityVector->entityListPtr)[i]);
-				/**/std::cout << "Found \"" << validEntityList.back()->name << "\"" << std::endl;
-			}
 		}
-		/**/std::cout << std::dec << "Found " << validEntityList.size() << " entities." << std::endl;
 	}
 	return validEntityList;
+}
+
+std::vector<PlayerEntity*> Hacks::getEnnemyList(GameObjects* gameObjects)
+{
+	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
+	EntityVector* playerEntityVector = &gameObjects->playerEntityVector;
+
+	std::vector<PlayerEntity*> ennemyList = getValidEntityList(playerEntityVector);
+	// Filter ennemies based on gameMode and teams
+	GameModes gameMode = gameObjects->gameMode;
+	// If we are a spectator, we have no ennemies
+	if (myPlayerEntityPtr->team != Teams::Blue && myPlayerEntityPtr->team != Teams::Red)
+	{
+		ennemyList.clear();
+	}
+	// If team based game modes, then remove allies and spectators from the list
+	else if (gameMode == GameModes::TDM || gameMode == GameModes::TSURV || gameMode == GameModes::CTF || gameMode == GameModes::BTDM || gameMode == GameModes::TOSOK ||
+		gameMode == GameModes::TKTF || gameMode == GameModes::TPF || gameMode == GameModes::TLSS || gameMode == GameModes::BTSURV || gameMode == GameModes::BTOSOK)
+	{
+		// Remove allies and spectators
+		ennemyList.erase(
+			std::remove_if(
+				ennemyList.begin(), 
+				ennemyList.end(), 
+				[myPlayerEntityPtr](PlayerEntity* playerEntityPtr) 
+				{ 
+					return (myPlayerEntityPtr->team == playerEntityPtr->team || (playerEntityPtr->team != Teams::Blue && playerEntityPtr->team != Teams::Red));
+				}), 
+			ennemyList.end());
+	}
+
+	return ennemyList;
 }
 
 bool Hacks::isValidEntity(PlayerEntity* playerEntity)
@@ -78,47 +104,7 @@ bool Hacks::isValidEntity(PlayerEntity* playerEntity)
 }
 
 
-// Weapons stuff
-
-//Weapon* Hacks::getWeaponPtr(PlayerEntity* playerEntity, WeaponTypes weaponType)
-//{
-//	// Get weapon ptr
-//	Weapon* weapon = nullptr;
-//	switch (weaponType)
-//	{
-//	case WeaponTypes::Knife:
-//		weapon = playerEntity->weaponKnifePtr;
-//		break;
-//	case WeaponTypes::Pistol:
-//		weapon = playerEntity->weaponPistolPtr;
-//		break;
-//	case WeaponTypes::Carabine:
-//		weapon = playerEntity->weaponCarabinePtr;
-//		break;
-//	case WeaponTypes::Shotgun:
-//		weapon = playerEntity->weaponShotgunPtr;
-//		break;
-//	case WeaponTypes::Subgun:
-//		weapon = playerEntity->weaponSubgunPtr;
-//		break;
-//	case WeaponTypes::Sniper:
-//		weapon = playerEntity->weaponSniperPtr;
-//		break;
-//	case WeaponTypes::Assault:
-//		weapon = playerEntity->weaponAssaultPtr;
-//		break;
-//	case WeaponTypes::Cpistol:
-//		weapon = playerEntity->weaponCpistolPtr;
-//		break;
-//	case WeaponTypes::Grenade:
-//		weapon = playerEntity->weaponGrenadePtr;
-//		break;
-//	case WeaponTypes::Akimbo:
-//		weapon = playerEntity->weaponAkimboPtr;
-//		break;
-//	}
-//	return weapon;
-//}
+// Weapons related
 
 WeaponTypes Hacks::getCurrentWeaponType(PlayerEntity* playerEntity)
 {
@@ -498,6 +484,9 @@ int16_t Hacks::getWeaponHackValue(PlayerEntity* playerEntity, WeaponTypes weapon
 	return value;
 }
 
+#pragma warning( push )
+#pragma warning( disable : 4244 )
+
 bool Hacks::setWeaponHackValue(PlayerEntity* playerEntity, WeaponTypes weaponType, WeaponHackTypes weaponHackType, int16_t value)
 {
 	if (!isValidEntity(playerEntity))
@@ -590,6 +579,8 @@ bool Hacks::setAllWeaponsHackValue(PlayerEntity* playerEntity, WeaponHackTypes w
 	return value;
 }
 
+#pragma warning( pop )
+
 int16_t Hacks::getDefaultWeaponHackValue(WeaponTypes weaponType, WeaponHackTypes weaponHackType)
 {
 	int16_t value = -1;
@@ -616,4 +607,38 @@ int16_t Hacks::getDefaultWeaponHackValue(WeaponTypes weaponType, WeaponHackTypes
 		break;
 	}
 	return value;
+}
+
+
+// Aimbot related
+
+void Hacks::aimbot(GameObjects* gameObjects)
+{
+	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
+	PlayerEntity* closestEnnemyPtr = nullptr;
+	std::vector<PlayerEntity*> entityList = getValidEntityList(&gameObjects->playerEntityVector);
+	for (PlayerEntity* ennemyEntityPtr : entityList)
+	{
+		if (closestEnnemyPtr == nullptr)
+			closestEnnemyPtr = ennemyEntityPtr;
+		if (myPlayerEntityPtr->vec3HeadPos.getDistance(ennemyEntityPtr->vec3HeadPos) < myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnnemyPtr->vec3HeadPos))
+			closestEnnemyPtr = ennemyEntityPtr;
+	}
+
+	return;
+}
+
+PlayerEntity* Hacks::getClosestEnnemy(GameObjects* gameObjects)
+{
+	std::vector<PlayerEntity*> ennemyList = getEnnemyList(gameObjects);
+	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
+
+	// Filter by distance
+
+	return ennemyList.front();
+}
+
+void Hacks::LocalPlayer::aimAt(const Vector3 dst)
+{
+
 }

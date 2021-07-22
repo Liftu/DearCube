@@ -109,13 +109,29 @@ void Menu::drawMenu(GameObjects* gameObjects)
 			//	ImGui::EndTabItem();
 			//}
 			 
-			//// Aimbot
-			//if (ImGui::BeginTabItem("Aimbot"))
-			//{
-			//	ImGui::Text("This is the Aimbot tab!");
+			// Aimbot
+			if (ImGui::BeginTabItem("Aimbot"))
+			{
+				//static bool aimbot = false;
+				ImGui::Checkbox("Aimbot", &this->bAimbot);
 
-			//	ImGui::EndTabItem();
-			//}
+				ImGui::BeginChild("ChildPlayers", ImVec2(0, 0), true);
+				PlayerEntity* closestEnnemyPtr = nullptr;
+				std::vector<PlayerEntity*> ennemyList = Hacks::getEnnemyList(gameObjects);
+				for (PlayerEntity* ennemyEntityPtr : ennemyList)
+				{
+					ImGui::Text("%s : %d : %s", ennemyEntityPtr->name, ennemyEntityPtr->health, (ennemyEntityPtr->state == States::Alive ? "Alive" : "Dead"));
+					//if (closestEnnemyPtr == nullptr)
+					//	closestEnnemyPtr = ennemyEntityPtr;
+					//if (myPlayerEntityPtr->vec3HeadPos.getDistance(ennemyEntityPtr->vec3HeadPos) < myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnnemyPtr->vec3HeadPos))
+					//	closestEnnemyPtr = ennemyEntityPtr;
+				}
+				//ImGui::Text("%s : %.2f", closestEnnemyPtr->name, myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnnemyPtr->vec3HeadPos));
+				//ImGui::Text("%s : %d : %s", playerEntity->name, playerEntity->health, (playerEntity->state == States::Alive ? "Alive" : "Dead"));
+				ImGui::EndChild();
+
+				ImGui::EndTabItem();
+			}
 
 			// Weapons
 			if (ImGui::BeginTabItem("Weapons"))
@@ -172,7 +188,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 
 					// No spread
 					int spread = Hacks::getWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::NoSpread);
-					if (ImGui::SliderInt("No spread", &spread, 0, c_defaultWeaponsSpread[(int)currentWeaponType]))
+					if (ImGui::SliderInt("No spread", &spread, 0, Hacks::c_defaultWeaponsSpread[(int)currentWeaponType]))
 					{
 						//ImGui::Text("%d", spread);
 						Hacks::setWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::NoSpread, spread);
@@ -181,7 +197,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 
 					// No recoil
 					int recoil = Hacks::getWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::NoRecoil);
-					if (ImGui::SliderInt("No recoil", &recoil, 0, c_defaultWeaponsRecoil[(int)currentWeaponType]))
+					if (ImGui::SliderInt("No recoil", &recoil, 0, Hacks::c_defaultWeaponsRecoil[(int)currentWeaponType]))
 					{
 						Hacks::setWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::NoRecoil, recoil);
 					}
@@ -189,7 +205,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 
 					// No kickback
 					int kickback = Hacks::getWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::NoKickback);
-					if (ImGui::SliderInt("No kickback", &kickback, 0, c_defaultWeaponsKickback[(int)currentWeaponType]))
+					if (ImGui::SliderInt("No kickback", &kickback, 0, Hacks::c_defaultWeaponsKickback[(int)currentWeaponType]))
 					{
 						Hacks::setWeaponHackValue(myPlayerEntityPtr, currentWeaponType, Hacks::WeaponHackTypes::NoKickback, kickback);
 					}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Windows.h>
+/**/#include <vector>
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"
@@ -24,22 +25,6 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 class Menu
 {
-private:
-	HWND hwnd;
-	bool bRunning = false;
-	bool bShow = false;
-
-	// SDL definitions for cursor display
-	typedef enum {
-		SDL_GRAB_QUERY,
-		SDL_GRAB_OFF,
-		SDL_GRAB_ON
-	} SDL_GrabMode;
-	typedef BOOL(__cdecl* t_SDL_WM_GrabInput)(SDL_GrabMode mode);
-	typedef BOOL(__cdecl* t_SDL_ShowCursor)(int toggle);
-	t_SDL_WM_GrabInput	_SDL_WM_GrabInput;
-	t_SDL_ShowCursor	_SDL_ShowCursor;
-
 public:
 	Menu(HWND hwnd);
 	~Menu();
@@ -54,5 +39,24 @@ public:
 	void toggleMenu() { this->bShow = !this->bShow; }
 	bool isShown() { return this->bShow; }
 	bool isRunning() { return this->bRunning; }
-};
 
+	bool isAimbotEnabled() { return bAimbot; }
+
+private:
+	// SDL definitions for cursor display
+	typedef enum {
+		SDL_GRAB_QUERY,
+		SDL_GRAB_OFF,
+		SDL_GRAB_ON
+	} SDL_GrabMode;
+	typedef BOOL(__cdecl* t_SDL_WM_GrabInput)(SDL_GrabMode mode);
+	typedef BOOL(__cdecl* t_SDL_ShowCursor)(int toggle);
+	t_SDL_WM_GrabInput	_SDL_WM_GrabInput;
+	t_SDL_ShowCursor	_SDL_ShowCursor;
+
+	// Variables
+	HWND hwnd;
+	bool bRunning = false;
+	bool bShow = false;
+	bool bAimbot = false;
+};
