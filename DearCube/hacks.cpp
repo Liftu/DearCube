@@ -45,36 +45,36 @@ std::vector<PlayerEntity*> Hacks::getValidEntityList(EntityVector* playerEntityV
 	return validEntityList;
 }
 
-std::vector<PlayerEntity*> Hacks::getEnnemyList(GameObjects* gameObjects)
+std::vector<PlayerEntity*> Hacks::getEnemyList(GameObjects* gameObjects)
 {
 	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
 	EntityVector* playerEntityVector = &gameObjects->playerEntityVector;
 
-	std::vector<PlayerEntity*> ennemyList = getValidEntityList(playerEntityVector);
+	std::vector<PlayerEntity*> enemyList = getValidEntityList(playerEntityVector);
 	// Filter ennemies based on gameMode and teams
 	GameModes gameMode = gameObjects->gameMode;
 	// If we are a spectator, we have no ennemies
 	if (myPlayerEntityPtr->team != Teams::Blue && myPlayerEntityPtr->team != Teams::Red)
 	{
-		ennemyList.clear();
+		enemyList.clear();
 	}
 	// If team based game modes, then remove allies and spectators from the list
 	else if (gameMode == GameModes::TDM || gameMode == GameModes::TSURV || gameMode == GameModes::CTF || gameMode == GameModes::BTDM || gameMode == GameModes::TOSOK ||
 		gameMode == GameModes::TKTF || gameMode == GameModes::TPF || gameMode == GameModes::TLSS || gameMode == GameModes::BTSURV || gameMode == GameModes::BTOSOK)
 	{
-		// Remove allies and spectators
-		ennemyList.erase(
+		// Remove allies and spectators (filter function is a lambda)
+		enemyList.erase(
 			std::remove_if(
-				ennemyList.begin(), 
-				ennemyList.end(), 
+				enemyList.begin(), 
+				enemyList.end(), 
 				[myPlayerEntityPtr](PlayerEntity* playerEntityPtr) 
 				{ 
 					return (myPlayerEntityPtr->team == playerEntityPtr->team || (playerEntityPtr->team != Teams::Blue && playerEntityPtr->team != Teams::Red));
 				}), 
-			ennemyList.end());
+			enemyList.end());
 	}
 
-	return ennemyList;
+	return enemyList;
 }
 
 bool Hacks::isValidEntity(PlayerEntity* playerEntity)
@@ -615,27 +615,59 @@ int16_t Hacks::getDefaultWeaponHackValue(WeaponTypes weaponType, WeaponHackTypes
 void Hacks::aimbot(GameObjects* gameObjects)
 {
 	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
-	PlayerEntity* closestEnnemyPtr = nullptr;
+	PlayerEntity* closestEnemyPtr = nullptr;
 	std::vector<PlayerEntity*> entityList = getValidEntityList(&gameObjects->playerEntityVector);
-	for (PlayerEntity* ennemyEntityPtr : entityList)
+	for (PlayerEntity* enemyEntityPtr : entityList)
 	{
-		if (closestEnnemyPtr == nullptr)
-			closestEnnemyPtr = ennemyEntityPtr;
-		if (myPlayerEntityPtr->vec3HeadPos.getDistance(ennemyEntityPtr->vec3HeadPos) < myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnnemyPtr->vec3HeadPos))
-			closestEnnemyPtr = ennemyEntityPtr;
+		if (closestEnemyPtr == nullptr)
+			closestEnemyPtr = enemyEntityPtr;
+		if (myPlayerEntityPtr->vec3HeadPos.getDistance(enemyEntityPtr->vec3HeadPos) < myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnemyPtr->vec3HeadPos))
+			closestEnemyPtr = enemyEntityPtr;
 	}
 
 	return;
 }
 
-PlayerEntity* Hacks::getClosestEnnemy(GameObjects* gameObjects)
+PlayerEntity* Hacks::getClosestEnemy(GameObjects* gameObjects)
 {
-	std::vector<PlayerEntity*> ennemyList = getEnnemyList(gameObjects);
+	std::vector<PlayerEntity*> enemyList = getEnemyList(gameObjects);
 	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
+	PlayerEntity* closestEnemyPtr = nullptr;
 
 	// Filter by distance
+	for (PlayerEntity* enemyEntityPtr : enemyList)
+		if (closestEnemyPtr == nullptr ||
+			myPlayerEntityPtr->vec3HeadPos.getDistance(enemyEntityPtr->vec3HeadPos) <
+			myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnemyPtr->vec3HeadPos)
+			)
+			closestEnemyPtr = enemyEntityPtr;
 
-	return ennemyList.front();
+	return closestEnemyPtr;
+}
+
+PlayerEntity* Hacks::getClosestEnemyToCrosshair(GameObjects* gameObjects)
+{
+	std::vector<PlayerEntity*> enemyList = getEnemyList(gameObjects);
+	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
+	PlayerEntity* closestEnemyPtr = nullptr;
+	Vector2 myViewAngles(myPlayerEntityPtr->vec3ViewAxis.x, myPlayerEntityPtr->vec3ViewAxis.y);
+
+	// Filter by distance to crosshair
+	for (PlayerEntity* enemyEntityPtr : enemyList)
+	{
+		if (closestEnemyPtr == nullptr)
+		{
+			closestEnemyPtr = enemyEntityPtr;
+			continue;
+		}
+
+		Vector2 viewAngleToClosestEnemy = Geom::calcAngle(myPlayerEntityPtr->vec3HeadPos, closestEnemyPtr->vec3HeadPos);
+		Vector2 viewAngleToEnemy = Geom::calcAngle(myPlayerEntityPtr->vec3HeadPos, enemyEntityPtr->vec3HeadPos);
+		if (myViewAngles.getDistance(viewAngleToEnemy) < myViewAngles.getDistance(viewAngleToClosestEnemy))
+			closestEnemyPtr = enemyEntityPtr;
+	}
+
+	return closestEnemyPtr;
 }
 
 void Hacks::LocalPlayer::aimAt(const Vector3 dst)

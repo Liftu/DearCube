@@ -175,6 +175,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="geam.cpp" />
+    <ClCompile Include="geom.cpp" />
     <ClCompile Include="glDraw.cpp" />
     <ClCompile Include="glText.cpp" />
     <ClCompile Include="hook32.cpp" />

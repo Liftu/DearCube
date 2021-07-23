@@ -12,6 +12,9 @@
 #define SDL_DISABLE  0
 #define SDL_ENABLE   1
 
+using Geom::Vector2;
+using Geom::Vector3;
+
 // Version
 extern const char DEARCUBE_VERSION[];
 

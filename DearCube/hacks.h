@@ -9,6 +9,9 @@
 
 #define MAX_NUMBER_OF_PLAYER 32
 
+using Geom::Vector2;
+using Geom::Vector3;
+
 namespace Hacks
 {
 	// Offsets
@@ -43,7 +46,7 @@ namespace Hacks
 	//int getNumberOfPlayer(DWORD moduleBaseAddr);
 	bool isValidEntity(PlayerEntity* playerEntity);
 	std::vector<PlayerEntity*> getValidEntityList(EntityVector* playerEntityVector);
-	std::vector<PlayerEntity*> getEnnemyList(GameObjects* gameObjects);
+	std::vector<PlayerEntity*> getEnemyList(GameObjects* gameObjects);
 
 
 	// Weapons related
@@ -70,5 +73,6 @@ namespace Hacks
 
 	// Aimbot related
 	void aimbot(GameObjects* gameObjects);
-	PlayerEntity* getClosestEnnemy(GameObjects* gameObjects);
+	PlayerEntity* getClosestEnemy(GameObjects* gameObjects);
+	PlayerEntity* getClosestEnemyToCrosshair(GameObjects* gameObjects);
 }

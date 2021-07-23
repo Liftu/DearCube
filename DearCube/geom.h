@@ -1,68 +1,72 @@
 #pragma once
 
+#include <cmath>
 
-struct Vector2
+#define PI 3.14159265358979323846f
+
+namespace Geom
 {
-	float x, y;
-
-	Vector2 getDistance(Vector2 other)
+	// This is mainly for 3d angles
+	struct Vector2
 	{
-		return Vector2({ abs(this->x - other.x), abs(this->y - other.y) });
-	}
-};
+		float x, y;
 
-struct Vector3
-{
-	float x, y, z;
+		Vector2() : x(), y() {}
+		Vector2(float x, float y) : x(x), y(y) {}
+		//Vector2(Vector3 vec3) : x(vec3.x), y(vec3.y) {}
 
-	Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
+		Vector2  operator +		(const Vector2& rhs) { return Vector2(this->x + rhs.x, this->y + rhs.y); }
+		Vector2  operator -		(const Vector2& rhs) { return Vector2(x - rhs.x, y); }
+		Vector2  operator *		(const Vector2& rhs) { return Vector2(x * rhs.x, y); }
+		Vector2  operator /		(const Vector2& rhs) { return Vector2(x / rhs.x, y); }
+		Vector2& operator +=	(const Vector2& rhs) { return *this = *this + rhs; }
+		Vector2& operator -=	(const Vector2& rhs) { return *this = *this - rhs; }
+		Vector2& operator *=	(const Vector2& rhs) { return *this = *this * rhs; }
+		Vector2& operator /=	(const Vector2& rhs) { return *this = *this / rhs; }
 
-	//bool operator ==	(const Vector3 other) { return (this->x == other.x && this->y == other.y && this->z == other.z); }
-	//bool operator !=	(const Vector3 other) { return !(this->x == other.x && this->y == other.y && this->z == other.z); }
-	//bool operator <		(const Vector3 other) { return (this->x + this->y + this->z) < (other.x + other.y + other.y); }
-	//bool operator <=	(const Vector3 other) { return (this->x + this->y + this->z) <= (other.x + other.y + other.y); }
-	//bool operator >		(const Vector3 other) { return (this->x + this->y + this->z) > (other.x + other.y + other.y); }
-	//bool operator >=	(const Vector3 other) { return (this->x + this->y + this->z) >= (other.x + other.y + other.y); }
-	Vector3  operator +		(const Vector3& rhs) { return Vector3(this->x + rhs.x, this->y + rhs.y, this->z - rhs.z); }
-	Vector3  operator -		(const Vector3& rhs) { return Vector3(x - rhs.x, y - rhs.y, z - rhs.z); }
-	Vector3  operator *		(const Vector3& rhs) { return Vector3(x * rhs.x, y * rhs.y, z * rhs.z); }
-	Vector3  operator /		(const Vector3& rhs) { return Vector3(x / rhs.x, y / rhs.y, z / rhs.z); }
-	Vector3& operator +=	(const Vector3& rhs) { return *this = *this + rhs; }
-	Vector3& operator -=	(const Vector3& rhs) { return *this = *this - rhs; }
-	Vector3& operator *=	(const Vector3& rhs) { return *this = *this * rhs; }
-	Vector3& operator /=	(const Vector3& rhs) { return *this = *this / rhs; }
+		// Binaries operator for 3d angle lengths
+		const bool operator<	(Vector2& rhs) { return length() < rhs.length(); }
+		const bool operator<=	(Vector2& rhs) { return length() <= rhs.length(); }
+		const bool operator>	(Vector2& rhs) { return length() > rhs.length(); }
+		const bool operator>=	(Vector2& rhs) { return length() >= rhs.length(); }
+		const bool operator==	(Vector2& rhs) { return length() == rhs.length(); }
+		const bool operator!=	(Vector2& rhs) { return length() != rhs.length(); }
 
-	float getDistance(const Vector3 other) { return (*this - other).length(); }
-	//float getDistance(const Vector3 other) { return Vector3(x - other.x, y - other.y, z - other.z).length(); }
-	float length() { return sqrt(this->x * this->x + this->y * this->y + this->z + this->z); }
-};
+		// Length but for 3d angles
+		float length();
+		float getDistance(const Vector2 other) { return (*this - other).length(); }
+	};
 
-// Apparently you have to declare https://stackoverflow.com/questions/4421706/what-are-the-basic-rules-and-idioms-for-operator-overloading
-//inline Vector3 operator +	(const Vector3& lhs, const Vector3& rhs) { return Vector3(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z - rhs.z); }
-//inline Vector3 operator -	(const Vector3& lhs, const Vector3& rhs) { return Vector3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z); }
-//inline Vector3 operator *	(const Vector3& lhs, const Vector3& rhs) { return Vector3(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z); }
-//inline Vector3 operator /	(const Vector3& lhs, const Vector3& rhs) { return Vector3(lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.z); }
+	// This is mainly for 3d position
+	struct Vector3
+	{
+		float x, y, z;
 
-//
-//
-//
-//class Vector3
-//{
-//public:
-//
-//    float x, y, z;
-//
-//    Vector3() {};
-//    Vector3(const float x, const float y, const float z) : x(x), y(y), z(z) {}
-//    Vector3 operator + (const Vector3& rhs) const { return Vector3(x + rhs.x, y + rhs.y, z + rhs.z); }
-//    Vector3 operator - (const Vector3& rhs) const { return Vector3(x - rhs.x, y - rhs.y, z - rhs.z); }
-//    Vector3 operator * (const float& rhs) const { return Vector3(x * rhs, y * rhs, z * rhs); }
-//    Vector3 operator / (const float& rhs) const { return Vector3(x / rhs, y / rhs, z / rhs); }
-//    Vector3& operator += (const Vector3& rhs) { return *this = *this + rhs; }
-//    Vector3& operator -= (const Vector3& rhs) { return *this = *this - rhs; }
-//    Vector3& operator *= (const float& rhs) { return *this = *this * rhs; }
-//    Vector3& operator /= (const float& rhs) { return *this = *this / rhs; }
-//    float Length() const { return sqrtf(x * x + y * y + z * z); }
-//    Vector3 Normalize() const { return *this * (1 / Length()); }
-//    float Distance(const Vector3& rhs) const { return (*this - rhs).Length(); }
-//};
+		Vector3() : x(0), y(0), z(0) {}
+		Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
+		Vector3(Vector2 vec2) : x(vec2.x), y(vec2.y), z(0) {}
+
+		Vector3  operator +		(const Vector3& rhs) { return Vector3(this->x + rhs.x, this->y + rhs.y, this->z - rhs.z); }
+		Vector3  operator -		(const Vector3& rhs) { return Vector3(x - rhs.x, y - rhs.y, z - rhs.z); }
+		Vector3  operator *		(const Vector3& rhs) { return Vector3(x * rhs.x, y * rhs.y, z * rhs.z); }
+		Vector3  operator /		(const Vector3& rhs) { return Vector3(x / rhs.x, y / rhs.y, z / rhs.z); }
+		Vector3& operator +=	(const Vector3& rhs) { return *this = *this + rhs; }
+		Vector3& operator -=	(const Vector3& rhs) { return *this = *this - rhs; }
+		Vector3& operator *=	(const Vector3& rhs) { return *this = *this * rhs; }
+		Vector3& operator /=	(const Vector3& rhs) { return *this = *this / rhs; }
+
+		// Binaries operator for 3d distances
+		const bool operator<	(Vector3& rhs) { return length() < rhs.length(); }
+		const bool operator<=	(Vector3& rhs) { return length() <= rhs.length(); }
+		const bool operator>	(Vector3& rhs) { return length() > rhs.length(); }
+		const bool operator>=	(Vector3& rhs) { return length() >= rhs.length(); }
+		const bool operator==	(Vector3& rhs) { return length() == rhs.length(); }
+		const bool operator!=	(Vector3& rhs) { return length() != rhs.length(); }
+
+		// Length for 3d distances
+		float length() { return sqrt(pow(this->x, 2.0f) + pow(this->y, 2.0f) + pow(this->z, 2.0f)); }
+		float getDistance(const Vector3 other) { return (*this - other).length(); }
+	};
+
+	Vector2 calcAngle(Vector3 posSrc, Vector3 posDst);
+}

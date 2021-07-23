@@ -4,6 +4,8 @@
 
 #include "geom.h"
 
+using Geom::Vector3;
+
 // Created with ReClass.NET 1.2 by KN4CK3R
 
 enum class WeaponTypes : int32_t

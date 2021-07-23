@@ -116,18 +116,34 @@ void Menu::drawMenu(GameObjects* gameObjects)
 				ImGui::Checkbox("Aimbot", &this->bAimbot);
 
 				ImGui::BeginChild("ChildPlayers", ImVec2(0, 0), true);
-				PlayerEntity* closestEnnemyPtr = nullptr;
-				std::vector<PlayerEntity*> ennemyList = Hacks::getEnnemyList(gameObjects);
-				for (PlayerEntity* ennemyEntityPtr : ennemyList)
-				{
-					ImGui::Text("%s : %d : %s", ennemyEntityPtr->name, ennemyEntityPtr->health, (ennemyEntityPtr->state == States::Alive ? "Alive" : "Dead"));
-					//if (closestEnnemyPtr == nullptr)
-					//	closestEnnemyPtr = ennemyEntityPtr;
-					//if (myPlayerEntityPtr->vec3HeadPos.getDistance(ennemyEntityPtr->vec3HeadPos) < myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnnemyPtr->vec3HeadPos))
-					//	closestEnnemyPtr = ennemyEntityPtr;
-				}
-				//ImGui::Text("%s : %.2f", closestEnnemyPtr->name, myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnnemyPtr->vec3HeadPos));
+				//ImGui::Text("%s : %.2f", closestEnemyPtr->name, myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnemyPtr->vec3HeadPos));
 				//ImGui::Text("%s : %d : %s", playerEntity->name, playerEntity->health, (playerEntity->state == States::Alive ? "Alive" : "Dead"));
+
+
+				ImGui::Text("Current pos        : %.3f, %.3f, %.3f", myPlayerEntityPtr->vec3HeadPos.x, myPlayerEntityPtr->vec3HeadPos.y, myPlayerEntityPtr->vec3HeadPos.z);
+				ImGui::Text("Current viewAngles : %.3f, %.3f, %.3f", myPlayerEntityPtr->vec3ViewAxis.x, myPlayerEntityPtr->vec3ViewAxis.y, myPlayerEntityPtr->vec3ViewAxis.z);
+				ImGui::Separator();
+
+				Vector2 myViewAngles(myPlayerEntityPtr->vec3ViewAxis.x, myPlayerEntityPtr->vec3ViewAxis.y);
+				PlayerEntity* closestEnemyPtr = Hacks::getClosestEnemyToCrosshair(gameObjects);
+				if (Hacks::isValidEntity(closestEnemyPtr))
+				{
+					ImGui::Text("%s : ", closestEnemyPtr->name);
+					ImGui::Text("Pos        : % .3f, % .3f, % .3f", closestEnemyPtr->vec3HeadPos.x, closestEnemyPtr->vec3HeadPos.y, closestEnemyPtr->vec3HeadPos.z);
+					ImGui::Text("Distance   : %.3f", myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnemyPtr->vec3HeadPos));
+					Vector2 viewAngleToEnemy = Geom::calcAngle(myPlayerEntityPtr->vec3HeadPos, closestEnemyPtr->vec3HeadPos);
+					ImGui::Text("viewAngle  : %.3f, %.3f", viewAngleToEnemy.x, viewAngleToEnemy.y);
+					Vector2 viewAngleToEnemyDelta = myViewAngles - viewAngleToEnemy;
+					ImGui::Text("angleDelta : %.3f, %.3f", viewAngleToEnemyDelta.x, viewAngleToEnemyDelta.y);
+				}
+				
+				std::vector<PlayerEntity*> enemyList = Hacks::getEnemyList(gameObjects);
+				for (PlayerEntity* enemyEntityPtr : enemyList)
+				{
+					Vector2 viewAngleToEnemy = Geom::calcAngle(myPlayerEntityPtr->vec3HeadPos, enemyEntityPtr->vec3HeadPos);
+					ImGui::Text("%s : distance to crosshair : %f", enemyEntityPtr->name, myViewAngles.getDistance(viewAngleToEnemy));
+				}
+
 				ImGui::EndChild();
 
 				ImGui::EndTabItem();
@@ -297,7 +313,7 @@ void Menu::render(GameObjects* gameObjects)
 		//_SDL_ShowCursor(SDL_ENABLE);
 
 		// Actual menu code
-		this->drawMenu(gameObjects);
+		//this->drawMenu(gameObjects);
 	}
 	else
 	{
@@ -305,6 +321,7 @@ void Menu::render(GameObjects* gameObjects)
 		_SDL_WM_GrabInput(SDL_GrabMode(1));
 		//_SDL_ShowCursor(SDL_DISABLE);
 	}
+	this->drawMenu(gameObjects);
 
 	// Rendering
 	ImGui::EndFrame();
@@ -327,6 +344,7 @@ void Menu::init()
 	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsClassic();
 	ImGuiStyle &style = ImGui::GetStyle();
+	style.WindowMinSize = ImVec2(400, 250);
 	style.WindowRounding = 3.0f;
 	style.ChildRounding = 3.0f;
 	style.FrameRounding = 3.0f;
