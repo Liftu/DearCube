@@ -15,10 +15,10 @@ namespace Geom
 		Vector2(float x, float y) : x(x), y(y) {}
 		//Vector2(Vector3 vec3) : x(vec3.x), y(vec3.y) {}
 
-		Vector2  operator +		(const Vector2& rhs) { return Vector2(this->x + rhs.x, this->y + rhs.y); }
-		Vector2  operator -		(const Vector2& rhs) { return Vector2(x - rhs.x, y); }
-		Vector2  operator *		(const Vector2& rhs) { return Vector2(x * rhs.x, y); }
-		Vector2  operator /		(const Vector2& rhs) { return Vector2(x / rhs.x, y); }
+		Vector2  operator +		(const Vector2& rhs) { return Vector2(x + rhs.x, y + rhs.y); }
+		Vector2  operator -		(const Vector2& rhs) { return Vector2(x - rhs.x, y - rhs.y); }
+		Vector2  operator *		(const Vector2& rhs) { return Vector2(x * rhs.x, y * rhs.y); }
+		Vector2  operator /		(const Vector2& rhs) { return Vector2(x / rhs.x, y / rhs.y); }
 		Vector2& operator +=	(const Vector2& rhs) { return *this = *this + rhs; }
 		Vector2& operator -=	(const Vector2& rhs) { return *this = *this - rhs; }
 		Vector2& operator *=	(const Vector2& rhs) { return *this = *this * rhs; }
@@ -46,7 +46,7 @@ namespace Geom
 		Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
 		Vector3(Vector2 vec2) : x(vec2.x), y(vec2.y), z(0) {}
 
-		Vector3  operator +		(const Vector3& rhs) { return Vector3(this->x + rhs.x, this->y + rhs.y, this->z - rhs.z); }
+		Vector3  operator +		(const Vector3& rhs) { return Vector3(x + rhs.x, y + rhs.y, z - rhs.z); }
 		Vector3  operator -		(const Vector3& rhs) { return Vector3(x - rhs.x, y - rhs.y, z - rhs.z); }
 		Vector3  operator *		(const Vector3& rhs) { return Vector3(x * rhs.x, y * rhs.y, z * rhs.z); }
 		Vector3  operator /		(const Vector3& rhs) { return Vector3(x / rhs.x, y / rhs.y, z / rhs.z); }
@@ -64,7 +64,7 @@ namespace Geom
 		const bool operator!=	(Vector3& rhs) { return length() != rhs.length(); }
 
 		// Length for 3d distances
-		float length() { return sqrt(pow(this->x, 2.0f) + pow(this->y, 2.0f) + pow(this->z, 2.0f)); }
+		float length() { return sqrt(pow(x, 2.0f) + pow(y, 2.0f) + pow(z, 2.0f)); }
 		float getDistance(const Vector3 other) { return (*this - other).length(); }
 	};
 

@@ -45,6 +45,7 @@ private:
 	HWND hwnd;
 	bool bRunning = false;
 	bool bShow = false;
+	bool bDebug = false;
 	bool bAimbot = false;
 
 public:

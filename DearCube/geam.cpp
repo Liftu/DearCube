@@ -5,23 +5,26 @@ using Geom::Vector3;
 
 // Copy paste from https://guidedhacking.com/threads/correct-angle-comparison-for-fov-aimbot.15714/
 // as I don't really understand this maths concepts
-// It seems that I only get the deistance on the same heigth
 // And et get closer when facing back to them....
 float Vector2::length()
 {
-	float xRad, yRad, l, r;
+	float l, r;
+	Vector2 rad;
 	Vector3 pos;
 
-	xRad = x * PI / 180;
-	yRad = y * PI / 180;
-	r = abs(cos(xRad));
-	pos.y = sin(xRad);
-	pos.x = r * sin(yRad);
-	pos.z = r * cos(yRad);
+	rad.x = x * PI / 180;
+	rad.y = y * PI / 180;
+	r = abs(cos(rad.x));
+	pos.y = sin(rad.x);
+	pos.x = r * sin(rad.y);
+	pos.z = r * cos(rad.y);
 	l = pos.getDistance(Vector3(0, 0, 1));
 
 	// angle
 	return acos(1 - l * l / 2) * 180 / PI;
+	
+	//float length = sqrt(pow(x, 2.0f) + pow(y, 2.0f));
+	//return length;
 }
 
 Vector2 Geom::calcAngle(Vector3 posSrc, Vector3 posDst)

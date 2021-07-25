@@ -120,11 +120,11 @@ void Menu::drawMenu(GameObjects* gameObjects)
 				//ImGui::Text("%s : %d : %s", playerEntity->name, playerEntity->health, (playerEntity->state == States::Alive ? "Alive" : "Dead"));
 
 
+				Vector2 myViewAngles(myPlayerEntityPtr->vec3ViewAxis.x, myPlayerEntityPtr->vec3ViewAxis.y);
 				ImGui::Text("Current pos        : %.3f, %.3f, %.3f", myPlayerEntityPtr->vec3HeadPos.x, myPlayerEntityPtr->vec3HeadPos.y, myPlayerEntityPtr->vec3HeadPos.z);
-				ImGui::Text("Current viewAngles : %.3f, %.3f, %.3f", myPlayerEntityPtr->vec3ViewAxis.x, myPlayerEntityPtr->vec3ViewAxis.y, myPlayerEntityPtr->vec3ViewAxis.z);
+				ImGui::Text("Current viewAngles : %.3f, %.3f", myViewAngles.x, myViewAngles.y);
 				ImGui::Separator();
 
-				Vector2 myViewAngles(myPlayerEntityPtr->vec3ViewAxis.x, myPlayerEntityPtr->vec3ViewAxis.y);
 				PlayerEntity* closestEnemyPtr = Hacks::getClosestEnemyToCrosshair(gameObjects);
 				if (Hacks::isValidEntity(closestEnemyPtr))
 				{
@@ -148,31 +148,6 @@ void Menu::drawMenu(GameObjects* gameObjects)
 
 				ImGui::EndTabItem();
 			}
-
-			// Debug
-			static MemoryEditor memEdit;
-			static bool show = false;
-			static PlayerEntity* selectedPlayerEntityPtr = myPlayerEntityPtr;	// Default is myPlayerEntityPtr
-			if (ImGui::BeginTabItem("Debug"))
-			{
-				ImGui::Text("Selected : %s", Hacks::isValidEntity(selectedPlayerEntityPtr) ? selectedPlayerEntityPtr->name : "none");
-				ImGui::Checkbox("Show memory editor", &show);
-
-				if (ImGui::Button(myPlayerEntityPtr->name))
-					selectedPlayerEntityPtr = myPlayerEntityPtr;
-
-				ImGui::BeginChild("ChildDebugPlayers", ImVec2(0, 0), true);
-				std::vector<PlayerEntity*> entityList = Hacks::getValidEntityList(&gameObjects->playerEntityVector);
-				for (PlayerEntity* enemyEntityPtr : entityList)
-					if (ImGui::Button(enemyEntityPtr->name))
-						selectedPlayerEntityPtr = enemyEntityPtr;
-				ImGui::EndChild();
-
-				ImGui::EndTabItem();
-			}
-			if (show && Hacks::isValidEntity(selectedPlayerEntityPtr))
-				memEdit.DrawWindow(selectedPlayerEntityPtr->name, selectedPlayerEntityPtr, sizeof(PlayerEntity));
-
 
 			// Weapons
 			if (ImGui::BeginTabItem("Weapons"))
@@ -274,6 +249,33 @@ void Menu::drawMenu(GameObjects* gameObjects)
 
 				ImGui::EndTabItem();
 			}
+
+			// Debug
+			if (this->bDebug)
+			{
+				static MemoryEditor memEdit;
+				static bool show = false;
+				static PlayerEntity* selectedPlayerEntityPtr = myPlayerEntityPtr;	// Default is myPlayerEntityPtr
+				if (ImGui::BeginTabItem("Debug"))
+				{
+					ImGui::Text("Player selected : %s", Hacks::isValidEntity(selectedPlayerEntityPtr) ? selectedPlayerEntityPtr->name : "none");
+					ImGui::Checkbox("Show PlayerEntity memory editor", &show);
+
+					if (ImGui::Button(myPlayerEntityPtr->name))
+						selectedPlayerEntityPtr = myPlayerEntityPtr;
+
+					ImGui::BeginChild("ChildDebugPlayers", ImVec2(0, 0), true);
+					std::vector<PlayerEntity*> entityList = Hacks::getValidEntityList(&gameObjects->playerEntityVector);
+					for (PlayerEntity* enemyEntityPtr : entityList)
+						if (ImGui::Button(enemyEntityPtr->name))
+							selectedPlayerEntityPtr = enemyEntityPtr;
+					ImGui::EndChild();
+
+					ImGui::EndTabItem();
+				}
+				if (show && Hacks::isValidEntity(selectedPlayerEntityPtr))
+					memEdit.DrawWindow(selectedPlayerEntityPtr->name, selectedPlayerEntityPtr, sizeof(PlayerEntity));
+			}
 		}
 		// Else : local player entity no found
 		else
@@ -307,6 +309,9 @@ void Menu::drawMenu(GameObjects* gameObjects)
 			ImGui::Separator();
 
 			ImGui::TextWrapped("DearCube uses Dear ImGui %s to draw this menu.", ImGui::GetVersion());
+			ImGui::Separator();
+
+			ImGui::Checkbox("Enable debug mode", &this->bDebug);
 
 			ImGui::EndTabItem();
 		}
