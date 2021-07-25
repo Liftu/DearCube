@@ -114,34 +114,60 @@ void Menu::drawMenu(GameObjects* gameObjects)
 			{
 				//static bool aimbot = false;
 				ImGui::Checkbox("Aimbot", &this->bAimbot);
+				
+				// FOV
+				ImGui::SliderFloat("FOV size", &this->fov, 0.0f, 200.0f, "%.3f");
+				ImGui::SameLine(); helpMarker("The FOV represents the maximum degree you allow the aimbot to aim at.");
+				// FOV circle
+				ImGui::Checkbox("Show FOV circle", &this->bShowFov);
+				if (this->bShowFov)
+				{
+					static float fovThickness = 2.0f;
+					static ImVec4 fovColors = ImVec4(0.25f, 0.0f, 1.0f, 0.45f);
+					ImGui::SliderFloat("FOV circle thickness", &fovThickness, 1.0, 5.0, "%.3f");
+					ImGui::ColorEdit4("FOV circle color", &fovColors.x);
 
+					// Draw the circle
+					ImGui::Begin("##CIRCLEFOV", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse |
+						ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
+					auto draw = ImGui::GetBackgroundDrawList();
+					// This calculation is approximate
+					float fovCircleRadius = this->fov / 50 * (this->gameWigth / 2.0f);	// 50 approximately represents the angle degree to the side of the screen
+					draw->AddCircle(ImVec2(this->gameWigth / 2.0f, this->gameHeight / 2.0f), fovCircleRadius, ImColor(fovColors), 0, fovThickness);
+					ImGui::End();
+					ImGui::SetWindowFocus();
+				}
+
+
+				// Debugging
+				ImGui::Separator();
+				ImGui::Separator();
 				ImGui::BeginChild("ChildPlayers", ImVec2(0, 0), true);
-				//ImGui::Text("%s : %.2f", closestEnemyPtr->name, myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnemyPtr->vec3HeadPos));
+				//ImGui::Text("%s : %.2f", closestEnemyPtr->name, myPlayerEntityPtr->headPos.getDistance(closestEnemyPtr->headPos));
 				//ImGui::Text("%s : %d : %s", playerEntity->name, playerEntity->health, (playerEntity->state == States::Alive ? "Alive" : "Dead"));
 
-
-				Vector2 myViewAngles(myPlayerEntityPtr->vec3ViewAxis.x, myPlayerEntityPtr->vec3ViewAxis.y);
-				ImGui::Text("Current pos        : %.3f, %.3f, %.3f", myPlayerEntityPtr->vec3HeadPos.x, myPlayerEntityPtr->vec3HeadPos.y, myPlayerEntityPtr->vec3HeadPos.z);
+				Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
+				ImGui::Text("Current pos        : %.3f, %.3f, %.3f", myPlayerEntityPtr->headPos.x, myPlayerEntityPtr->headPos.y, myPlayerEntityPtr->headPos.z);
 				ImGui::Text("Current viewAngles : %.3f, %.3f", myViewAngles.x, myViewAngles.y);
 				ImGui::Separator();
 
-				PlayerEntity* closestEnemyPtr = Hacks::getClosestEnemyToCrosshair(gameObjects);
+				PlayerEntity* closestEnemyPtr = Hacks::getClosestEnemyToCrosshair(gameObjects, this->fov);
 				if (Hacks::isValidEntity(closestEnemyPtr))
 				{
 					ImGui::Text("%s : ", closestEnemyPtr->name);
-					ImGui::Text("Pos        : % .3f, % .3f, % .3f", closestEnemyPtr->vec3HeadPos.x, closestEnemyPtr->vec3HeadPos.y, closestEnemyPtr->vec3HeadPos.z);
-					ImGui::Text("Distance   : %.3f", myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnemyPtr->vec3HeadPos));
-					Vector2 viewAngleToEnemy = Geom::calcAngle(myPlayerEntityPtr->vec3HeadPos, closestEnemyPtr->vec3HeadPos);
-					ImGui::Text("viewAngle  : %.3f, %.3f", viewAngleToEnemy.x, viewAngleToEnemy.y);
-					Vector2 viewAngleToEnemyDelta = myViewAngles - viewAngleToEnemy;
-					ImGui::Text("angleDelta : %.3f, %.3f", viewAngleToEnemyDelta.x, viewAngleToEnemyDelta.y);
+					ImGui::Text("Pos        : % .3f, % .3f, % .3f", closestEnemyPtr->headPos.x, closestEnemyPtr->headPos.y, closestEnemyPtr->headPos.z);
+					ImGui::Text("Distance   : %.3f", myPlayerEntityPtr->headPos.getDistance(closestEnemyPtr->headPos));
+					Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, closestEnemyPtr->headPos);
+					ImGui::Text("viewAngle  : %.3f, %.3f", viewAnglesToEnemy.x, viewAnglesToEnemy.y);
+					Vector2 viewAnglesToEnemyDelta = myViewAngles - viewAnglesToEnemy;
+					ImGui::Text("angleDelta : %.3f, %.3f", viewAnglesToEnemyDelta.x, viewAnglesToEnemyDelta.y);
 				}
 
 				std::vector<PlayerEntity*> enemyList = Hacks::getEnemyList(gameObjects);
 				for (PlayerEntity* enemyEntityPtr : enemyList)
 				{
-					Vector2 viewAngleToEnemy = Geom::calcAngle(myPlayerEntityPtr->vec3HeadPos, enemyEntityPtr->vec3HeadPos);
-					ImGui::Text("%s : distance to crosshair : %f", enemyEntityPtr->name, myViewAngles.getDistance(viewAngleToEnemy));
+					Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, enemyEntityPtr->headPos);
+					ImGui::Text("%s : distance to crosshair : %f", enemyEntityPtr->name, myViewAngles.getDistance(viewAnglesToEnemy));
 				}
 
 				ImGui::EndChild();

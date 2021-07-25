@@ -43,10 +43,15 @@ private:
 
 	// Variables
 	HWND hwnd;
+	int gameWigth = 1024, gameHeight = 768;
 	bool bRunning = false;
 	bool bShow = false;
 	bool bDebug = false;
+
+	// Aimbot
 	bool bAimbot = false;
+	bool bShowFov = false;
+	float fov = 20.0f;
 
 public:
 	Menu(HWND hwnd);
@@ -64,4 +69,5 @@ public:
 	bool isRunning() { return this->bRunning; }
 
 	bool isAimbotEnabled() { return bAimbot; }
+	float getFovValue() { return fov; }
 };

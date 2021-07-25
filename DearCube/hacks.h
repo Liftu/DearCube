@@ -32,12 +32,12 @@ namespace Hacks
 	const WORD c_defaultWeaponsRecoilAnimation[(int)WeaponTypes::SIZE] = { 0x00, 0x06, 0x04, 0x09, 0x01, 0x04, 0x00, 0x06, 0x03, 0x06 };
 	const WORD c_defaultWeaponsIsFullAuto[(int)WeaponTypes::SIZE] = { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x01 };
 
-	struct LocalPlayer
-	{
-		PlayerEntity* playerEntity;
+	//struct LocalPlayer
+	//{
+	//	PlayerEntity* playerEntity;
 
-		void aimAt(const Vector3 dst);
-	};
+	//	void aimAt(const Vector3 dst);
+	//};
 
 	// Entities related
 	GameObjects* getGameObjectsPtr(DWORD moduleBaseAddr);
@@ -47,6 +47,7 @@ namespace Hacks
 	bool isValidEntity(PlayerEntity* playerEntity);
 	std::vector<PlayerEntity*> getValidEntityList(EntityVector* playerEntityVector);
 	std::vector<PlayerEntity*> getEnemyList(GameObjects* gameObjects);
+	std::vector<PlayerEntity*> getAliveEnemyList(GameObjects* gameObjects);
 
 
 	// Weapons related
@@ -72,7 +73,8 @@ namespace Hacks
 
 
 	// Aimbot related
-	void aimbot(GameObjects* gameObjects);
+	bool aimbot(GameObjects* gameObjects, float fov, float smoothness);
 	PlayerEntity* getClosestEnemy(GameObjects* gameObjects);
-	PlayerEntity* getClosestEnemyToCrosshair(GameObjects* gameObjects);
+	PlayerEntity* getClosestEnemyToCrosshair(GameObjects* gameObjects, float fov);
+	bool smoothSetViewAngles(PlayerEntity* myPlayerEntityPtr, Vector2 viewAnglesToEnemy, float smoothness);
 }

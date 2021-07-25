@@ -85,7 +85,7 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     // Maybe call hacks that are external to the menu like aimbot if enbale
     if (menu->isAimbotEnabled())
     {
-        Hacks::aimbot(gameObjects);
+        Hacks::aimbot(gameObjects, menu->getFovValue(), 1.0f);
     }
 
     //draw();

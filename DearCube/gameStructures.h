@@ -117,14 +117,14 @@ class PlayerEntity
 {
 public:
 	uint32_t vTable; //0x0000
-	Vector3 vec3HeadPos; //0x0004
-	Vector3 vec3Spead; //0x0010
+	Vector3 headPos; //0x0004
+	Vector3 spead; //0x0010
 	int32_t xSpeedInt; //0x001C
 	int32_t ySpeedInt; //0x0020
 	int32_t zSpeedInt; //0x0024
-	Vector3 vec3Velocity; //0x0028
-	Vector3 vec3Pos; //0x0034
-	Vector3 vec3ViewAxis; //0x0040
+	Vector3 velocity; //0x0028
+	Vector3 pos; //0x0034
+	Vector3 viewAngles; //0x0040
 	float pitchVel; //0x004C
 	float maxSpeed; //0x0050
 	int32_t timeInAir; //0x0054
@@ -149,7 +149,7 @@ public:
 	int32_t lastWaterSplash; //0x007C
 	int8_t moveForwardBackward; //0x0080
 	int8_t moveRightLeft; //0x0081
-	States state; //0x0082
+	States currentState; //0x0082
 	EntityTypes type; //0x0083
 	float eyeHeigthVel; //0x0084
 	int32_t lastPos; //0x0088

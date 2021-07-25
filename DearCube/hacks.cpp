@@ -65,16 +65,33 @@ std::vector<PlayerEntity*> Hacks::getEnemyList(GameObjects* gameObjects)
 		// Remove allies and spectators (filter function is a lambda)
 		enemyList.erase(
 			std::remove_if(
-				enemyList.begin(), 
-				enemyList.end(), 
-				[myPlayerEntityPtr](PlayerEntity* playerEntityPtr) 
-				{ 
+				enemyList.begin(),
+				enemyList.end(),
+				[myPlayerEntityPtr](PlayerEntity* playerEntityPtr)
+				{
 					return (myPlayerEntityPtr->team == playerEntityPtr->team || (playerEntityPtr->team != Teams::Blue && playerEntityPtr->team != Teams::Red));
-				}), 
+				}),
 			enemyList.end());
 	}
 
 	return enemyList;
+}
+
+std::vector<PlayerEntity*> Hacks::getAliveEnemyList(GameObjects* gameObjects)
+{
+	std::vector<PlayerEntity*> aliveEnemyList = getEnemyList(gameObjects);
+	// Remove all non alive enemies (filter function is a lambda)
+	aliveEnemyList.erase(
+		std::remove_if(
+			aliveEnemyList.begin(),
+			aliveEnemyList.end(),
+			[](PlayerEntity* playerEntityPtr)
+			{
+				return (playerEntityPtr->currentState != States::Alive);
+			}),
+		aliveEnemyList.end());
+
+	return aliveEnemyList;
 }
 
 bool Hacks::isValidEntity(PlayerEntity* playerEntity)
@@ -612,65 +629,77 @@ int16_t Hacks::getDefaultWeaponHackValue(WeaponTypes weaponType, WeaponHackTypes
 
 // Aimbot related
 
-void Hacks::aimbot(GameObjects* gameObjects)
+bool Hacks::aimbot(GameObjects* gameObjects, float fov, float smoothness)
 {
 	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
-	PlayerEntity* closestEnemyPtr = nullptr;
-	std::vector<PlayerEntity*> entityList = getValidEntityList(&gameObjects->playerEntityVector);
-	for (PlayerEntity* enemyEntityPtr : entityList)
-	{
-		if (closestEnemyPtr == nullptr)
-			closestEnemyPtr = enemyEntityPtr;
-		if (myPlayerEntityPtr->vec3HeadPos.getDistance(enemyEntityPtr->vec3HeadPos) < myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnemyPtr->vec3HeadPos))
-			closestEnemyPtr = enemyEntityPtr;
-	}
+	PlayerEntity* closestEnemyPtr = Hacks::getClosestEnemyToCrosshair(gameObjects, fov);
 
-	return;
+	if (!isValidEntity(myPlayerEntityPtr) || !isValidEntity(closestEnemyPtr))
+		return false;
+
+	Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
+	Vector2 viewAnglseToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, closestEnemyPtr->headPos);
+
+	return smoothSetViewAngles(myPlayerEntityPtr, viewAnglseToEnemy, 0.0f);
 }
 
 PlayerEntity* Hacks::getClosestEnemy(GameObjects* gameObjects)
 {
-	std::vector<PlayerEntity*> enemyList = getEnemyList(gameObjects);
+	std::vector<PlayerEntity*> enemyList = getAliveEnemyList(gameObjects);
 	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
 	PlayerEntity* closestEnemyPtr = nullptr;
 
 	// Filter by distance
 	for (PlayerEntity* enemyEntityPtr : enemyList)
 		if (closestEnemyPtr == nullptr ||
-			myPlayerEntityPtr->vec3HeadPos.getDistance(enemyEntityPtr->vec3HeadPos) <
-			myPlayerEntityPtr->vec3HeadPos.getDistance(closestEnemyPtr->vec3HeadPos)
+			myPlayerEntityPtr->headPos.getDistance(enemyEntityPtr->headPos) <
+			myPlayerEntityPtr->headPos.getDistance(closestEnemyPtr->headPos)
 			)
 			closestEnemyPtr = enemyEntityPtr;
 
 	return closestEnemyPtr;
 }
 
-PlayerEntity* Hacks::getClosestEnemyToCrosshair(GameObjects* gameObjects)
+PlayerEntity* Hacks::getClosestEnemyToCrosshair(GameObjects* gameObjects, float fov)
 {
-	std::vector<PlayerEntity*> enemyList = getEnemyList(gameObjects);
+	std::vector<PlayerEntity*> enemyList = getAliveEnemyList(gameObjects);
 	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
 	PlayerEntity* closestEnemyPtr = nullptr;
-	Vector2 myViewAngles(myPlayerEntityPtr->vec3ViewAxis.x, myPlayerEntityPtr->vec3ViewAxis.y);
+	Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
 
 	// Filter by distance to crosshair
 	for (PlayerEntity* enemyEntityPtr : enemyList)
 	{
+		Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, enemyEntityPtr->headPos);
+		
+		if (myViewAngles.getDistance(viewAnglesToEnemy) > fov)
+			continue;
+
 		if (closestEnemyPtr == nullptr)
 		{
 			closestEnemyPtr = enemyEntityPtr;
 			continue;
 		}
 
-		Vector2 viewAngleToClosestEnemy = Geom::calcAngle(myPlayerEntityPtr->vec3HeadPos, closestEnemyPtr->vec3HeadPos);
-		Vector2 viewAngleToEnemy = Geom::calcAngle(myPlayerEntityPtr->vec3HeadPos, enemyEntityPtr->vec3HeadPos);
-		if (myViewAngles.getDistance(viewAngleToEnemy) < myViewAngles.getDistance(viewAngleToClosestEnemy))
+		Vector2 viewAnglesToClosestEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, closestEnemyPtr->headPos);
+
+		if (myViewAngles.getDistance(viewAnglesToEnemy) < myViewAngles.getDistance(viewAnglesToClosestEnemy))
 			closestEnemyPtr = enemyEntityPtr;
 	}
 
 	return closestEnemyPtr;
 }
 
-void Hacks::LocalPlayer::aimAt(const Vector3 dst)
+bool Hacks::smoothSetViewAngles(PlayerEntity* myPlayerEntityPtr, Vector2 viewAnglesToEnemy, float smoothness)
 {
+	if (!isValidEntity(myPlayerEntityPtr))
+		return false;
 
+	myPlayerEntityPtr->viewAngles = Vector3(viewAnglesToEnemy);
+	return true;
 }
+
+//void Hacks::LocalPlayer::aimAt(const Vector3 dst)
+//{
+//
+//}
