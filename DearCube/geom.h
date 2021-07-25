@@ -19,6 +19,7 @@ namespace Geom
 		Vector2  operator -		(const Vector2& rhs) { return Vector2(x - rhs.x, y - rhs.y).normalize(); }
 		Vector2  operator *		(const Vector2& rhs) { return Vector2(x * rhs.x, y * rhs.y).normalize(); }
 		Vector2  operator /		(const Vector2& rhs) { return Vector2(x / rhs.x, y / rhs.y).normalize(); }
+		Vector2  operator /		(const float rhs) { return Vector2(x / rhs, y / rhs).normalize(); }
 		Vector2& operator +=	(const Vector2& rhs) { return *this = *this + rhs; }
 		Vector2& operator -=	(const Vector2& rhs) { return *this = *this - rhs; }
 		Vector2& operator *=	(const Vector2& rhs) { return *this = *this * rhs; }

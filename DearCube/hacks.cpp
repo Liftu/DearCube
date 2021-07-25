@@ -632,7 +632,7 @@ int16_t Hacks::getDefaultWeaponHackValue(WeaponTypes weaponType, WeaponHackTypes
 bool Hacks::aimbot(GameObjects* gameObjects, float fov, float smoothness)
 {
 	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
-	PlayerEntity* closestEnemyPtr = Hacks::getClosestEnemyToCrosshair(gameObjects, fov);
+	PlayerEntity* closestEnemyPtr = Hacks::getClosestEnemyToCrosshair(gameObjects, fov);	// Could use some close to crosshair / close in position ration.
 
 	if (!isValidEntity(myPlayerEntityPtr) || !isValidEntity(closestEnemyPtr))
 		return false;
@@ -640,7 +640,7 @@ bool Hacks::aimbot(GameObjects* gameObjects, float fov, float smoothness)
 	Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
 	Vector2 viewAnglseToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, closestEnemyPtr->headPos);
 
-	return smoothSetViewAngles(myPlayerEntityPtr, viewAnglseToEnemy, 0.0f);
+	return smoothSetViewAngles(myPlayerEntityPtr, viewAnglseToEnemy, smoothness);
 }
 
 PlayerEntity* Hacks::getClosestEnemy(GameObjects* gameObjects)
@@ -695,7 +695,9 @@ bool Hacks::smoothSetViewAngles(PlayerEntity* myPlayerEntityPtr, Vector2 viewAng
 	if (!isValidEntity(myPlayerEntityPtr))
 		return false;
 
-	myPlayerEntityPtr->viewAngles = Vector3(viewAnglesToEnemy);
+	Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
+
+	myPlayerEntityPtr->viewAngles = Vector3(myViewAngles + (viewAnglesToEnemy - myViewAngles) / smoothness);
 	return true;
 }
 

@@ -10,9 +10,6 @@
 #include "hacks.h"
 /**/#include "imgui_memory_editor.h"
 
-#define SDL_DISABLE  0
-#define SDL_ENABLE   1
-
 using Geom::Vector2;
 using Geom::Vector3;
 
@@ -37,9 +34,7 @@ private:
 		SDL_GRAB_ON
 	} SDL_GrabMode;
 	typedef BOOL(__cdecl* t_SDL_WM_GrabInput)(SDL_GrabMode mode);
-	typedef BOOL(__cdecl* t_SDL_ShowCursor)(int toggle);
 	t_SDL_WM_GrabInput	_SDL_WM_GrabInput;
-	t_SDL_ShowCursor	_SDL_ShowCursor;
 
 	// Variables
 	HWND hwnd;
@@ -52,6 +47,9 @@ private:
 	bool bAimbot = false;
 	bool bShowFov = false;
 	float fov = 20.0f;
+	float aimSmooth = 20.0f;
+	float fovThickness = 2.0f;
+	ImVec4 fovColors = ImVec4(0.25f, 0.0f, 1.0f, 0.45f);
 
 public:
 	Menu(HWND hwnd);
@@ -70,4 +68,5 @@ public:
 
 	bool isAimbotEnabled() { return bAimbot; }
 	float getFovValue() { return fov; }
+	float getAimSmoothValue() { return aimSmooth; }
 };

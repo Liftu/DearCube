@@ -65,7 +65,6 @@ Menu::Menu(HWND hwnd)
 
 	// Get some SDL functions
 	this->_SDL_WM_GrabInput = (t_SDL_WM_GrabInput)Hook32::getFunctionAddr("SDL.dll", "SDL_WM_GrabInput");
-	this->_SDL_ShowCursor	= (t_SDL_ShowCursor)Hook32::getFunctionAddr("SDL.dll", "SDL_WM_GrabInput");
 
 	// Set default values
 	this->bRunning	= true;
@@ -116,61 +115,52 @@ void Menu::drawMenu(GameObjects* gameObjects)
 				ImGui::Checkbox("Aimbot", &this->bAimbot);
 				
 				// FOV
-				ImGui::SliderFloat("FOV size", &this->fov, 0.0f, 200.0f, "%.3f");
+				ImGui::SliderFloat("FOV size", &this->fov, 0.0f, 200.0f, "%.2f");
 				ImGui::SameLine(); helpMarker("The FOV represents the maximum degree you allow the aimbot to aim at.");
 				// FOV circle
 				ImGui::Checkbox("Show FOV circle", &this->bShowFov);
 				if (this->bShowFov)
 				{
-					static float fovThickness = 2.0f;
-					static ImVec4 fovColors = ImVec4(0.25f, 0.0f, 1.0f, 0.45f);
-					ImGui::SliderFloat("FOV circle thickness", &fovThickness, 1.0, 5.0, "%.3f");
-					ImGui::ColorEdit4("FOV circle color", &fovColors.x);
-
-					// Draw the circle
-					ImGui::Begin("##CIRCLEFOV", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse |
-						ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
-					auto draw = ImGui::GetBackgroundDrawList();
-					// This calculation is approximate
-					float fovCircleRadius = this->fov / 50 * (this->gameWigth / 2.0f);	// 50 approximately represents the angle degree to the side of the screen
-					draw->AddCircle(ImVec2(this->gameWigth / 2.0f, this->gameHeight / 2.0f), fovCircleRadius, ImColor(fovColors), 0, fovThickness);
-					ImGui::End();
-					ImGui::SetWindowFocus();
+					ImGui::SliderFloat("FOV circle thickness", &this->fovThickness, 1.0, 5.0, "%.2f px");
+					ImGui::ColorEdit4("FOV circle color", &this->fovColors.x);
 				}
 
+				// Smoothness
+				ImGui::SliderFloat("Smoothness", &this->aimSmooth, 0.0f, 100.0f, "%.2f°");
+				ImGui::SameLine(); helpMarker("The aim smoothness represents the spead at which the aimbot will aim at the target.");
 
-				// Debugging
-				ImGui::Separator();
-				ImGui::Separator();
-				ImGui::BeginChild("ChildPlayers", ImVec2(0, 0), true);
-				//ImGui::Text("%s : %.2f", closestEnemyPtr->name, myPlayerEntityPtr->headPos.getDistance(closestEnemyPtr->headPos));
-				//ImGui::Text("%s : %d : %s", playerEntity->name, playerEntity->health, (playerEntity->state == States::Alive ? "Alive" : "Dead"));
+				//// Debugging
+				//ImGui::Separator();
+				//ImGui::Separator();
+				//ImGui::BeginChild("ChildPlayers", ImVec2(0, 0), true);
+				////ImGui::Text("%s : %.2f", closestEnemyPtr->name, myPlayerEntityPtr->headPos.getDistance(closestEnemyPtr->headPos));
+				////ImGui::Text("%s : %d : %s", playerEntity->name, playerEntity->health, (playerEntity->state == States::Alive ? "Alive" : "Dead"));
 
-				Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
-				ImGui::Text("Current pos        : %.3f, %.3f, %.3f", myPlayerEntityPtr->headPos.x, myPlayerEntityPtr->headPos.y, myPlayerEntityPtr->headPos.z);
-				ImGui::Text("Current viewAngles : %.3f, %.3f", myViewAngles.x, myViewAngles.y);
-				ImGui::Separator();
+				//Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
+				//ImGui::Text("Current pos        : %.3f, %.3f, %.3f", myPlayerEntityPtr->headPos.x, myPlayerEntityPtr->headPos.y, myPlayerEntityPtr->headPos.z);
+				//ImGui::Text("Current viewAngles : %.3f, %.3f", myViewAngles.x, myViewAngles.y);
+				//ImGui::Separator();
 
-				PlayerEntity* closestEnemyPtr = Hacks::getClosestEnemyToCrosshair(gameObjects, this->fov);
-				if (Hacks::isValidEntity(closestEnemyPtr))
-				{
-					ImGui::Text("%s : ", closestEnemyPtr->name);
-					ImGui::Text("Pos        : % .3f, % .3f, % .3f", closestEnemyPtr->headPos.x, closestEnemyPtr->headPos.y, closestEnemyPtr->headPos.z);
-					ImGui::Text("Distance   : %.3f", myPlayerEntityPtr->headPos.getDistance(closestEnemyPtr->headPos));
-					Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, closestEnemyPtr->headPos);
-					ImGui::Text("viewAngle  : %.3f, %.3f", viewAnglesToEnemy.x, viewAnglesToEnemy.y);
-					Vector2 viewAnglesToEnemyDelta = myViewAngles - viewAnglesToEnemy;
-					ImGui::Text("angleDelta : %.3f, %.3f", viewAnglesToEnemyDelta.x, viewAnglesToEnemyDelta.y);
-				}
+				//PlayerEntity* closestEnemyPtr = Hacks::getClosestEnemyToCrosshair(gameObjects, this->fov);
+				//if (Hacks::isValidEntity(closestEnemyPtr))
+				//{
+				//	ImGui::Text("%s : ", closestEnemyPtr->name);
+				//	ImGui::Text("Pos        : % .3f, % .3f, % .3f", closestEnemyPtr->headPos.x, closestEnemyPtr->headPos.y, closestEnemyPtr->headPos.z);
+				//	ImGui::Text("Distance   : %.3f", myPlayerEntityPtr->headPos.getDistance(closestEnemyPtr->headPos));
+				//	Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, closestEnemyPtr->headPos);
+				//	ImGui::Text("viewAngle  : %.3f, %.3f", viewAnglesToEnemy.x, viewAnglesToEnemy.y);
+				//	Vector2 viewAnglesToEnemyDelta = viewAnglesToEnemy - myViewAngles;
+				//	ImGui::Text("angleDelta : %.3f, %.3f", viewAnglesToEnemyDelta.x, viewAnglesToEnemyDelta.y);
+				//}
 
-				std::vector<PlayerEntity*> enemyList = Hacks::getEnemyList(gameObjects);
-				for (PlayerEntity* enemyEntityPtr : enemyList)
-				{
-					Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, enemyEntityPtr->headPos);
-					ImGui::Text("%s : distance to crosshair : %f", enemyEntityPtr->name, myViewAngles.getDistance(viewAnglesToEnemy));
-				}
+				//std::vector<PlayerEntity*> enemyList = Hacks::getEnemyList(gameObjects);
+				//for (PlayerEntity* enemyEntityPtr : enemyList)
+				//{
+				//	Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, enemyEntityPtr->headPos);
+				//	ImGui::Text("%s : distance to crosshair : %f", enemyEntityPtr->name, myViewAngles.getDistance(viewAnglesToEnemy));
+				//}
 
-				ImGui::EndChild();
+				//ImGui::EndChild();
 
 				ImGui::EndTabItem();
 			}
@@ -365,19 +355,28 @@ void Menu::render(GameObjects* gameObjects)
 	{
 		// Intercept cursor
 		_SDL_WM_GrabInput(SDL_GrabMode(2));
-		// Thought it would be needed to show the cursor, but it juste made the game laggy.
-		//_SDL_ShowCursor(SDL_ENABLE);
 
 		// Actual menu code
-		//this->drawMenu(gameObjects);
+		this->drawMenu(gameObjects);
 	}
 	else
 	{
 		// Restore cursor
 		_SDL_WM_GrabInput(SDL_GrabMode(1));
-		//_SDL_ShowCursor(SDL_DISABLE);
 	}
-	this->drawMenu(gameObjects);
+	//this->drawMenu(gameObjects);
+
+	// Draw the fov circle
+	if (this->bShowFov)
+	{
+		ImGui::Begin("##CIRCLEFOV", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | 
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
+		auto draw = ImGui::GetBackgroundDrawList();
+		// This calculation is approximate
+		float fovCircleRadius = this->fov / 50 * (this->gameWigth / 2.0f);	// 50 approximately represents the angle degree to the side of the screen
+		draw->AddCircle(ImVec2(this->gameWigth / 2.0f, this->gameHeight / 2.0f), fovCircleRadius, ImColor(this->fovColors), 0, this->fovThickness);
+		ImGui::End();
+	}
 
 	// Rendering
 	ImGui::EndFrame();
