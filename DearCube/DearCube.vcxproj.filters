@@ -75,6 +75,9 @@
     <ClInclude Include="geom.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="libs\imgui_club\imgui_memory_editor\imgui_memory_editor.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

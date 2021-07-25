@@ -4,3 +4,6 @@
 [submodule "AssaultCube-Hack-Menu/libs/imgui"]
 	path = DearCube/libs/imgui
 	url = git@github.com:ocornut/imgui.git
+[submodule "DearCube/libs/imgui_club"]
+	path = DearCube/libs/imgui_club
+	url = git@github.com:ocornut/imgui_club.git

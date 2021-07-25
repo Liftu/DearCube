@@ -108,7 +108,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 			// 
 			//	ImGui::EndTabItem();
 			//}
-			 
+
 			// Aimbot
 			if (ImGui::BeginTabItem("Aimbot"))
 			{
@@ -136,7 +136,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 					Vector2 viewAngleToEnemyDelta = myViewAngles - viewAngleToEnemy;
 					ImGui::Text("angleDelta : %.3f, %.3f", viewAngleToEnemyDelta.x, viewAngleToEnemyDelta.y);
 				}
-				
+
 				std::vector<PlayerEntity*> enemyList = Hacks::getEnemyList(gameObjects);
 				for (PlayerEntity* enemyEntityPtr : enemyList)
 				{
@@ -148,6 +148,31 @@ void Menu::drawMenu(GameObjects* gameObjects)
 
 				ImGui::EndTabItem();
 			}
+
+			// Debug
+			static MemoryEditor memEdit;
+			static bool show = false;
+			static PlayerEntity* selectedPlayerEntityPtr = myPlayerEntityPtr;	// Default is myPlayerEntityPtr
+			if (ImGui::BeginTabItem("Debug"))
+			{
+				ImGui::Text("Selected : %s", Hacks::isValidEntity(selectedPlayerEntityPtr) ? selectedPlayerEntityPtr->name : "none");
+				ImGui::Checkbox("Show memory editor", &show);
+
+				if (ImGui::Button(myPlayerEntityPtr->name))
+					selectedPlayerEntityPtr = myPlayerEntityPtr;
+
+				ImGui::BeginChild("ChildDebugPlayers", ImVec2(0, 0), true);
+				std::vector<PlayerEntity*> entityList = Hacks::getValidEntityList(&gameObjects->playerEntityVector);
+				for (PlayerEntity* enemyEntityPtr : entityList)
+					if (ImGui::Button(enemyEntityPtr->name))
+						selectedPlayerEntityPtr = enemyEntityPtr;
+				ImGui::EndChild();
+
+				ImGui::EndTabItem();
+			}
+			if (show && Hacks::isValidEntity(selectedPlayerEntityPtr))
+				memEdit.DrawWindow(selectedPlayerEntityPtr->name, selectedPlayerEntityPtr, sizeof(PlayerEntity));
+
 
 			// Weapons
 			if (ImGui::BeginTabItem("Weapons"))

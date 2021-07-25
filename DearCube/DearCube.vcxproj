@@ -91,7 +91,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>libs/imgui;libs/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>libs/imgui_club/imgui_memory_editor;libs/imgui;libs/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -110,7 +110,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>libs/imgui;libs/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>libs/imgui_club/imgui_memory_editor;libs/imgui;libs/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -171,6 +171,7 @@
     <ClInclude Include="libs\imgui\imconfig.h" />
     <ClInclude Include="libs\imgui\imgui.h" />
     <ClInclude Include="libs\imgui\imgui_internal.h" />
+    <ClInclude Include="libs\imgui_club\imgui_memory_editor\imgui_memory_editor.h" />
     <ClInclude Include="Menu.h" />
   </ItemGroup>
   <ItemGroup>

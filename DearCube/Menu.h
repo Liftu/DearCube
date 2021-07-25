@@ -8,6 +8,7 @@
 #include "imgui_impl_opengl2.h"
 #include "hook32.h"
 #include "hacks.h"
+/**/#include "imgui_memory_editor.h"
 
 #define SDL_DISABLE  0
 #define SDL_ENABLE   1
@@ -28,23 +29,6 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 class Menu
 {
-public:
-	Menu(HWND hwnd);
-	~Menu();
-
-	void drawMenu(GameObjects* gameObjects);
-	void render(GameObjects* gameObjects);
-	void init();
-	void shutdown();
-
-	void helpMarker(const char* desc);
-
-	void toggleMenu() { this->bShow = !this->bShow; }
-	bool isShown() { return this->bShow; }
-	bool isRunning() { return this->bRunning; }
-
-	bool isAimbotEnabled() { return bAimbot; }
-
 private:
 	// SDL definitions for cursor display
 	typedef enum {
@@ -62,4 +46,21 @@ private:
 	bool bRunning = false;
 	bool bShow = false;
 	bool bAimbot = false;
+
+public:
+	Menu(HWND hwnd);
+	~Menu();
+
+	void drawMenu(GameObjects* gameObjects);
+	void render(GameObjects* gameObjects);
+	void init();
+	void shutdown();
+
+	void helpMarker(const char* desc);
+
+	void toggleMenu() { this->bShow = !this->bShow; }
+	bool isShown() { return this->bShow; }
+	bool isRunning() { return this->bRunning; }
+
+	bool isAimbotEnabled() { return bAimbot; }
 };
