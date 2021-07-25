@@ -29,15 +29,26 @@ float Vector2::length()
 	return length;
 }
 
-Vector2 Vector2::operator-(const Vector2& rhs)
-{
-	Vector2 delta(this->x - rhs.x, this->y - rhs.y);
-	if (delta.x > 180)
-		delta.x -= 360;
-	if (delta.x < -180)
-		delta.x += 360;
+//Vector2 Vector2::operator-(const Vector2& rhs)
+//{
+//	Vector2 delta(this->x - rhs.x, this->y - rhs.y);
+//	if (delta.x > 180) delta.x -= 360;
+//	if (delta.x < -180) delta.x += 360;
+//
+//	return delta;
+//}
 
-	return delta;
+Vector2 Vector2::normalize()
+{
+	Vector2 result(*this);
+
+	while (result.x > 180.0f) result.x -= 360.0f;
+	while (result.x < -180.0f) result.x += 360.0f;
+
+	while (result.y > 90.0f) result.y -= 180.0f;
+	while (result.y < -90.0f) result.y += 180.0f;
+
+	return result;
 }
 
 Vector2 Geom::calcAngle(Vector3 posSrc, Vector3 posDst)

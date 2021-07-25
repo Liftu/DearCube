@@ -15,10 +15,10 @@ namespace Geom
 		Vector2(float x, float y) : x(x), y(y) {}
 		//Vector2(Vector3 vec3) : x(vec3.x), y(vec3.y) {}
 
-		Vector2  operator +		(const Vector2& rhs) { return Vector2(x + rhs.x, y + rhs.y); }
-		Vector2  operator -		(const Vector2& rhs);// { return Vector2(x - rhs.x, y - rhs.y); }
-		Vector2  operator *		(const Vector2& rhs) { return Vector2(x * rhs.x, y * rhs.y); }
-		Vector2  operator /		(const Vector2& rhs) { return Vector2(x / rhs.x, y / rhs.y); }
+		Vector2  operator +		(const Vector2& rhs) { return Vector2(x + rhs.x, y + rhs.y).normalize(); }
+		Vector2  operator -		(const Vector2& rhs) { return Vector2(x - rhs.x, y - rhs.y).normalize(); }
+		Vector2  operator *		(const Vector2& rhs) { return Vector2(x * rhs.x, y * rhs.y).normalize(); }
+		Vector2  operator /		(const Vector2& rhs) { return Vector2(x / rhs.x, y / rhs.y).normalize(); }
 		Vector2& operator +=	(const Vector2& rhs) { return *this = *this + rhs; }
 		Vector2& operator -=	(const Vector2& rhs) { return *this = *this - rhs; }
 		Vector2& operator *=	(const Vector2& rhs) { return *this = *this * rhs; }
@@ -35,6 +35,7 @@ namespace Geom
 		// Length but for 3d angles
 		float length();
 		float getDistance(const Vector2 other) { return (*this - other).length(); }
+		Vector2 normalize();
 	};
 
 	// This is mainly for 3d position
