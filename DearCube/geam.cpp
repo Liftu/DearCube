@@ -3,28 +3,41 @@
 using Geom::Vector2;
 using Geom::Vector3;
 
-// Copy paste from https://guidedhacking.com/threads/correct-angle-comparison-for-fov-aimbot.15714/
-// as I don't really understand this maths concepts
-// And et get closer when facing back to them....
+
 float Vector2::length()
 {
-	float l, r;
-	Vector2 rad;
-	Vector3 pos;
+	// From https://guidedhacking.com/threads/correct-angle-comparison-for-fov-aimbot.15714/
+	// I don't really understand those maths concepts
+	// It get closer when facing back to them....
+	//float l, r;
+	//Vector2 rad;
+	//Vector3 pos;
 
-	rad.x = x * PI / 180;
-	rad.y = y * PI / 180;
-	r = abs(cos(rad.x));
-	pos.y = sin(rad.x);
-	pos.x = r * sin(rad.y);
-	pos.z = r * cos(rad.y);
-	l = pos.getDistance(Vector3(0, 0, 1));
+	//rad.x = x * PI / 180;
+	//rad.y = y * PI / 180;
+	//r = abs(cos(rad.x));
+	//pos.y = sin(rad.x);
+	//pos.x = r * sin(rad.y);
+	//pos.z = r * cos(rad.y);
+	//l = pos.getDistance(Vector3(0, 0, 1));
 
-	// angle
-	return acos(1 - l * l / 2) * 180 / PI;
+	//// angle length
+	//return acos(1 - l * l / 2) * 180 / PI;
 	
-	//float length = sqrt(pow(x, 2.0f) + pow(y, 2.0f));
-	//return length;
+	// My way
+	float length = sqrt(pow(x, 2.0f) + pow(y, 2.0f));
+	return length;
+}
+
+Vector2 Vector2::operator-(const Vector2& rhs)
+{
+	Vector2 delta(this->x - rhs.x, this->y - rhs.y);
+	if (delta.x > 180)
+		delta.x -= 360;
+	if (delta.x < -180)
+		delta.x += 360;
+
+	return delta;
 }
 
 Vector2 Geom::calcAngle(Vector3 posSrc, Vector3 posDst)
