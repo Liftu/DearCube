@@ -116,7 +116,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 				
 				// FOV
 				ImGui::SliderFloat("FOV size", &this->fov, 0.0f, 200.0f, "%.2f");
-				ImGui::SameLine(); helpMarker("The FOV represents the maximum degree you allow the aimbot to aim at.");
+				ImGui::SameLine(); helpMarker("The FOV represents the maximum distance in degrees from your current view to the enemy at which the aimbot will start aiming.");
 				// FOV circle
 				ImGui::Checkbox("Show FOV circle", &this->bShowFov);
 				if (this->bShowFov)
@@ -126,8 +126,13 @@ void Menu::drawMenu(GameObjects* gameObjects)
 				}
 
 				// Smoothness
-				ImGui::SliderFloat("Smoothness", &this->aimSmooth, 0.0f, 100.0f, "%.2f°");
+				ImGui::SliderFloat("Smoothness", &this->aimSmooth, 1.0f, 100.0f, "%.2f°");
 				ImGui::SameLine(); helpMarker("The aim smoothness represents the spead at which the aimbot will aim at the target.");
+
+				// Triggerbot
+				ImGui::Checkbox("Triggerbot", &this->bTriggerbot);
+				ImGui::SliderFloat("Trigger distance", &this->triggerDistance, 0.1f, 10.0f, "%.2f°");
+				ImGui::SameLine(); helpMarker("The triggerbot distance represents the distance in degrees from the target at which the triggerbot will start shooting.");
 
 				//// Debugging
 				//ImGui::Separator();
@@ -289,6 +294,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 
 					ImGui::EndTabItem();
 				}
+				// Show the memory editor for the selected player entity
 				if (show && Hacks::isValidEntity(selectedPlayerEntityPtr))
 					memEdit.DrawWindow(selectedPlayerEntityPtr->name, selectedPlayerEntityPtr, sizeof(PlayerEntity));
 			}

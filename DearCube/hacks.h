@@ -81,4 +81,6 @@ namespace Hacks
 	PlayerEntity* getBestTarget(GameObjects* gameObjects, float fov, float distanceRatio);
 	bool smoothSetViewAngles(PlayerEntity* myPlayerEntityPtr, Vector2 viewAnglesToEnemy, float smoothness);
 	bool isTargetVisible(PlayerEntity* myPlayerEntityPtr, Vector3 targetPos);
+
+	bool triggerbot(GameObjects* gameObjects, float degreeDistanceToShoot);
 }

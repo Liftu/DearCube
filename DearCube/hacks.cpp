@@ -767,6 +767,9 @@ PlayerEntity* Hacks::getBestTarget(GameObjects* gameObjects, float fov, float an
 
 bool Hacks::smoothSetViewAngles(PlayerEntity* myPlayerEntityPtr, Vector2 viewAnglesToEnemy, float smoothness)
 {
+	if (smoothness < 1.0f)
+		return false;
+
 	if (!isValidEntity(myPlayerEntityPtr))
 		return false;
 
@@ -806,4 +809,30 @@ bool Hacks::isTargetVisible(PlayerEntity* myPlayerEntityPtr, Vector3 targetPos)
 	}
 
 	return !(bool)traceLineResult.collided;
+}
+
+bool Hacks::triggerbot(GameObjects* gameObjects, float degreeDistanceToShoot)
+{
+	std::vector<PlayerEntity*> enemyList = getAliveEnemyList(gameObjects);
+	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
+	Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
+
+	myPlayerEntityPtr->isShooting = false;	// Stop shooting if shooting
+
+	for (PlayerEntity* enemyEntityPtr : enemyList)
+	{
+		if (!isTargetVisible(myPlayerEntityPtr, enemyEntityPtr->headPos))
+			continue;
+
+		// Instead I could reverse the call to traceLine that updates the HUD and recreate it here.
+		Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, enemyEntityPtr->headPos);
+		if (myViewAngles.getDistance(viewAnglesToEnemy) <= degreeDistanceToShoot)
+		{
+			// Shoot
+			myPlayerEntityPtr->isShooting = true;
+			return true;
+		}
+	}
+
+	return false;
 }

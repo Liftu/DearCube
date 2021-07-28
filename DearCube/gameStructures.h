@@ -6,7 +6,7 @@
 
 using Geom::Vector3;
 
-// Created with ReClass.NET 1.2 by KN4CK3R
+/// Created with ReClass.NET 1.2 by KN4CK3R
 
 enum class WeaponTypes : int32_t
 {
@@ -142,7 +142,7 @@ public:
 	bool isCancollide; //0x006F
 	bool isStuck; //0x0070
 	bool isScoping; //0x0071
-	bool isShooting; //0x0072
+	bool isShootingNoWorking; //0x0072
 	char pad_0073[1]; //0x0073
 	int32_t lastJump; //0x0074
 	float lastJumpHeight; //0x0078
@@ -189,7 +189,7 @@ public:
 	int32_t lastPain; //0x0218
 	int32_t lastVoiceCom; //0x021C
 	int32_t lastDeath; //0x0220
-	bool attacking; //0x0224
+	bool isShooting; //0x0224
 	char name[15]; //0x0225
 	char pad_0234[248]; //0x0234
 	Teams team; //0x032C
@@ -214,7 +214,6 @@ static_assert(sizeof(PlayerEntity) == 0x3A0);
 class Weapon
 {
 public:
-	char pad_0000[4]; //0x0000
 	WeaponTypes weaponType; //0x0004
 	class PlayerEntity* playerOwnerPtr; //0x0008
 	class WeaponCharacs* weaponCharacsPtr; //0x000C
@@ -224,6 +223,17 @@ public:
 	uint32_t shotsFiredInARow; //0x001C
 	uint32_t reloadingStartTime; //0x0020
 	char pad_0024[12]; //0x0024
+
+	virtual void Function0();
+	virtual void Function1();
+	virtual void Function2();
+	virtual void shoot();
+	virtual void Function4();
+	virtual void _adjust_screen2World_coords();
+	virtual void Function6();
+	virtual void Function7();
+	virtual void Function8();
+	virtual void Function9();
 }; //Size: 0x0030
 static_assert(sizeof(Weapon) == 0x30);
 

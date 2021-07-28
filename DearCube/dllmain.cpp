@@ -85,6 +85,11 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     {
         Hacks::aimbot(gameObjects, menu->getFovValue(), menu->getAimSmoothValue());
     }
+    if (menu->isTriggerbotEnabled())
+    {
+        Hacks::triggerbot(gameObjects, menu->getTriggerDistanceValue());
+    }
+
 
     //draw();
 
