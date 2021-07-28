@@ -17,7 +17,7 @@ namespace Hacks
 	// Offsets
 	const DWORD o_gameObjects = 0x0010F49C;
 	const DWORD o_playerEntityVectorPtr = 0x0010F4F8;
-	//const DWORD o_entityListSize		= 0x0010F500;
+	const DWORD o_TraceLineFunction = 0x0008A310;
 
 	// Constants
 	const DWORD c_playerEntityType = 0x004E4A98;
@@ -32,18 +32,14 @@ namespace Hacks
 	const WORD c_defaultWeaponsRecoilAnimation[(int)WeaponTypes::SIZE] = { 0x00, 0x06, 0x04, 0x09, 0x01, 0x04, 0x00, 0x06, 0x03, 0x06 };
 	const WORD c_defaultWeaponsIsFullAuto[(int)WeaponTypes::SIZE] = { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x01 };
 
-	//struct LocalPlayer
-	//{
-	//	PlayerEntity* playerEntity;
 
-	//	void aimAt(const Vector3 dst);
-	//};
+	DWORD getModuleBaseAddr();
 
 	// Entities related
-	GameObjects* getGameObjectsPtr(DWORD moduleBaseAddr);
-	//PlayerEntity* getMyPlayerEntityPtr(DWORD moduleBaseAddr);
-	//EntityVector* getPlayerEntityVectorPtr(DWORD moduleBaseAddr);
-	//int getNumberOfPlayer(DWORD moduleBaseAddr);
+	GameObjects* getGameObjectsPtr();
+	//PlayerEntity* getMyPlayerEntityPtr();
+	//EntityVector* getPlayerEntityVectorPtr();
+	//int getNumberOfPlayer();
 	bool isValidEntity(PlayerEntity* playerEntity);
 	std::vector<PlayerEntity*> getValidEntityList(EntityVector* playerEntityVector);
 	std::vector<PlayerEntity*> getEnemyList(GameObjects* gameObjects);
@@ -73,8 +69,16 @@ namespace Hacks
 
 
 	// Aimbot related
+	struct TraceLineResult
+	{
+		Vector3 pos;
+		int8_t collided;
+	};
+
 	bool aimbot(GameObjects* gameObjects, float fov, float smoothness);
 	PlayerEntity* getClosestEnemy(GameObjects* gameObjects);
 	PlayerEntity* getClosestEnemyToCrosshair(GameObjects* gameObjects, float fov);
+	PlayerEntity* getBestTarget(GameObjects* gameObjects, float fov, float distanceRatio);
 	bool smoothSetViewAngles(PlayerEntity* myPlayerEntityPtr, Vector2 viewAnglesToEnemy, float smoothness);
+	bool isTargetVisible(PlayerEntity* myPlayerEntityPtr, Vector3 targetPos);
 }

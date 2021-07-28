@@ -163,7 +163,6 @@
     <ClInclude Include="glDraw.h" />
     <ClInclude Include="glText.h" />
     <ClInclude Include="hacks.h" />
-    <ClInclude Include="gameVariables.h" />
     <ClInclude Include="geom.h" />
     <ClInclude Include="hook32.h" />
     <ClInclude Include="libs\imgui\backends\imgui_impl_opengl2.h" />

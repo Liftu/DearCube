@@ -13,10 +13,8 @@
 #include "hacks.h"
 
 // Globals
-// // Version
+// Version
 const char DEARCUBE_VERSION[] = "1.0";
-// Get module base address
-DWORD moduleBaseAddr = (DWORD)GetModuleHandle(L"ac_client.exe");
 // The menu
 Menu* menu;
 
@@ -73,7 +71,7 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     }
 
     // Retrieve in-game objects
-    GameObjects* gameObjects = Hacks::getGameObjectsPtr(moduleBaseAddr);
+    GameObjects* gameObjects = Hacks::getGameObjectsPtr();
     PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
     EntityVector& playerEntityVector = gameObjects->playerEntityVector;
     // Declaration with & operator so we do not copy the content, 

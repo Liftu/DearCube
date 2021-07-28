@@ -46,7 +46,7 @@ private:
 	// Aimbot
 	bool bAimbot = false;
 	bool bShowFov = false;
-	float fov = 20.0f;
+	float fov = 15.0f;
 	float aimSmooth = 20.0f;
 	float fovThickness = 2.0f;
 	ImVec4 fovColors = ImVec4(0.25f, 0.0f, 1.0f, 0.45f);

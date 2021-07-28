@@ -1,25 +1,47 @@
 #include "hacks.h"
 
+DWORD Hacks::getModuleBaseAddr()
+{
+	return (DWORD)GetModuleHandle(L"ac_client.exe");
+}
+
+
 // Entities stuff
 
-GameObjects* Hacks::getGameObjectsPtr(DWORD moduleBaseAddr)
+GameObjects* Hacks::getGameObjectsPtr()
 {
+	DWORD moduleBaseAddr = getModuleBaseAddr();
+	if (moduleBaseAddr == NULL)
+		return nullptr;
+
 	return reinterpret_cast<GameObjects*>(moduleBaseAddr + o_gameObjects);
 }
 
-//PlayerEntity* Hacks::getMyPlayerEntityPtr(DWORD moduleBaseAddr)
+//PlayerEntity* Hacks::getMyPlayerEntityPtr()
 //{
-//	return getGameObjectsPtr(moduleBaseAddr)->myPlayerEntityPtr;
+//	GameObjects* gameObjectsPtr = getGameObjectsPtr();
+//	if (gameObjectsPtr == nullptr)
+//		return nullptr;
+//
+//	return gameObjectsPtr->myPlayerEntityPtr;
 //}
 
-//EntityVector* Hacks::getPlayerEntityVectorPtr(DWORD moduleBaseAddr)
+//EntityVector* Hacks::getPlayerEntityVectorPtr()
 //{
-//	return &getGameObjectsPtr(moduleBaseAddr)->playerEntityVector;
+//	GameObjects* gameObjectsPtr = getGameObjectsPtr();
+//	if (gameObjectsPtr == nullptr)
+//		return nullptr;
+//
+//	return &gameObjectsPtr->playerEntityVector;
 //}
 
-//int Hacks::getNumberOfPlayer(DWORD moduleBaseAddr)
+//int Hacks::getNumberOfPlayer()
 //{
-//	return getGameObjectsPtr(moduleBaseAddr)->playerEntityVector.length;
+//	GameObjects* gameObjectsPtr = getGameObjectsPtr();
+//	if (gameObjectsPtr == nullptr)
+//		return -1;
+//
+//	return gameObjectsPtr->playerEntityVector.length;
 //}
 
 std::vector<PlayerEntity*> Hacks::getValidEntityList(EntityVector* playerEntityVector)
@@ -632,13 +654,14 @@ int16_t Hacks::getDefaultWeaponHackValue(WeaponTypes weaponType, WeaponHackTypes
 bool Hacks::aimbot(GameObjects* gameObjects, float fov, float smoothness)
 {
 	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
-	PlayerEntity* closestEnemyPtr = Hacks::getClosestEnemyToCrosshair(gameObjects, fov);	// Could use some close to crosshair / close in position ration.
+	//PlayerEntity* enemyEntityPtr = Hacks::getClosestEnemyToCrosshair(gameObjects, fov);	// Could use some close to crosshair / close in position ratio.
+	PlayerEntity* enemyEntityPtr = getBestTarget(gameObjects, fov, 0.7f);
 
-	if (!isValidEntity(myPlayerEntityPtr) || !isValidEntity(closestEnemyPtr))
+	if (!isValidEntity(myPlayerEntityPtr) || !isValidEntity(enemyEntityPtr))
 		return false;
 
 	Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
-	Vector2 viewAnglseToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, closestEnemyPtr->headPos);
+	Vector2 viewAnglseToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, enemyEntityPtr->headPos);
 
 	return smoothSetViewAngles(myPlayerEntityPtr, viewAnglseToEnemy, smoothness);
 }
@@ -690,6 +713,58 @@ PlayerEntity* Hacks::getClosestEnemyToCrosshair(GameObjects* gameObjects, float 
 	return closestEnemyPtr;
 }
 
+PlayerEntity* Hacks::getBestTarget(GameObjects* gameObjects, float fov, float angleToDistanceRatio)
+{
+	// ratio has to be between [0, 1]
+	if (angleToDistanceRatio < 0 || angleToDistanceRatio > 1)
+		return nullptr;
+
+	std::vector<PlayerEntity*> enemyList = getAliveEnemyList(gameObjects);
+	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
+
+	PlayerEntity* bestTargetPtr = nullptr;
+	float bestTargetCoefficient = 0.0f;
+
+	Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
+
+	// Filter by distance to crosshair and distance to player
+	for (PlayerEntity* enemyEntityPtr : enemyList)
+	{
+		// If player not visible : skip
+		if (!isTargetVisible(myPlayerEntityPtr, enemyEntityPtr->headPos))
+			continue;
+
+		Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, enemyEntityPtr->headPos);
+
+		// If player outside FOV : skip
+		if (myViewAngles.getDistance(viewAnglesToEnemy) > fov)
+			continue;
+
+
+		// Coefficient = angle * angleRatio + distance * distanceRatio;
+		float currentTargetCoefficient = myViewAngles.getDistance(viewAnglesToEnemy) * angleToDistanceRatio +
+			myPlayerEntityPtr->headPos.getDistance(enemyEntityPtr->headPos) * (1 - angleToDistanceRatio);
+
+		if (bestTargetPtr == nullptr)
+		{
+			bestTargetCoefficient = currentTargetCoefficient;
+			bestTargetPtr = enemyEntityPtr;
+			continue;
+		}
+
+		//Vector2 viewAnglesToClosestEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, bestTargetPtr->headPos);
+
+		if (currentTargetCoefficient < bestTargetCoefficient)
+		{
+			bestTargetCoefficient = currentTargetCoefficient;
+			bestTargetPtr = enemyEntityPtr;
+			continue;
+		}
+	}
+
+	return bestTargetPtr;
+}
+
 bool Hacks::smoothSetViewAngles(PlayerEntity* myPlayerEntityPtr, Vector2 viewAnglesToEnemy, float smoothness)
 {
 	if (!isValidEntity(myPlayerEntityPtr))
@@ -701,7 +776,34 @@ bool Hacks::smoothSetViewAngles(PlayerEntity* myPlayerEntityPtr, Vector2 viewAng
 	return true;
 }
 
-//void Hacks::LocalPlayer::aimAt(const Vector3 dst)
-//{
-//
-//}
+bool Hacks::isTargetVisible(PlayerEntity* myPlayerEntityPtr, Vector3 targetPos)
+{
+	DWORD moduleBaseAddr = getModuleBaseAddr();
+	if (moduleBaseAddr == NULL)
+		return false;
+
+	// Traceline function addr
+	DWORD traceLineFunctionAddr = moduleBaseAddr + o_TraceLineFunction;
+	Vector3 myPos = myPlayerEntityPtr->headPos;
+	TraceLineResult traceLineResult;
+
+	// This traceLine function has an undefined calling convention (first arg in eax)
+	// So we have to call it direclty from asm.
+	__asm
+	{
+		push 0
+		push 0;						Check entities
+		push myPlayerEntityPtr;		Player trace owner (to avoid colliding with ourself)
+		push targetPos.z
+		push targetPos.y
+		push targetPos.x;			Taget position
+		push myPos.z
+		push myPos.y
+		push myPos.x;				Source position
+		lea eax, [traceLineResult];	The result ptr
+		call traceLineFunctionAddr;		Call to the traceLine game function
+		add esp, 0x24;				Clean the stack (9 * 4 = 36 = 0x24)
+	}
+
+	return !(bool)traceLineResult.collided;
+}

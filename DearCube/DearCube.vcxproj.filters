@@ -42,9 +42,6 @@
     <ClInclude Include="gameStructures.h">
       <Filter>game</Filter>
     </ClInclude>
-    <ClInclude Include="gameVariables.h">
-      <Filter>game</Filter>
-    </ClInclude>
     <ClInclude Include="hook32.h">
       <Filter>hooking</Filter>
     </ClInclude>
