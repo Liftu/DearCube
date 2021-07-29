@@ -38,7 +38,6 @@ private:
 
 	// Variables
 	HWND hwnd;
-	int gameWigth = 1024, gameHeight = 768;
 	bool bRunning = false;
 	bool bShow = false;
 	bool bDebug = false;
@@ -58,7 +57,7 @@ public:
 	~Menu();
 
 	void drawMenu(GameObjects* gameObjects);
-	void render(GameObjects* gameObjects);
+	void render(Vector2 screenDimensions, GameObjects* gameObjects);
 	void init();
 	void shutdown();
 

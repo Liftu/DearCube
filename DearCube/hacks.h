@@ -5,7 +5,6 @@
 #include <algorithm>
 
 #include "gameStructures.h"
-//#include "gameVariables.h"
 
 #define MAX_NUMBER_OF_PLAYER 32
 
@@ -33,7 +32,9 @@ namespace Hacks
 	const WORD c_defaultWeaponsIsFullAuto[(int)WeaponTypes::SIZE] = { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x01 };
 
 
+	// Miscellaneous
 	DWORD getModuleBaseAddr();
+
 
 	// Entities related
 	GameObjects* getGameObjectsPtr();

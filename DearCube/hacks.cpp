@@ -1,5 +1,7 @@
 #include "hacks.h"
 
+// Miscellaneous
+
 DWORD Hacks::getModuleBaseAddr()
 {
 	return (DWORD)GetModuleHandle(L"ac_client.exe");
@@ -788,7 +790,7 @@ bool Hacks::isTargetVisible(PlayerEntity* myPlayerEntityPtr, Vector3 targetPos)
 	// Traceline function addr
 	DWORD traceLineFunctionAddr = moduleBaseAddr + o_TraceLineFunction;
 	Vector3 myPos = myPlayerEntityPtr->headPos;
-	TraceLineResult traceLineResult;
+	TraceLineResult traceLineResult = { Vector3(), false };
 
 	// This traceLine function has an undefined calling convention (first arg in eax)
 	// So we have to call it direclty from asm.

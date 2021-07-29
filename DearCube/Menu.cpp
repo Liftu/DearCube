@@ -315,7 +315,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 		//if (ImGui::BeginTabItem("Presets"))
 		//{
 		//	ImGui::Text("Maybe if I manage to do all the remaining features fisrt.");
-
+		//
 		//	ImGui::EndTabItem();
 		//}
 
@@ -344,7 +344,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 	ImGui::End();
 }
 
-void Menu::render(GameObjects* gameObjects)
+void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 {
 	if (!this->bRunning)
 		return;
@@ -354,8 +354,11 @@ void Menu::render(GameObjects* gameObjects)
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
+
+	// Hide/show the menu with INSERT
 	if (GetAsyncKeyState(VK_INSERT) & 1)
 		this->bShow = !this->bShow;
+
 
 	if (this->bShow)
 	{
@@ -370,7 +373,7 @@ void Menu::render(GameObjects* gameObjects)
 		// Restore cursor
 		_SDL_WM_GrabInput(SDL_GrabMode(1));
 	}
-	//this->drawMenu(gameObjects);
+
 
 	// Draw the fov circle
 	if (this->bShowFov)
@@ -379,12 +382,13 @@ void Menu::render(GameObjects* gameObjects)
 			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		auto draw = ImGui::GetBackgroundDrawList();
 		// This calculation is approximate
-		float fovCircleRadius = this->fov / 50 * (this->gameWigth / 2.0f);	// 50 approximately represents the angle degree to the side of the screen
-		draw->AddCircle(ImVec2(this->gameWigth / 2.0f, this->gameHeight / 2.0f), fovCircleRadius, ImColor(this->fovColors), 0, this->fovThickness);
+		float fovCircleRadius = this->fov / 50 * (screenDimensions.x / 2.0f);	// 50 approximately represents the angle degree to the side of the screen
+		draw->AddCircle(ImVec2(screenDimensions.x / 2.0f, screenDimensions.y / 2.0f), fovCircleRadius, ImColor(this->fovColors), 0, this->fovThickness);
 		ImGui::End();
 	}
 
-	// Rendering
+
+	// ImGui rendering
 	ImGui::EndFrame();
 	ImGui::Render();
 	ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());

@@ -8,7 +8,6 @@
 #include "Menu.h"
 #include "glDraw.h"
 #include "glText.h"
-//#include "gameVariables.h"
 #include "gameStructures.h"
 #include "hacks.h"
 
@@ -17,6 +16,8 @@
 const char DEARCUBE_VERSION[] = "1.0";
 // The menu
 Menu* menu;
+// Screen dimensions
+Vector2 screenDimensions;
 
 
 // OpenGL wglSwapBuffers hooking
@@ -49,16 +50,23 @@ t_wglSwapBuffers gateway_wglSwapBuffers;
 //    GL::drawOutline(300, 300, 200, 200, 1.0f, rgb::red);
 //
 //    // Example text 1
-//    float textPointX = glFont.centerText(300, 200, strlen(example1) * FONT_WIDTH);
+//    float textPointX = glFont.centerText(300, 200, (float)strlen(example1) * FONT_WIDTH);
 //    float textPointY = 300 - FONT_HEIGHT / 2;
 //    glFont.print(textPointX, textPointY, rgb::green, "%s", example1);
 //
 //    // Example text 2
-//    Vec3 insideTextPoint = glFont.centerText(300, 300 + 100, 200, 200, strlen(example2) * FONT_WIDTH, FONT_HEIGHT);
+//    Vec3 insideTextPoint = glFont.centerText(300, 300 + 100, 200, 200, (float)strlen(example2) * FONT_WIDTH, FONT_HEIGHT);
 //    glFont.print(insideTextPoint.x, insideTextPoint.y, rgb::ligthGrey, "%s", example2);
 //
 //    GL::restoreGL();
 //}
+
+Vector2 getScreenDimensions()
+{
+    GLint viewport[4] = { 0 };	// window : 0 = x, 1 = y, 2 = width, 3 = heigth
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    return Vector2((float)viewport[2], (float)viewport[3]);
+}
 
 
 BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
@@ -77,8 +85,11 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     // Declaration with & operator so we do not copy the content, 
     // instead we get a reference witouh having to declare a pointer.
 
+    // Get screen dimensions
+    screenDimensions = getScreenDimensions();
+
     // Draw menu
-    menu->render(gameObjects);
+    menu->render(screenDimensions, gameObjects);
 
     // Maybe call hacks that are external to the menu like aimbot if enbale
     if (menu->isAimbotEnabled())
