@@ -440,6 +440,35 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 					ImVec2 textCoords = ImVec2((boxUpperLeftCoords.x + boxLowerRightCoords.x) / 2.0f - (nameWidth / 2.0f), boxLowerRightCoords.y + 5);
 					drawList->AddText(textCoords, ImColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), enemyPtr->name);
 				}
+
+				if (this->bESPHealthBar)
+				{
+					// Draw the backgound red bar
+					ImVec2 healthBarUpperLeftCoords = ImVec2(boxLowerRightCoords.x + 3.0f, boxUpperLeftCoords.y + 1);
+					ImVec2 healthBarLowerRightCoords = ImVec2(boxLowerRightCoords.x + 6.0f, boxLowerRightCoords.y - 1);
+					drawList->AddRectFilled(healthBarUpperLeftCoords, healthBarLowerRightCoords, ImColor(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)));
+					// Draw the frontground green bar (proportional to health value)
+					float barSize = healthBarLowerRightCoords.y - healthBarUpperLeftCoords.y;
+					healthBarUpperLeftCoords.y += barSize - barSize * (enemyPtr->health / 100.0f);
+					drawList->AddRectFilled(healthBarUpperLeftCoords, healthBarLowerRightCoords, ImColor(ImVec4(0.0f, 1.0f, 0.0f, 1.0f)));
+				}
+
+				if (this->bESPShieldBar)
+				{
+					// Do not display backgorund for the shield bar
+					ImVec2 shieldhBarUpperLeftCoords = ImVec2(boxLowerRightCoords.x + 3.0f, boxUpperLeftCoords.y + 1);
+					ImVec2 shieldBarLowerRightCoords = ImVec2(boxLowerRightCoords.x + 6.0f, boxLowerRightCoords.y - 1);
+					// Do not overlap health bar if displayed
+					if (this->bESPHealthBar)
+					{
+						shieldhBarUpperLeftCoords.x += 6.0f;
+						shieldBarLowerRightCoords.x += 6.0f;
+					}
+					// Draw the blue bar (proportional to shield value)
+					float barSize = shieldBarLowerRightCoords.y - shieldhBarUpperLeftCoords.y;
+					shieldhBarUpperLeftCoords.y += barSize - barSize * (enemyPtr->shield / 100.0f);
+					drawList->AddRectFilled(shieldhBarUpperLeftCoords, shieldBarLowerRightCoords, ImColor(ImVec4(0.0f, 0.0f, 1.0f, 1.0f)));
+				}
 			}
 		}
 		// Draw head circle
