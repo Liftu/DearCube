@@ -50,12 +50,15 @@ private:
 	float aimSmooth = 15.0f;
 	float triggerDistance = 0.5f;
 	float fovThickness = 2.0f;
-	ImVec4 fovColors = ImVec4(0.25f, 0.0f, 1.0f, 0.45f);
+	ImVec4 fovColor = ImVec4(0.25f, 0.0f, 1.0f, 0.45f);
 
 	// ESP
-	bool bESP = false;
+	bool bESPBox = false;
 	float espBoxThickness = 1.0f;
-	ImVec4 espBoxColors = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+	ImVec4 espBoxColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+	bool bESPHead = false;
+	float espHeadThickness = 1.0f;
+	ImVec4 espHeadColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
 
 public:
 	Menu(HWND hwnd);

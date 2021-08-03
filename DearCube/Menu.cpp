@@ -103,7 +103,22 @@ void Menu::drawMenu(GameObjects* gameObjects)
 			// ESP (may put in inside HUD tab)
 			if (ImGui::BeginTabItem("ESP"))
 			{
-				ImGui::Checkbox("ESP", &this->bESP);
+				// ESP box
+				ImGui::Checkbox("ESP box", &this->bESPBox);
+				if (this->bESPBox)
+				{
+					ImGui::SliderFloat("ESP box thickness", &this->espBoxThickness, 1.0, 5.0, "%.2f px");
+					ImGui::ColorEdit4("ESP box color", &this->espBoxColor.x);
+				}
+
+				// ESP head
+				ImGui::Checkbox("ESP head circle", &this->bESPHead);
+				if (this->bESPHead)
+				{
+					ImGui::SliderFloat("ESP head thickness", &this->espHeadThickness, 1.0, 5.0, "%.2f px");
+					ImGui::ColorEdit4("ESP head color", &this->espHeadColor.x);
+				}
+
 				ImGui::EndTabItem();
 			}
 
@@ -120,7 +135,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 				if (this->bShowFov)
 				{
 					ImGui::SliderFloat("FOV circle thickness", &this->fovThickness, 1.0, 5.0, "%.2f px");
-					ImGui::ColorEdit4("FOV circle color", &this->fovColors.x);
+					ImGui::ColorEdit4("FOV circle color", &this->fovColor.x);
 				}
 
 				// Smoothness
@@ -381,18 +396,19 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 		// This calculation is approximate
 		float fovCircleRadius = this->fov / 50 * (screenDimensions.x / 2.0f);	// 50 approximately represents the angle degree to the side of the screen
-		drawList->AddCircle(ImVec2(screenDimensions.x / 2.0f, screenDimensions.y / 2.0f), fovCircleRadius, ImColor(this->fovColors), 0, this->fovThickness);
+		drawList->AddCircle(ImVec2(screenDimensions.x / 2.0f, screenDimensions.y / 2.0f), fovCircleRadius, ImColor(this->fovColor), 0, this->fovThickness);
 		ImGui::End();
 	}
 
 	// Draw ESP
-	if (this->bESP)
-	{
-		ImGui::Begin("##ESPDRAWS", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
-		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+	ImGui::Begin("##ESPDRAWS", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
+	ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 
-		for (PlayerEntity* enemyPtr : Hacks::getAliveEnemyList(gameObjects))
+	for (PlayerEntity* enemyPtr : Hacks::getAliveEnemyList(gameObjects))
+	{
+		// Draw body box
+		if (this->bESPBox)
 		{
 			Vector2 enemyLowerBoxPos;
 			Vector2 enemyUpperBoxPos;
@@ -408,16 +424,24 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 				ImVec2 boxLowerRightCoords = ImVec2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2 + (enemyScreenWidth / 2), enemyLowerBoxPos.y);
 
 				// Draw box
-				drawList->AddRect(boxUpperLeftCoords, boxLowerRightCoords, ImColor(this->espBoxColors), 0.0f, 0, this->espBoxThickness);
+				drawList->AddRect(boxUpperLeftCoords, boxLowerRightCoords, ImColor(this->espBoxColor), 0.0f, 0, this->espBoxThickness);
 
-				// Draw head
-				// This calculation is approximate
-				//float headCircleRadius = 200 / gameObjects->myPlayerEntityPtr->headPos.getDistance(enemyPtr->headPos);
-				//drawList->AddCircle(ImVec2(enemyScreenPos.x, enemyScreenPos.y), headCircleRadius, ImColor(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)), 0, this->fovThickness);
 			}
 		}
-		ImGui::End();
+		// Draw head circle
+		if (this->bESPHead)
+		{
+			Vector2 enemyHeadScreenPos;
+			if (Hacks::worldToScreen(Hacks::getEnemyHeadPos(enemyPtr), Vector2(1024, 768), enemyHeadScreenPos))
+			{
+				// Calculate head circle radius
+				float distance = gameObjects->myPlayerEntityPtr->headPos.getDistance(enemyPtr->headPos);
+				float headCircleRadius = 200 / distance;
+				drawList->AddCircle(ImVec2(enemyHeadScreenPos.x, enemyHeadScreenPos.y), headCircleRadius, ImColor(this->espHeadColor), 0, this->espHeadThickness);
+			}
+		}
 	}
+	ImGui::End();
 
 
 	// ImGui rendering
