@@ -107,9 +107,15 @@ void Menu::drawMenu(GameObjects* gameObjects)
 				ImGui::Checkbox("ESP box", &this->bESPBox);
 				if (this->bESPBox)
 				{
+					// ESP box health and shield bar
+					ImGui::Checkbox("Display health bar", &this->bESPHealthBar);
+					ImGui::Checkbox("Display shield bar", &this->bESPShieldBar);
+					ImGui::Checkbox("Display name", &this->bESPName);
+
 					ImGui::SliderFloat("ESP box thickness", &this->espBoxThickness, 1.0, 5.0, "%.2f px");
 					ImGui::ColorEdit4("ESP box color", &this->espBoxColor.x);
 				}
+
 
 				// ESP head
 				ImGui::Checkbox("ESP head circle", &this->bESPHead);
@@ -420,12 +426,20 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 				// Calculate enemy width on screen
 				float enemyScreenWidth = 1200.0f / distance;	// arbitrary value
 
-				ImVec2 boxUpperLeftCoords = ImVec2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2 - (enemyScreenWidth / 2), enemyUpperBoxPos.y);
-				ImVec2 boxLowerRightCoords = ImVec2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2 + (enemyScreenWidth / 2), enemyLowerBoxPos.y);
+				ImVec2 boxUpperLeftCoords = ImVec2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2.0f - (enemyScreenWidth / 2.0f), enemyUpperBoxPos.y);
+				ImVec2 boxLowerRightCoords = ImVec2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2.0f + (enemyScreenWidth / 2.0f), enemyLowerBoxPos.y);
 
 				// Draw box
 				drawList->AddRect(boxUpperLeftCoords, boxLowerRightCoords, ImColor(this->espBoxColor), 0.0f, 0, this->espBoxThickness);
 
+				// Draw name
+				if (this->bESPName)
+				{
+					float fontWidth = ImGui::GetFont()->FontSize / 2.0f;
+					float nameWidth = strlen(enemyPtr->name) * (fontWidth);
+					ImVec2 textCoords = ImVec2((boxUpperLeftCoords.x + boxLowerRightCoords.x) / 2.0f - (nameWidth / 2.0f), boxLowerRightCoords.y + 5);
+					drawList->AddText(textCoords, ImColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), enemyPtr->name);
+				}
 			}
 		}
 		// Draw head circle
@@ -436,7 +450,7 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 			{
 				// Calculate head circle radius
 				float distance = gameObjects->myPlayerEntityPtr->headPos.getDistance(enemyPtr->headPos);
-				float headCircleRadius = 200 / distance;
+				float headCircleRadius = 200 / distance;	// arbitrary value
 				drawList->AddCircle(ImVec2(enemyHeadScreenPos.x, enemyHeadScreenPos.y), headCircleRadius, ImColor(this->espHeadColor), 0, this->espHeadThickness);
 			}
 		}

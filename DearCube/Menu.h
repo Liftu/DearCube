@@ -56,6 +56,11 @@ private:
 	bool bESPBox = false;
 	float espBoxThickness = 1.0f;
 	ImVec4 espBoxColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	bool bESPName = false;
+	bool bESPHealthBar = false;
+	bool bESPShieldBar = false;
+
 	bool bESPHead = false;
 	float espHeadThickness = 1.0f;
 	ImVec4 espHeadColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
