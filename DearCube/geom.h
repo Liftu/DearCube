@@ -19,16 +19,16 @@ namespace Geom
 		Vector2  operator -		(const Vector2& rhs) { return Vector2(x - rhs.x, y - rhs.y).normalize(); }
 		Vector2  operator *		(const Vector2& rhs) { return Vector2(x * rhs.x, y * rhs.y).normalize(); }
 		Vector2  operator /		(const Vector2& rhs) { return Vector2(x / rhs.x, y / rhs.y).normalize(); }
-		Vector2  operator /		(const float rhs) { return Vector2(x / rhs, y / rhs).normalize(); }
+		Vector2  operator /		(const float	rhs) { return Vector2(x / rhs, y / rhs).normalize(); }
 		Vector2& operator +=	(const Vector2& rhs) { return *this = *this + rhs; }
 		Vector2& operator -=	(const Vector2& rhs) { return *this = *this - rhs; }
 		Vector2& operator *=	(const Vector2& rhs) { return *this = *this * rhs; }
 		Vector2& operator /=	(const Vector2& rhs) { return *this = *this / rhs; }
 
 		// Binaries operator for 3d angle lengths
-		const bool operator<	(Vector2& rhs) { return length() < rhs.length(); }
+		const bool operator<	(Vector2& rhs) { return length() <  rhs.length(); }
 		const bool operator<=	(Vector2& rhs) { return length() <= rhs.length(); }
-		const bool operator>	(Vector2& rhs) { return length() > rhs.length(); }
+		const bool operator>	(Vector2& rhs) { return length() >  rhs.length(); }
 		const bool operator>=	(Vector2& rhs) { return length() >= rhs.length(); }
 		const bool operator==	(Vector2& rhs) { return length() == rhs.length(); }
 		const bool operator!=	(Vector2& rhs) { return length() != rhs.length(); }
@@ -71,4 +71,14 @@ namespace Geom
 	};
 
 	Vector2 calcAngle(Vector3 posSrc, Vector3 posDst);
+
+	struct Vector4
+	{
+		float x, y, z, w;
+
+		Vector4() : x(0), y(0), z(0), w(0) {}
+		Vector4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+		Vector4(Vector2 vec2) : x(vec2.x), y(vec2.y), z(0), w(0) {}
+		Vector4(Vector3 vec3) : x(vec3.x), y(vec3.y), z(vec3.z), w(0) {}
+	};
 }

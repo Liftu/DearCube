@@ -101,17 +101,32 @@ void Menu::drawMenu(GameObjects* gameObjects)
 			//}
 
 			// ESP (may put in inside HUD tab)
-			//if (ImGui::BeginTabItem("ESP"))
-			//{
-			//	ImGui::Text("This is the ESP tab!");
-			// 
-			//	ImGui::EndTabItem();
-			//}
+			if (ImGui::BeginTabItem("ESP"))
+			{
+				ImGui::Checkbox("ESP", &this->bESP);
+				if (this->bESP)
+				{
+					ImGui::BeginChild("ChildTest");
+					for (PlayerEntity* enemyPtr : Hacks::getAliveEnemyList(gameObjects))
+					{
+						Vector2 enemyScreenPos;
+						float w = -999999.9f;
+						if (Hacks::WorldToScreen(enemyPtr->headPos, Vector2(1024, 768), enemyScreenPos, w))
+							ImGui::Text("%s : %.1f %.1f", enemyPtr->name, enemyScreenPos.x, enemyScreenPos.y);
+						else
+							ImGui::Text(enemyPtr->name);
+						ImGui::Text("%f", w);
+					}
+					ImGui::EndChild();
+				}
+
+			 
+				ImGui::EndTabItem();
+			}
 
 			// Aimbot
 			if (ImGui::BeginTabItem("Aimbot"))
 			{
-				//static bool aimbot = false;
 				ImGui::Checkbox("Aimbot", &this->bAimbot);
 				
 				// FOV
@@ -366,7 +381,7 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 		_SDL_WM_GrabInput(SDL_GrabMode(2));
 
 		// Actual menu code
-		this->drawMenu(gameObjects);
+		//this->drawMenu(gameObjects);
 	}
 	else
 	{
@@ -374,6 +389,7 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 		_SDL_WM_GrabInput(SDL_GrabMode(1));
 	}
 
+	this->drawMenu(gameObjects);
 
 	// Draw the fov circle
 	if (this->bShowFov)

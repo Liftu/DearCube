@@ -52,6 +52,9 @@ private:
 	float fovThickness = 2.0f;
 	ImVec4 fovColors = ImVec4(0.25f, 0.0f, 1.0f, 0.45f);
 
+	// ESP
+	bool bESP = false;
+
 public:
 	Menu(HWND hwnd);
 	~Menu();

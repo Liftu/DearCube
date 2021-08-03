@@ -838,3 +838,77 @@ bool Hacks::triggerbot(GameObjects* gameObjects, float degreeDistanceToShoot)
 
 	return false;
 }
+
+
+// ESP related
+
+float* Hacks::getviewMatrixPtr()
+{
+	DWORD moduleBaseAddr = getModuleBaseAddr();
+	if (moduleBaseAddr == NULL)
+		return nullptr;
+
+	return reinterpret_cast<float*>(moduleBaseAddr + o_viewMatix);
+}
+
+
+bool Hacks::WorldToScreen(Vector3 position, Vector2 screenDimensions, Vector2& screenPosition, float& w)
+{
+	// Resources :
+	// https://guidedhacking.com/threads/so-what-is-a-viewmatrix-anyway-and-how-does-a-w2s-work.10964/
+	// http://songho.ca/opengl/gl_transform.html
+
+	float* viewMatrix = getviewMatrixPtr();
+	Vector4 clipCoords;
+
+	// Multiply positionMatrix with viewMatrix to get cameraMatrix (eye coordinates)
+	clipCoords.x = position.x * viewMatrix[0] + position.y * viewMatrix[4] + position.z * viewMatrix[8]  + 1 * viewMatrix[12];	// position.w is 1.
+	clipCoords.y = position.x * viewMatrix[1] + position.y * viewMatrix[5] + position.z * viewMatrix[9]  + 1 * viewMatrix[13];
+	clipCoords.z = position.x * viewMatrix[2] + position.y * viewMatrix[6] + position.z * viewMatrix[10] + 1 * viewMatrix[14];	// This is useless btw.
+	clipCoords.w = position.x * viewMatrix[3] + position.y * viewMatrix[7] + position.z * viewMatrix[11] + 1 * viewMatrix[15];
+
+	// So, how do we know they're behind us then? Its just some weird f*ckin number.
+	// Well you know how it was 1 before? I like to think of it as "1" simply means theyre in view. As a world position, they're always "in view", so it's always 1.
+	// So all we have to do is check if its not 1 ( but theyre floats, so use < > ! ). This explanation isnt rooted in math, its anecdotal, i havent bothered much to check tbh.
+
+	// I don't know why, bu this doesn't equal whet it should...
+	if (clipCoords.w < 1.0) // maybe fiddle with the value for your specific game, but this should work for most id imagine
+		return false; // not on our screen (behind us)
+
+	// do some funky stuff here to scale the screenPosition to your screen dimensions
+	// This is called converting from Clip-Space to Window-Space ( some call it NDC -- Normalized Device Coordinates )
+	// First step is this thing called Perspective divide, simply divide your values by W.
+	clipCoords.x /= clipCoords.w;
+	clipCoords.y /= clipCoords.w;
+	clipCoords.y *= -1; // This is done because of how y works ingame vs in our mind. When we say: 100 Y vs 0 Y, we generally think of 100 being taller/higher on the screen, but it would be the inverse in actuality. Likewise in the W2S, this ensures our projections move the right way, i.e. going down when we look up and vice versa.
+
+	// These are now NDC values, lets save them.
+	Vector2 NDC(clipCoords.x, clipCoords.y);	// stored for later calculations
+
+	// Next, you half those values and add 0.5.
+	clipCoords.x /= 2;
+	clipCoords.y /= 2;
+
+	// Next, you multiply by your screen dimensions, how else are you gonna scale it!?!?
+	// Dont be a square. Get your screen dimensions programmatically. If you're on dx9, pDevice->GetViewPort() and the view port will spit out width+height.
+	// DX11 is similar except you get it from the swapchain.
+	clipCoords.x *= screenDimensions.x;
+	clipCoords.y *= screenDimensions.y;
+
+	// Finally, because NDC generally range from -1 to 1, 0 is actually the center of our screen. So following that logic, if we had an NDC of 0, which means our x_value * width == 0, we'd be drawing at X=0 instead of X=middle of our screen.
+	// So we rectify that by adding half the width & height to our final values.
+	clipCoords.x += (NDC.x + screenDimensions.x / 2);
+	clipCoords.y += (NDC.y + screenDimensions.y / 2);
+
+	// So, thanks to matrix multiplication, we've multiplied a 1x4 matrix ( position ) and a 4x4 matrix ( viewprojection ) and got a resultant 1x4 matrix!
+	// And since we only need 2 dimensions, we discard one of them (z), and use the other (w) to determine whether we even need to draw
+
+	screenPosition.x = clipCoords.x;
+	screenPosition.y = clipCoords.y;
+
+	// Last check to see if target is outside of screen
+	if (screenPosition.x < 0.0f || screenPosition.x > screenDimensions.x || screenPosition.y < 0.0f || screenPosition.y > screenDimensions.y)
+		return false;
+
+	return true;
+}

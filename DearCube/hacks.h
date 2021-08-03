@@ -10,6 +10,7 @@
 
 using Geom::Vector2;
 using Geom::Vector3;
+using Geom::Vector4;
 
 namespace Hacks
 {
@@ -17,6 +18,7 @@ namespace Hacks
 	const DWORD o_gameObjects = 0x0010F49C;
 	const DWORD o_playerEntityVectorPtr = 0x0010F4F8;
 	const DWORD o_TraceLineFunction = 0x0008A310;
+	const DWORD o_viewMatix = 0x00101AE8;
 
 	// Constants
 	const DWORD c_playerEntityType = 0x004E4A98;
@@ -84,4 +86,9 @@ namespace Hacks
 	bool isTargetVisible(PlayerEntity* myPlayerEntityPtr, Vector3 targetPos);
 
 	bool triggerbot(GameObjects* gameObjects, float degreeDistanceToShoot);
+
+
+	// ESP related
+	float* getviewMatrixPtr();
+	bool WorldToScreen(Vector3 position, Vector2 screenDimensions, Vector2& screenPosition, float& w);
 }
