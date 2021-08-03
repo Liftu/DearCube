@@ -851,8 +851,7 @@ float* Hacks::getviewMatrixPtr()
 	return reinterpret_cast<float*>(moduleBaseAddr + o_viewMatix);
 }
 
-
-bool Hacks::WorldToScreen(Vector3 position, Vector2 screenDimensions, Vector2& screenPosition, float& w)
+bool Hacks::worldToScreen(Vector3 position, Vector2 screenDimensions, Vector2& screenPosition)
 {
 	// Resources :
 	// https://guidedhacking.com/threads/so-what-is-a-viewmatrix-anyway-and-how-does-a-w2s-work.10964/
@@ -911,4 +910,37 @@ bool Hacks::WorldToScreen(Vector3 position, Vector2 screenDimensions, Vector2& s
 		return false;
 
 	return true;
+}
+
+Vector3 Hacks::getEnemyHeadPos(PlayerEntity* enemyPtr)
+{
+	if (!isValidEntity(enemyPtr))
+		return Vector3();
+
+	Vector3 enemyHeadPos = enemyPtr->headPos;
+	enemyHeadPos.z += 0.30f; // arbitrary value
+
+	return enemyHeadPos;
+}
+
+Vector3 Hacks::getEnemyUpperBoxPos(PlayerEntity* enemyPtr)
+{
+	if (!isValidEntity(enemyPtr))
+		return Vector3();
+
+	Vector3 enemyHeadPos = enemyPtr->headPos;
+	enemyHeadPos.z += 0.8f;	// arbitrary value
+
+	return enemyHeadPos;
+}
+
+Vector3 Hacks::getEnemyLowerBoxPos(PlayerEntity* enemyPtr)
+{
+	if (!isValidEntity(enemyPtr))
+		return Vector3();
+
+	Vector3 enemyHeadPos = enemyPtr->pos;
+	enemyHeadPos.z -= 0.5f;	// arbitrary value
+
+	return enemyHeadPos;
 }

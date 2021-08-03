@@ -104,23 +104,6 @@ void Menu::drawMenu(GameObjects* gameObjects)
 			if (ImGui::BeginTabItem("ESP"))
 			{
 				ImGui::Checkbox("ESP", &this->bESP);
-				if (this->bESP)
-				{
-					ImGui::BeginChild("ChildTest");
-					for (PlayerEntity* enemyPtr : Hacks::getAliveEnemyList(gameObjects))
-					{
-						Vector2 enemyScreenPos;
-						float w = -999999.9f;
-						if (Hacks::WorldToScreen(enemyPtr->headPos, Vector2(1024, 768), enemyScreenPos, w))
-							ImGui::Text("%s : %.1f %.1f", enemyPtr->name, enemyScreenPos.x, enemyScreenPos.y);
-						else
-							ImGui::Text(enemyPtr->name);
-						ImGui::Text("%f", w);
-					}
-					ImGui::EndChild();
-				}
-
-			 
 				ImGui::EndTabItem();
 			}
 
@@ -381,25 +364,58 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 		_SDL_WM_GrabInput(SDL_GrabMode(2));
 
 		// Actual menu code
-		//this->drawMenu(gameObjects);
+		this->drawMenu(gameObjects);
 	}
 	else
 	{
 		// Restore cursor
 		_SDL_WM_GrabInput(SDL_GrabMode(1));
 	}
-
-	this->drawMenu(gameObjects);
+	//this->drawMenu(gameObjects);
 
 	// Draw the fov circle
 	if (this->bShowFov)
 	{
-		ImGui::Begin("##CIRCLEFOV", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | 
+		ImGui::Begin("##FOVCIRCLE", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | 
 			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
-		auto draw = ImGui::GetBackgroundDrawList();
+		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 		// This calculation is approximate
 		float fovCircleRadius = this->fov / 50 * (screenDimensions.x / 2.0f);	// 50 approximately represents the angle degree to the side of the screen
-		draw->AddCircle(ImVec2(screenDimensions.x / 2.0f, screenDimensions.y / 2.0f), fovCircleRadius, ImColor(this->fovColors), 0, this->fovThickness);
+		drawList->AddCircle(ImVec2(screenDimensions.x / 2.0f, screenDimensions.y / 2.0f), fovCircleRadius, ImColor(this->fovColors), 0, this->fovThickness);
+		ImGui::End();
+	}
+
+	// Draw ESP
+	if (this->bESP)
+	{
+		ImGui::Begin("##ESPDRAWS", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
+		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+
+		for (PlayerEntity* enemyPtr : Hacks::getAliveEnemyList(gameObjects))
+		{
+			Vector2 enemyLowerBoxPos;
+			Vector2 enemyUpperBoxPos;
+			bool LowerVisibility = Hacks::worldToScreen(Hacks::getEnemyLowerBoxPos(enemyPtr), Vector2(1024, 768), enemyLowerBoxPos);
+			bool upperVisility = Hacks::worldToScreen(Hacks::getEnemyUpperBoxPos(enemyPtr), Vector2(1024, 768), enemyUpperBoxPos);
+			if (LowerVisibility || upperVisility)
+			{
+				float distance = gameObjects->myPlayerEntityPtr->headPos.getDistance(enemyPtr->headPos);
+				// Calculate enemy width on screen
+				float enemyScreenWidth = 1200.0f / distance;	// arbitrary value
+
+				ImVec2 boxUpperLeftCoords = ImVec2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2 - (enemyScreenWidth / 2), enemyUpperBoxPos.y);
+				ImVec2 boxLowerRightCoords = ImVec2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2 + (enemyScreenWidth / 2), enemyLowerBoxPos.y);
+
+				// Draw box
+				drawList->AddRect(boxUpperLeftCoords, boxLowerRightCoords, ImColor(this->espBoxColors), 0.0f, 0, this->espBoxThickness);
+
+				// Draw head
+				// This calculation is approximate
+				//float headCircleRadius = 200 / gameObjects->myPlayerEntityPtr->headPos.getDistance(enemyPtr->headPos);
+				//drawList->AddCircle(ImVec2(enemyScreenPos.x, enemyScreenPos.y), headCircleRadius, ImColor(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)), 0, this->fovThickness);
+			}
+		}
 		ImGui::End();
 	}
 

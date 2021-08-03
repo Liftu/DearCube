@@ -46,14 +46,16 @@ private:
 	bool bAimbot = false;
 	bool bTriggerbot = false;
 	bool bShowFov = false;
-	float fov = 15.0f;
-	float aimSmooth = 20.0f;
+	float fov = 10.0f;
+	float aimSmooth = 15.0f;
 	float triggerDistance = 0.5f;
 	float fovThickness = 2.0f;
 	ImVec4 fovColors = ImVec4(0.25f, 0.0f, 1.0f, 0.45f);
 
 	// ESP
 	bool bESP = false;
+	float espBoxThickness = 1.0f;
+	ImVec4 espBoxColors = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
 
 public:
 	Menu(HWND hwnd);

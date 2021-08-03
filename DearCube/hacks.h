@@ -90,5 +90,8 @@ namespace Hacks
 
 	// ESP related
 	float* getviewMatrixPtr();
-	bool WorldToScreen(Vector3 position, Vector2 screenDimensions, Vector2& screenPosition, float& w);
+	bool worldToScreen(Vector3 position, Vector2 screenDimensions, Vector2& screenPosition);
+	Vector3 getEnemyHeadPos(PlayerEntity* enemyPtr);
+	Vector3 getEnemyUpperBoxPos(PlayerEntity* enemyPtr);
+	Vector3 getEnemyLowerBoxPos(PlayerEntity* enemyPtr);
 }

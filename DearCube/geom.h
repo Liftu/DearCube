@@ -48,7 +48,7 @@ namespace Geom
 		Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
 		Vector3(Vector2 vec2) : x(vec2.x), y(vec2.y), z(0) {}
 
-		Vector3  operator +		(const Vector3& rhs) { return Vector3(x + rhs.x, y + rhs.y, z - rhs.z); }
+		Vector3  operator +		(const Vector3& rhs) { return Vector3(x + rhs.x, y + rhs.y, z + rhs.z); }
 		Vector3  operator -		(const Vector3& rhs) { return Vector3(x - rhs.x, y - rhs.y, z - rhs.z); }
 		Vector3  operator *		(const Vector3& rhs) { return Vector3(x * rhs.x, y * rhs.y, z * rhs.z); }
 		Vector3  operator /		(const Vector3& rhs) { return Vector3(x / rhs.x, y / rhs.y, z / rhs.z); }
