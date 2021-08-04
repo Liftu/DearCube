@@ -65,7 +65,7 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     }
     if (menu->isTriggerbotEnabled())
     {
-        Hacks::triggerbot(gameObjects, menu->getTriggerDistanceValue());
+        Hacks::triggerbot(gameObjects);// , menu->getTriggerDistanceValue());
     }
     if (menu->getCurrentESPTool() == Menu::ESPTools::ESP_TOOL_OPENGL)
     {

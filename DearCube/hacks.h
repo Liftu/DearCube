@@ -19,8 +19,10 @@ namespace Hacks
 	// Offsets
 	const DWORD o_gameObjects = 0x0010F49C;
 	const DWORD o_playerEntityVectorPtr = 0x0010F4F8;
-	const DWORD o_TraceLineFunction = 0x0008A310;
 	const DWORD o_viewMatix = 0x00101AE8;
+	const DWORD o_aimAtPos = 0x0010A400;
+	const DWORD o_traceLineFunction = 0x0008A310;
+	const DWORD o_traceLineFunction_enemyOnCrosshair = 0x00060670;
 
 	// Constants
 	const DWORD c_playerEntityType = 0x004E4A98;
@@ -46,6 +48,8 @@ namespace Hacks
 	//EntityVector* getPlayerEntityVectorPtr();
 	//int getNumberOfPlayer();
 	bool isValidEntity(PlayerEntity* playerEntity);
+	bool isEnemyEntity(GameObjects* gameObjects, PlayerEntity* enemyEntityPtr);
+	bool isAliveEntity(PlayerEntity* playerEntityPtr);
 	std::vector<PlayerEntity*> getValidEntityList(EntityVector* playerEntityVector);
 	std::vector<PlayerEntity*> getEnemyList(GameObjects* gameObjects);
 	std::vector<PlayerEntity*> getAliveEnemyList(GameObjects* gameObjects);
@@ -88,7 +92,12 @@ namespace Hacks
 	bool isTargetVisible(PlayerEntity* myPlayerEntityPtr, Vector3 targetPos);
 	Vector3 getEnemyTorsoPos(PlayerEntity* enemyPtr);
 
-	bool triggerbot(GameObjects* gameObjects, float degreeDistanceToShoot);
+	
+	// Triggerbot related
+	Vector3* getAimAtPos();
+	//typedef PlayerEntity*(__cdecl* t_intersectClosest)(float from[3], float to[3], PlayerEntity* srcEntity, float &bestDistSquared, int &hitzone);
+	PlayerEntity* getEnemyOnAim(PlayerEntity* myPlayerEntityPtr);
+	bool triggerbot(GameObjects* gameObjects);
 
 
 	// ESP related

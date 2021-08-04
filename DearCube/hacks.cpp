@@ -46,6 +46,61 @@ GameObjects* Hacks::getGameObjectsPtr()
 //	return gameObjectsPtr->playerEntityVector.length;
 //}
 
+bool Hacks::isValidEntity(PlayerEntity* playerEntity)
+{
+	if (playerEntity != nullptr)
+	{
+		// The try catch is to prevent try to dereference a not a pointer variable
+		// which would lead to an EXCEPTION_ACCESS_VIOLATION
+		// May want to use IsBadReadPtr() :
+		//if (pPointer && HIWORD(pPointer))
+		//{
+		//	if (!IsBadReadPtr(pPointer, sizeof(DWORD_PTR)))
+		//		return true;
+		//}
+		//return false;
+		__try
+		{
+			if (playerEntity->vTable == c_playerEntityType || playerEntity->vTable == c_botEntityType)
+				return true;
+		}
+		__except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_EXECUTION)
+		{
+			return false;
+		}
+	}
+	return false;
+}
+
+bool Hacks::isEnemyEntity(GameObjects* gameObjects, PlayerEntity* enemyEntityPtr)
+{
+	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
+	GameModes gameMode = gameObjects->gameMode;
+
+	if (!isValidEntity(myPlayerEntityPtr) || !isValidEntity(enemyEntityPtr))
+		return false;
+	
+	// If no team
+	else if (myPlayerEntityPtr->team != Teams::Blue && myPlayerEntityPtr->team != Teams::Red)
+		return false;
+	
+	// based on gamemode
+	else if (gameMode == GameModes::TDM || gameMode == GameModes::TSURV || gameMode == GameModes::CTF || gameMode == GameModes::BTDM || gameMode == GameModes::TOSOK ||
+		gameMode == GameModes::TKTF || gameMode == GameModes::TPF || gameMode == GameModes::TLSS || gameMode == GameModes::BTSURV || gameMode == GameModes::BTOSOK)
+		if (myPlayerEntityPtr->team == enemyEntityPtr->team || (enemyEntityPtr->team != Teams::Blue && enemyEntityPtr->team != Teams::Red))
+			return false;
+
+	return true;
+}
+
+bool Hacks::isAliveEntity(PlayerEntity* playerEntityPtr)
+{
+	if (!isValidEntity(playerEntityPtr))
+		return false;
+
+	return playerEntityPtr->currentState == States::Alive;
+}
+
 std::vector<PlayerEntity*> Hacks::getValidEntityList(EntityVector* playerEntityVector)
 {
 	std::vector<PlayerEntity*> validEntityList;
@@ -116,32 +171,6 @@ std::vector<PlayerEntity*> Hacks::getAliveEnemyList(GameObjects* gameObjects)
 		aliveEnemyList.end());
 
 	return aliveEnemyList;
-}
-
-bool Hacks::isValidEntity(PlayerEntity* playerEntity)
-{
-	if (playerEntity != nullptr)
-	{
-		// The try catch is to prevent try to dereference a not a pointer variable
-		// which would lead to an EXCEPTION_ACCESS_VIOLATION
-		// May want to use IsBadReadPtr() :
-		//if (pPointer && HIWORD(pPointer))
-		//{
-		//	if (!IsBadReadPtr(pPointer, sizeof(DWORD_PTR)))
-		//		return true;
-		//}
-		//return false;
-		__try
-		{
-			if (playerEntity->vTable == c_playerEntityType || playerEntity->vTable == c_botEntityType)
-				return true;
-		}
-		__except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_EXECUTION)
-		{
-			return false;
-		}
-	}
-	return false;
 }
 
 
@@ -788,7 +817,7 @@ bool Hacks::isTargetVisible(PlayerEntity* myPlayerEntityPtr, Vector3 targetPos)
 		return false;
 
 	// Traceline function addr
-	DWORD traceLineFunctionAddr = moduleBaseAddr + o_TraceLineFunction;
+	DWORD traceLineFunctionAddr = moduleBaseAddr + o_traceLineFunction;
 	Vector3 myPos = myPlayerEntityPtr->headPos;
 	TraceLineResult traceLineResult = { Vector3(), false };
 
@@ -806,7 +835,7 @@ bool Hacks::isTargetVisible(PlayerEntity* myPlayerEntityPtr, Vector3 targetPos)
 		push myPos.y
 		push myPos.x;				Source position
 		lea eax, [traceLineResult];	The result ptr
-		call traceLineFunctionAddr;		Call to the traceLine game function
+		call traceLineFunctionAddr;	Call to the traceLine game function
 		add esp, 0x24;				Clean the stack (9 * 4 = 36 = 0x24)
 	}
 
@@ -824,31 +853,95 @@ Vector3 Hacks::getEnemyTorsoPos(PlayerEntity* enemyPtr)
 	return enemyHeadPos;
 }
 
-bool Hacks::triggerbot(GameObjects* gameObjects, float degreeDistanceToShoot)
+
+// Triggerbot related
+
+Vector3* Hacks::getAimAtPos()
 {
-	std::vector<PlayerEntity*> enemyList = getAliveEnemyList(gameObjects);
-	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
-	Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
+	DWORD moduleBaseAddr = getModuleBaseAddr();
+	if (moduleBaseAddr == NULL)
+		return nullptr;
 
-	myPlayerEntityPtr->isShooting = false;	// Stop shooting if shooting
+	return reinterpret_cast<Vector3*>(moduleBaseAddr + o_aimAtPos);
+}
 
-	for (PlayerEntity* enemyEntityPtr : enemyList)
+PlayerEntity* Hacks::getEnemyOnAim(PlayerEntity* myPlayerEntityPtr)
+{
+	Vector3* aimAtPosPtr = getAimAtPos();
+	if (aimAtPosPtr == nullptr)
+		return nullptr;
+
+	DWORD intersectClosestAddr = getModuleBaseAddr() + o_traceLineFunction_enemyOnCrosshair;
+
+	Vector3* myHeadPos = &myPlayerEntityPtr->headPos;
+	PlayerEntity* result = nullptr;
+
+	// The intersectClosest function call is really weird...
+	// it pass the 4th argument in EDI and the rest to the stack.
+	float dist;
+	int hitZone;	// 1 = body, 2 = head
+	__asm
 	{
-		if (!isTargetVisible(myPlayerEntityPtr, enemyEntityPtr->headPos))
-			continue;
+		push 0;						bool aiming
+		lea edx, hitZone;
+		push edx;					int hitZone
+		push myPlayerEntityPtr;		PlayerEntity*
+		push aimAtPosPtr;			Vector3*
+		push myHeadPos;				Vector3*
+		lea edi, dist;				float dist
+		call intersectClosestAddr;	call to the traceLine function
+		add esp, 0x14;				clean 5 values on stack
+		mov result, eax;			ret
+	}
+	return result;
+	//t_intersectClosest intersectClosest = (t_intersectClosest)(getModuleBaseAddr() + o_traceLineFunction_enemyOnCrosshair);
+	//PlayerEntity* enemyOnAim = intersectClosest(&myPlayerEntityPtr->headPos.x, (float*)aimAtPosPtr, myPlayerEntityPtr, dist, hitZone);
+	/*return enemyOnAim;*/
+}
 
-		// Instead I could reverse the call to traceLine that updates the HUD and recreate it here.
-		Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, enemyEntityPtr->headPos);
-		if (myViewAngles.getDistance(viewAnglesToEnemy) <= degreeDistanceToShoot)
-		{
-			// Shoot
-			myPlayerEntityPtr->isShooting = true;
-			return true;
-		}
+bool Hacks::triggerbot(GameObjects* gameObjects)
+{
+	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
+	myPlayerEntityPtr->isShooting = false;	// Stop shooting if shooting
+	PlayerEntity* enemyOnAimPtr = getEnemyOnAim(myPlayerEntityPtr);
+	if (!isValidEntity(enemyOnAimPtr))
+		return false;
+
+	if (isEnemyEntity(gameObjects, enemyOnAimPtr) && isAliveEntity(enemyOnAimPtr))
+	{
+		myPlayerEntityPtr->isShooting = true;
+		return true;
 	}
 
 	return false;
 }
+
+//bool Hacks::triggerbot(GameObjects* gameObjects, float degreeDistanceToShoot)
+//{
+//	std::vector<PlayerEntity*> enemyList = getAliveEnemyList(gameObjects);
+//	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
+//	Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
+//
+//	myPlayerEntityPtr->isShooting = false;	// Stop shooting if shooting
+//
+//	for (PlayerEntity* enemyEntityPtr : enemyList)
+//	{
+//		Hacks::getEnemyOnAim(myPlayerEntityPtr);
+//		if (!isTargetVisible(myPlayerEntityPtr, enemyEntityPtr->headPos))
+//			continue;
+//
+//		// Instead I could reverse the call to traceLine that updates the HUD and recreate it here.
+//		Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, enemyEntityPtr->headPos);
+//		if (myViewAngles.getDistance(viewAnglesToEnemy) <= degreeDistanceToShoot)
+//		{
+//			// Shoot
+//			myPlayerEntityPtr->isShooting = true;
+//			return true;
+//		}
+//	}
+//
+//	return false;
+//}
 
 
 // ESP related
