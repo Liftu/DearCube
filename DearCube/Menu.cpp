@@ -88,7 +88,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 	if (ImGui::BeginTabBar("MainTabBar"))
 	{
 		PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
-		//// If local player entity is found, then we can draw the different hack tabs
+		// If local player entity is found, then we can draw the different hack tabs
 		if (Hacks::isValidEntity(myPlayerEntityPtr))
 		{
 			// HUD
@@ -103,10 +103,16 @@ void Menu::drawMenu(GameObjects* gameObjects)
 			// ESP (may put in inside HUD tab)
 			if (ImGui::BeginTabItem("ESP"))
 			{
+				static const char* espToolNames[] = { "ImGui", "OpenGL" };
+				ImGui::Combo("Drawing tool", (int*)&this->currentESPTool, espToolNames, 2);
+				ImGui::SameLine(); helpMarker("This is the library that wiil be used to draw the ESP.\nChoose the one that work best for you or your favorite.");
+
 				// ESP box
 				ImGui::Checkbox("ESP box", &this->bESPBox);
+				ImGui::SameLine(); helpMarker("Display a box around enemies to detect them through walls.");
 				if (this->bESPBox)
 				{
+					ImGui::BeginChild("ChildEspBox", ImVec2(0, 130), true);
 					// ESP box health and shield bar
 					ImGui::Checkbox("Display health bar", &this->bESPHealthBar);
 					ImGui::Checkbox("Display shield bar", &this->bESPShieldBar);
@@ -114,15 +120,19 @@ void Menu::drawMenu(GameObjects* gameObjects)
 
 					ImGui::SliderFloat("ESP box thickness", &this->espBoxThickness, 1.0, 5.0, "%.2f px");
 					ImGui::ColorEdit4("ESP box color", &this->espBoxColor.x);
-				}
 
+					ImGui::EndChild();
+				}
 
 				// ESP head
 				ImGui::Checkbox("ESP head circle", &this->bESPHead);
+				ImGui::SameLine(); helpMarker("Display a circle around enemies head to detect them through walls.");
 				if (this->bESPHead)
 				{
+					ImGui::BeginChild("ChildEspHead", ImVec2(0, 58), true);
 					ImGui::SliderFloat("ESP head thickness", &this->espHeadThickness, 1.0, 5.0, "%.2f px");
 					ImGui::ColorEdit4("ESP head color", &this->espHeadColor.x);
+					ImGui::EndChild();
 				}
 
 				ImGui::EndTabItem();
@@ -407,84 +417,87 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 	}
 
 	// Draw ESP
-	ImGui::Begin("##ESPDRAWS", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
-	ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-
-	for (PlayerEntity* enemyPtr : Hacks::getAliveEnemyList(gameObjects))
+	if (this->currentESPTool == ESPTools::ESP_TOOL_IMGUI)
 	{
-		// Draw body box
-		if (this->bESPBox)
+		ImGui::Begin("##ESPDRAWS", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
+		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+
+		for (PlayerEntity* enemyPtr : Hacks::getAliveEnemyList(gameObjects))
 		{
-			Vector2 enemyLowerBoxPos;
-			Vector2 enemyUpperBoxPos;
-			bool LowerVisibility = Hacks::worldToScreen(Hacks::getEnemyLowerBoxPos(enemyPtr), Vector2(1024, 768), enemyLowerBoxPos);
-			bool upperVisility = Hacks::worldToScreen(Hacks::getEnemyUpperBoxPos(enemyPtr), Vector2(1024, 768), enemyUpperBoxPos);
-			if (LowerVisibility || upperVisility)
+			// Draw body box
+			if (this->bESPBox)
 			{
-				float distance = gameObjects->myPlayerEntityPtr->headPos.getDistance(enemyPtr->headPos);
-				// Calculate enemy width on screen
-				float enemyScreenWidth = 1200.0f / distance;	// arbitrary value
-
-				ImVec2 boxUpperLeftCoords = ImVec2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2.0f - (enemyScreenWidth / 2.0f), enemyUpperBoxPos.y);
-				ImVec2 boxLowerRightCoords = ImVec2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2.0f + (enemyScreenWidth / 2.0f), enemyLowerBoxPos.y);
-
-				// Draw box
-				drawList->AddRect(boxUpperLeftCoords, boxLowerRightCoords, ImColor(this->espBoxColor), 0.0f, 0, this->espBoxThickness);
-
-				// Draw name
-				if (this->bESPName)
+				Vector2 enemyLowerBoxPos;
+				Vector2 enemyUpperBoxPos;
+				bool LowerVisibility = Hacks::worldToScreen(Hacks::getEnemyLowerBoxPos(enemyPtr), screenDimensions, enemyLowerBoxPos);
+				bool upperVisility = Hacks::worldToScreen(Hacks::getEnemyUpperBoxPos(enemyPtr), screenDimensions, enemyUpperBoxPos);
+				if (LowerVisibility || upperVisility)
 				{
-					float fontWidth = ImGui::GetFont()->FontSize / 2.0f;
-					float nameWidth = strlen(enemyPtr->name) * (fontWidth);
-					ImVec2 textCoords = ImVec2((boxUpperLeftCoords.x + boxLowerRightCoords.x) / 2.0f - (nameWidth / 2.0f), boxLowerRightCoords.y + 5);
-					drawList->AddText(textCoords, ImColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), enemyPtr->name);
-				}
+					float distance = gameObjects->myPlayerEntityPtr->headPos.getDistance(enemyPtr->headPos);
+					// Calculate enemy width on screen
+					float enemyScreenWidth = 1200.0f / distance;	// arbitrary value
 
-				if (this->bESPHealthBar)
-				{
-					// Draw the backgound red bar
-					ImVec2 healthBarUpperLeftCoords = ImVec2(boxLowerRightCoords.x + 3.0f, boxUpperLeftCoords.y + 1);
-					ImVec2 healthBarLowerRightCoords = ImVec2(boxLowerRightCoords.x + 6.0f, boxLowerRightCoords.y - 1);
-					drawList->AddRectFilled(healthBarUpperLeftCoords, healthBarLowerRightCoords, ImColor(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)));
-					// Draw the frontground green bar (proportional to health value)
-					float barSize = healthBarLowerRightCoords.y - healthBarUpperLeftCoords.y;
-					healthBarUpperLeftCoords.y += barSize - barSize * (enemyPtr->health / 100.0f);
-					drawList->AddRectFilled(healthBarUpperLeftCoords, healthBarLowerRightCoords, ImColor(ImVec4(0.0f, 1.0f, 0.0f, 1.0f)));
-				}
+					ImVec2 boxUpperLeftCoords = ImVec2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2.0f - (enemyScreenWidth / 2.0f), enemyUpperBoxPos.y);
+					ImVec2 boxLowerRightCoords = ImVec2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2.0f + (enemyScreenWidth / 2.0f), enemyLowerBoxPos.y);
 
-				if (this->bESPShieldBar)
-				{
-					// Do not display backgorund for the shield bar
-					ImVec2 shieldhBarUpperLeftCoords = ImVec2(boxLowerRightCoords.x + 3.0f, boxUpperLeftCoords.y + 1);
-					ImVec2 shieldBarLowerRightCoords = ImVec2(boxLowerRightCoords.x + 6.0f, boxLowerRightCoords.y - 1);
-					// Do not overlap health bar if displayed
+					// Draw box
+					drawList->AddRect(boxUpperLeftCoords, boxLowerRightCoords, ImColor(this->espBoxColor), 0.0f, 0, this->espBoxThickness);
+
+					// Draw name
+					if (this->bESPName)
+					{
+						float fontWidth = ImGui::GetFont()->FontSize / 2.0f;
+						float nameWidth = strlen(enemyPtr->name) * (fontWidth);
+						ImVec2 textCoords = ImVec2((boxUpperLeftCoords.x + boxLowerRightCoords.x) / 2.0f - (nameWidth / 2.0f), boxLowerRightCoords.y + 5);
+						drawList->AddText(textCoords, ImColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), enemyPtr->name);
+					}
+
 					if (this->bESPHealthBar)
 					{
-						shieldhBarUpperLeftCoords.x += 6.0f;
-						shieldBarLowerRightCoords.x += 6.0f;
+						// Draw the backgound red bar
+						ImVec2 healthBarUpperLeftCoords = ImVec2(boxLowerRightCoords.x + 3.0f, boxUpperLeftCoords.y + 1);
+						ImVec2 healthBarLowerRightCoords = ImVec2(boxLowerRightCoords.x + 6.0f, boxLowerRightCoords.y - 1);
+						drawList->AddRectFilled(healthBarUpperLeftCoords, healthBarLowerRightCoords, ImColor(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)));
+						// Draw the frontground green bar (proportional to health value)
+						float barSize = healthBarLowerRightCoords.y - healthBarUpperLeftCoords.y;
+						healthBarUpperLeftCoords.y += barSize - barSize * (enemyPtr->health / 100.0f);
+						drawList->AddRectFilled(healthBarUpperLeftCoords, healthBarLowerRightCoords, ImColor(ImVec4(0.0f, 1.0f, 0.0f, 1.0f)));
 					}
-					// Draw the blue bar (proportional to shield value)
-					float barSize = shieldBarLowerRightCoords.y - shieldhBarUpperLeftCoords.y;
-					shieldhBarUpperLeftCoords.y += barSize - barSize * (enemyPtr->shield / 100.0f);
-					drawList->AddRectFilled(shieldhBarUpperLeftCoords, shieldBarLowerRightCoords, ImColor(ImVec4(0.0f, 0.0f, 1.0f, 1.0f)));
+
+					if (this->bESPShieldBar)
+					{
+						// Do not display backgorund for the shield bar
+						ImVec2 shieldhBarUpperLeftCoords = ImVec2(boxLowerRightCoords.x + 3.0f, boxUpperLeftCoords.y + 1);
+						ImVec2 shieldBarLowerRightCoords = ImVec2(boxLowerRightCoords.x + 6.0f, boxLowerRightCoords.y - 1);
+						// Do not overlap health bar if displayed
+						if (this->bESPHealthBar)
+						{
+							shieldhBarUpperLeftCoords.x += 6.0f;
+							shieldBarLowerRightCoords.x += 6.0f;
+						}
+						// Draw the blue bar (proportional to shield value)
+						float barSize = shieldBarLowerRightCoords.y - shieldhBarUpperLeftCoords.y;
+						shieldhBarUpperLeftCoords.y += barSize - barSize * (enemyPtr->shield / 100.0f);
+						drawList->AddRectFilled(shieldhBarUpperLeftCoords, shieldBarLowerRightCoords, ImColor(ImVec4(0.0f, 0.0f, 1.0f, 1.0f)));
+					}
+				}
+			}
+			// Draw head circle
+			if (this->bESPHead)
+			{
+				Vector2 enemyHeadScreenPos;
+				if (Hacks::worldToScreen(Hacks::getEnemyHeadPos(enemyPtr), screenDimensions, enemyHeadScreenPos))
+				{
+					// Calculate head circle radius
+					float distance = gameObjects->myPlayerEntityPtr->headPos.getDistance(enemyPtr->headPos);
+					float headCircleRadius = 200 / distance;	// arbitrary value
+					drawList->AddCircle(ImVec2(enemyHeadScreenPos.x, enemyHeadScreenPos.y), headCircleRadius, ImColor(this->espHeadColor), 0, this->espHeadThickness);
 				}
 			}
 		}
-		// Draw head circle
-		if (this->bESPHead)
-		{
-			Vector2 enemyHeadScreenPos;
-			if (Hacks::worldToScreen(Hacks::getEnemyHeadPos(enemyPtr), Vector2(1024, 768), enemyHeadScreenPos))
-			{
-				// Calculate head circle radius
-				float distance = gameObjects->myPlayerEntityPtr->headPos.getDistance(enemyPtr->headPos);
-				float headCircleRadius = 200 / distance;	// arbitrary value
-				drawList->AddCircle(ImVec2(enemyHeadScreenPos.x, enemyHeadScreenPos.y), headCircleRadius, ImColor(this->espHeadColor), 0, this->espHeadThickness);
-			}
-		}
+		ImGui::End();
 	}
-	ImGui::End();
 
 
 	// ImGui rendering
@@ -508,7 +521,7 @@ void Menu::init()
 	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsClassic();
 	ImGuiStyle &style = ImGui::GetStyle();
-	style.WindowMinSize = ImVec2(400, 250);
+	style.WindowMinSize = ImVec2(400, 275);
 	style.WindowRounding = 3.0f;
 	style.ChildRounding = 3.0f;
 	style.FrameRounding = 3.0f;

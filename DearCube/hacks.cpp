@@ -813,6 +813,17 @@ bool Hacks::isTargetVisible(PlayerEntity* myPlayerEntityPtr, Vector3 targetPos)
 	return !(bool)traceLineResult.collided;
 }
 
+Vector3 Hacks::getEnemyTorsoPos(PlayerEntity* enemyPtr)
+{
+	if (!isValidEntity(enemyPtr))
+		return Vector3();
+
+	Vector3 enemyHeadPos = enemyPtr->headPos;
+	enemyHeadPos.z -= 1.0f; // arbitrary value
+
+	return enemyHeadPos;
+}
+
 bool Hacks::triggerbot(GameObjects* gameObjects, float degreeDistanceToShoot)
 {
 	std::vector<PlayerEntity*> enemyList = getAliveEnemyList(gameObjects);
@@ -943,4 +954,97 @@ Vector3 Hacks::getEnemyLowerBoxPos(PlayerEntity* enemyPtr)
 	enemyHeadPos.z -= 0.5f;	// arbitrary value
 
 	return enemyHeadPos;
+}
+
+void Hacks::drawESP(GameObjects* gameObjects, Vector2 screenDimensions, bool drawEspBox, float espBoxThickness, Vector4 espBoxColor, 
+	bool displayName, bool displayHealth, bool displayShield, bool drawEspHead, float espHeadThickness, Vector4 espHeadColor)
+{
+	static GL::Font glFont;
+	const static int FONT_HEIGHT = 15;
+	const static int FONT_WIDTH = 8;
+	HDC currentHDC = wglGetCurrentDC();
+
+	if (!glFont.bBuilt || currentHDC != glFont.hDc)
+	{
+		glFont.build(FONT_HEIGHT);
+	}
+
+	GL::setupOrtho();
+
+	for (PlayerEntity* enemyPtr : getAliveEnemyList(gameObjects))
+	{
+		// Draw body box
+		if (drawEspBox)
+		{
+			Vector2 enemyLowerBoxPos;
+			Vector2 enemyUpperBoxPos;
+			bool LowerVisibility = worldToScreen(getEnemyLowerBoxPos(enemyPtr), screenDimensions, enemyLowerBoxPos);
+			bool upperVisility = worldToScreen(getEnemyUpperBoxPos(enemyPtr), screenDimensions, enemyUpperBoxPos);
+			if (LowerVisibility || upperVisility)
+			{
+				float distance = gameObjects->myPlayerEntityPtr->headPos.getDistance(enemyPtr->headPos);
+				// Calculate enemy width on screen
+				float enemyScreenWidth = 1200.0f / distance;	// arbitrary value
+
+				Vector2 boxUpperLeftCoords = Vector2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2.0f - (enemyScreenWidth / 2.0f), enemyUpperBoxPos.y);
+				Vector2 boxLowerRightCoords = Vector2((enemyUpperBoxPos.x + enemyLowerBoxPos.x) / 2.0f + (enemyScreenWidth / 2.0f), enemyLowerBoxPos.y);
+
+				// Draw box
+				GL::drawOutlineRect(boxUpperLeftCoords.x, boxUpperLeftCoords.y, boxLowerRightCoords.x, boxLowerRightCoords.y, espBoxThickness, &espBoxColor.x);
+
+				// Draw name
+				if (displayName)
+				{
+					Vector2 textCoords = Vector2(glFont.centerText(boxUpperLeftCoords.x, boxLowerRightCoords.x, (float)strlen(enemyPtr->name) * FONT_WIDTH),
+												boxLowerRightCoords.y + FONT_HEIGHT);
+					glFont.print(textCoords.x, textCoords.y, rgb::white, "%s", enemyPtr->name);
+				}
+
+				if (displayHealth)
+				{
+					// Draw the backgound red bar
+					Vector2 healthBarUpperLeftCoords = Vector2(boxLowerRightCoords.x + 5.0f, boxUpperLeftCoords.y + 1);
+					Vector2 healthBarLowerRightCoords = Vector2(boxLowerRightCoords.x + 8.0f, boxLowerRightCoords.y - 1);
+					GL::drawFilledRect(healthBarUpperLeftCoords.x, healthBarUpperLeftCoords.y, healthBarLowerRightCoords.x, healthBarLowerRightCoords.y, rgb::red);
+					// Draw the frontground green bar (proportional to health value)
+					float barSize = healthBarLowerRightCoords.y - healthBarUpperLeftCoords.y;
+					healthBarUpperLeftCoords.y += barSize - barSize * (enemyPtr->health / 100.0f);
+					GL::drawFilledRect(healthBarUpperLeftCoords.x, healthBarUpperLeftCoords.y, healthBarLowerRightCoords.x, healthBarLowerRightCoords.y, rgb::green);
+				}
+
+				if (displayShield)
+				{
+					// Do not display backgorund for the shield bar
+					Vector2 shieldhBarUpperLeftCoords = Vector2(boxLowerRightCoords.x + 5.0f, boxUpperLeftCoords.y + 1);
+					Vector2 shieldBarLowerRightCoords = Vector2(boxLowerRightCoords.x + 8.0f, boxLowerRightCoords.y - 1);
+					// Do not overlap health bar if displayed
+					if (displayHealth)
+					{
+						shieldhBarUpperLeftCoords.x += 6.0f;
+						shieldBarLowerRightCoords.x += 6.0f;
+					}
+					// Draw the blue bar (proportional to shield value)
+					float barSize = shieldBarLowerRightCoords.y - shieldhBarUpperLeftCoords.y;
+					shieldhBarUpperLeftCoords.y += barSize - barSize * (enemyPtr->shield / 100.0f);
+					GL::drawFilledRect(shieldhBarUpperLeftCoords.x, shieldhBarUpperLeftCoords.y, shieldBarLowerRightCoords.x, shieldBarLowerRightCoords.y, rgb::blue);
+				}
+			}
+		}
+		// Draw head circle
+		if (drawEspHead)
+		{
+			Vector2 enemyHeadScreenPos;
+			if (worldToScreen(getEnemyHeadPos(enemyPtr), screenDimensions, enemyHeadScreenPos))
+			{
+				// Calculate head circle radius
+				float distance = gameObjects->myPlayerEntityPtr->headPos.getDistance(enemyPtr->headPos);
+				float headCircleRadius = 200 / distance;	// arbitrary value
+				GL::drawOutlineCircle(enemyHeadScreenPos.x, enemyHeadScreenPos.y, headCircleRadius, 50, espHeadThickness, &espHeadColor.x);
+			}
+		}
+	}
+
+	GL::restoreGL();
+
+	return;
 }

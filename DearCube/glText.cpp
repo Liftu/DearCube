@@ -14,9 +14,9 @@ void GL::Font::build(int height)
 	bBuilt = true;
 }
 
-void GL::Font::print(float x, float y, const unsigned char color[3], const char* format, ...)
+void GL::Font::print(float x, float y, const GLfloat color[3], const char* format, ...)
 {
-	glColor3ub(color[0], color[1], color[2]);
+	glColor4f(color[0], color[1], color[2], color[3]);
 	glRasterPos2f(x, y);
 
 	char text[100];
@@ -32,18 +32,19 @@ void GL::Font::print(float x, float y, const unsigned char color[3], const char*
 	glPopAttrib();
 }
 
-Vec3 GL::Font::centerText(float x, float y, float width, float height, float textWidth, float textHeight)
+Vector2 GL::Font::centerText(float x, float y, float width, float height, float textWidth, float textHeight)
 {
-	Vec3 text;
+	Vector2 text;
 	text.x = x + (width - textWidth) / 2;
 	text.y = y + textHeight;
 	return text;
 }
 
-float GL::Font::centerText(float x, float width, float textWidth)
+float GL::Font::centerText(float xLeft, float xRight, float textWidth)
 {
+	float width = xRight - xLeft;
 	if (width > textWidth)
-		return (x + ((width - textWidth) / 2));
+		return (xLeft + ((width - textWidth) / 2));
 	else
-		return (x - ((textWidth - width) / 2));
+		return (xLeft - ((textWidth - width) / 2));
 }

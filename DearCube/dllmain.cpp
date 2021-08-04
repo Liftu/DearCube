@@ -28,39 +28,6 @@ t_wglSwapBuffers gateway_wglSwapBuffers;
 // Define the hoooked function (this will be our mainloop)
 
 
-//GL::Font glFont;
-//const int FONT_HEIGHT = 15;
-//const int FONT_WIDTH = 9;
-//
-//const char* example1 = "ESP Box";
-//const char* example2 = "I'm inside fam";
-//
-//void draw()
-//{
-//    HDC currentHDC = wglGetCurrentDC();
-//
-//    if (!glFont.bBuilt || currentHDC != glFont.hDc)
-//    {
-//        glFont.build(FONT_HEIGHT);
-//    }
-//
-//    GL::setupOrtho();
-//
-//    // Box
-//    GL::drawOutline(300, 300, 200, 200, 1.0f, rgb::red);
-//
-//    // Example text 1
-//    float textPointX = glFont.centerText(300, 200, (float)strlen(example1) * FONT_WIDTH);
-//    float textPointY = 300 - FONT_HEIGHT / 2;
-//    glFont.print(textPointX, textPointY, rgb::green, "%s", example1);
-//
-//    // Example text 2
-//    Vec3 insideTextPoint = glFont.centerText(300, 300 + 100, 200, 200, (float)strlen(example2) * FONT_WIDTH, FONT_HEIGHT);
-//    glFont.print(insideTextPoint.x, insideTextPoint.y, rgb::ligthGrey, "%s", example2);
-//
-//    GL::restoreGL();
-//}
-
 Vector2 getScreenDimensions()
 {
     GLint viewport[4] = { 0 };	// window : 0 = x, 1 = y, 2 = width, 3 = heigth
@@ -100,9 +67,11 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     {
         Hacks::triggerbot(gameObjects, menu->getTriggerDistanceValue());
     }
-
-
-    //draw();
+    if (menu->getCurrentESPTool() == Menu::ESPTools::ESP_TOOL_OPENGL)
+    {
+        Hacks::drawESP(gameObjects, screenDimensions, menu->isESPBoxEnabled(), menu->getESPBoxThickness(), menu->getESPBoxColor(), menu->isESPNameEnabled(),
+            menu->isESPHealthBarEnabled(), menu->isESPShieldBarEnabled(), menu->isESPHeadEnabled(), menu->getESPHeadThickness(), menu->getESPHeadColor());
+    }
 
     // Update screen by calling the original opengl wglSwapBuffers function
     return gateway_wglSwapBuffers(hDc);

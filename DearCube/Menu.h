@@ -26,6 +26,13 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 class Menu
 {
+public:
+	enum class ESPTools : int
+	{
+		ESP_TOOL_IMGUI = 0,
+		ESP_TOOL_OPENGL
+	};
+
 private:
 	// SDL definitions for cursor display
 	typedef enum {
@@ -53,6 +60,8 @@ private:
 	ImVec4 fovColor = ImVec4(0.25f, 0.0f, 1.0f, 0.45f);
 
 	// ESP
+	ESPTools currentESPTool = ESPTools::ESP_TOOL_IMGUI;
+
 	bool bESPBox = false;
 	float espBoxThickness = 1.0f;
 	ImVec4 espBoxColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -80,9 +89,25 @@ public:
 	bool isShown() { return this->bShow; }
 	bool isRunning() { return this->bRunning; }
 
-	bool isAimbotEnabled() { return bAimbot; }
-	bool isTriggerbotEnabled() { return bTriggerbot; }
-	float getFovValue() { return fov; }
-	float getAimSmoothValue() { return aimSmooth; }
-	float getTriggerDistanceValue() { return triggerDistance; }
+	// Aimbot
+	bool isAimbotEnabled() { return this->bAimbot; }
+	bool isTriggerbotEnabled() { return this->bTriggerbot; }
+	float getFovValue() { return this->fov; }
+	float getAimSmoothValue() { return this->aimSmooth; }
+	float getTriggerDistanceValue() { return this->triggerDistance; }
+
+
+	// ESP
+	ESPTools getCurrentESPTool() { return this->currentESPTool; }
+
+	bool isESPBoxEnabled() { return this->bESPBox; }
+	float getESPBoxThickness() { return this->espBoxThickness; }
+	Vector4 getESPBoxColor() { return Vector4(this->espBoxColor.x, this->espBoxColor.y, this->espBoxColor.z, this->espBoxColor.w); }
+	bool isESPNameEnabled() { return this->bESPName; }
+	bool isESPHealthBarEnabled() { return this->bESPHealthBar; }
+	bool isESPShieldBarEnabled() { return this->bESPShieldBar; }
+
+	bool isESPHeadEnabled() { return this->bESPHead; }
+	float getESPHeadThickness() { return this->espHeadThickness; }
+	Vector4 getESPHeadColor() { return Vector4(this->espHeadColor.x, this->espHeadColor.y, this->espHeadColor.z, this->espHeadColor.w); }
 };

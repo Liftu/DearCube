@@ -5,6 +5,8 @@
 #include <algorithm>
 
 #include "gameStructures.h"
+#include "glText.h"
+#include "glDraw.h"
 
 #define MAX_NUMBER_OF_PLAYER 32
 
@@ -84,6 +86,7 @@ namespace Hacks
 	PlayerEntity* getBestTarget(GameObjects* gameObjects, float fov, float distanceRatio);
 	bool smoothSetViewAngles(PlayerEntity* myPlayerEntityPtr, Vector2 viewAnglesToEnemy, float smoothness);
 	bool isTargetVisible(PlayerEntity* myPlayerEntityPtr, Vector3 targetPos);
+	Vector3 getEnemyTorsoPos(PlayerEntity* enemyPtr);
 
 	bool triggerbot(GameObjects* gameObjects, float degreeDistanceToShoot);
 
@@ -94,4 +97,6 @@ namespace Hacks
 	Vector3 getEnemyHeadPos(PlayerEntity* enemyPtr);
 	Vector3 getEnemyUpperBoxPos(PlayerEntity* enemyPtr);
 	Vector3 getEnemyLowerBoxPos(PlayerEntity* enemyPtr);
+	void drawESP(GameObjects* gameObjects, Vector2 screenDimensions, bool drawEspBox, float espBoxThickness, Vector4 espBoxColor, 
+		bool displayName, bool displayHealth, bool displayShield, bool drawEspHead, float espHeadThickness, Vector4 espHeadColor);
 }

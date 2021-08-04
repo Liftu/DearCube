@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <gl/GL.h>
 
-struct Vec3 { float x, y, z; };
+#include "geom.h"
+
+using Geom::Vector2;
 
 namespace GL
 {
@@ -19,9 +21,9 @@ namespace GL
 		int width;
 
 		void build(int height);
-		void print(float x, float y, const unsigned char color[3], const char* format, ...);
+		void print(float x, float y, const GLfloat color[4], const char* format, ...);
 
-		Vec3 centerText(float x, float y, float width, float height, float textWidth, float textHeight);
+		Vector2 centerText(float x, float y, float width, float height, float textWidth, float textHeight);
 		float centerText(float x, float width, float textWidth);
 	};
 }

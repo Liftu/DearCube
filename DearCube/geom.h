@@ -68,6 +68,7 @@ namespace Geom
 		// Length for 3d distances
 		float length() { return sqrt(pow(x, 2.0f) + pow(y, 2.0f) + pow(z, 2.0f)); }
 		float getDistance(const Vector3 other) { return (*this - other).length(); }
+		Vector2 toVector2() { return Vector2(this->x, this->y); }
 	};
 
 	Vector2 calcAngle(Vector3 posSrc, Vector3 posDst);
@@ -80,5 +81,8 @@ namespace Geom
 		Vector4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 		Vector4(Vector2 vec2) : x(vec2.x), y(vec2.y), z(0), w(0) {}
 		Vector4(Vector3 vec3) : x(vec3.x), y(vec3.y), z(vec3.z), w(0) {}
+
+		Vector2 toVector2() { return Vector2(this->x, this->y); }
+		Vector3 toVector3() { return Vector3(this->x, this->y, this->z); }
 	};
 }
