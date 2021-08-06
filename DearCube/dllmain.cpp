@@ -1,13 +1,8 @@
 // dllmain.cpp : Définit le point d'entrée de l'application DLL.
 #include <windows.h>
-#include <TlHelp32.h>
-#include <iostream>
-#include <vector>
 
-#include "hook32.h"
+#include "detours.h"
 #include "Menu.h"
-#include "glDraw.h"
-#include "glText.h"
 #include "gameStructures.h"
 #include "hacks.h"
 
@@ -77,6 +72,7 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     return gateway_wglSwapBuffers(hDc);
 }
 
+
 DWORD WINAPI injectedThread(HMODULE hModule)
 {
     // Menu setup
@@ -86,7 +82,7 @@ DWORD WINAPI injectedThread(HMODULE hModule)
     {
         char message[256];
         sprintf_s(message, 256, 
-            "DearCube was not able to retrieve the window handle for \"%s\". Ensure you injected the DLL into the right process.\nIf this error persists, please contact the developer on github.", 
+            "DearCube was not able to retrieve the window handle for \"%s\". Ensure you injected the DLL into the right process.\nIf this error persists, please contact the developer on Github.",
             windowTitle);
         MessageBoxA(NULL, message, "Unable to retrieve the window handle", MB_OK | MB_ICONERROR);
         FreeLibraryAndExitThread(hModule, EXIT_FAILURE);
@@ -95,16 +91,31 @@ DWORD WINAPI injectedThread(HMODULE hModule)
 
     // Hooking
     // the OpenGL SwapBuffers function is called at every screen update
-    Hook32 swapBuffersHook32("opengl32.dll", "wglSwapBuffers", hooked_wglSwapBuffers, &gateway_wglSwapBuffers, 5);
-    swapBuffersHook32.enable();
+    gateway_wglSwapBuffers = (t_wglSwapBuffers)DetourFindFunction("opengl32.dll", "wglSwapBuffers");
+    if (gateway_wglSwapBuffers == NULL)
+    {
+        MessageBoxA(NULL, "DearCube was not able to hook the function \"wglSwapBuffers\".\nPlease contact the developer on Github.",
+            "Unable to hook \"wglSwapBuffers\"", MB_OK | MB_ICONERROR);
+        FreeLibraryAndExitThread(hModule, EXIT_FAILURE);
+    }
+    DetourTransactionBegin();
+    DetourUpdateThread(GetCurrentThread());
+    DetourAttach(&(PVOID&)gateway_wglSwapBuffers, hooked_wglSwapBuffers);
+    DetourTransactionCommit();
     
-    // If menu isn't running, then we can exit.
+
+    // Idle mode, if menu isn't running anymore we can exit.
     while (menu->isRunning())
         Sleep(5);
 
+
     // Cleanup & exit (WHEN UNHOOKING IMPLEMENTED)
     // Unhook
-    swapBuffersHook32.disable();
+    DetourTransactionBegin();
+    DetourUpdateThread(GetCurrentThread());
+    DetourDetach(&(PVOID&)gateway_wglSwapBuffers, hooked_wglSwapBuffers);
+    DetourTransactionCommit();
+
     // Exit
     // SOMETIMES THE WHOLE PROCCESS CRACHES WHEN CALLING THIS
     FreeLibraryAndExitThread(hModule, EXIT_SUCCESS);

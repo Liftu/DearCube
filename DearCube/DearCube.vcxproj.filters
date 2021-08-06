@@ -75,6 +75,9 @@
     <ClInclude Include="libs\imgui_club\imgui_memory_editor\imgui_memory_editor.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="libs\detours\detours.h">
+      <Filter>hooking</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
