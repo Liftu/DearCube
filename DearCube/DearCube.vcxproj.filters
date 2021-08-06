@@ -119,11 +119,8 @@
     <ClCompile Include="libs\imgui\backends\imgui_impl_win32.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="geam.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="geom.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -177,8 +177,10 @@
     <ClInclude Include="Menu.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="geam.cpp" />
+    <ClCompile Include="dllmain.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">libs/imgui_club/imgui_memory_editor;libs/detours;libs/imgui;libs/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">libs/imgui_club/imgui_memory_editor;libs/detours;libs/imgui;libs/imgui/backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="geom.cpp" />
     <ClCompile Include="glDraw.cpp" />
     <ClCompile Include="glText.cpp" />
