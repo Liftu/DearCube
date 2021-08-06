@@ -42,7 +42,7 @@
     <ClInclude Include="gameStructures.h">
       <Filter>game</Filter>
     </ClInclude>
-    <ClInclude Include="hook32.h">
+    <ClInclude Include="Hook32.h">
       <Filter>hooking</Filter>
     </ClInclude>
     <ClInclude Include="glText.h">
@@ -86,7 +86,7 @@
     <ClCompile Include="hacks.cpp">
       <Filter>hacking</Filter>
     </ClCompile>
-    <ClCompile Include="hook32.cpp">
+    <ClCompile Include="Hook32.cpp">
       <Filter>hooking</Filter>
     </ClCompile>
     <ClCompile Include="glText.cpp">

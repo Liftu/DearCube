@@ -5,6 +5,7 @@
 #include "Menu.h"
 #include "gameStructures.h"
 #include "hacks.h"
+#include "Hook32.h"
 
 // Globals
 // Version
@@ -21,6 +22,31 @@ typedef BOOL(__stdcall* t_wglSwapBuffers)(HDC hDc);
 // Declare the function pointer variable
 t_wglSwapBuffers gateway_wglSwapBuffers;
 // Define the hoooked function (this will be our mainloop)
+
+// Original OpenGL glDrawElements
+static void (__stdcall* original_glDrawElements)(GLenum mode, GLsizei count, GLenum type, const void* indices) = glDrawElements;
+//static VOID(WINAPI* TrueSleep)(DWORD dwMilliseconds) = Sleep;
+
+__declspec(naked) void hooked_glDrawElements()
+{
+    _asm
+    {
+        mov eax, dword ptr[esp + 0x24]
+        cmp eax, 0x100
+        jl enableDepth
+    }
+    glDepthFunc(GL_ALWAYS);
+    goto exit;
+
+enableDepth:
+    glDepthFunc(GL_LEQUAL);
+
+exit:
+    __asm
+    {
+        ret
+    }
+}
 
 
 Vector2 getScreenDimensions()
@@ -102,7 +128,10 @@ DWORD WINAPI injectedThread(HMODULE hModule)
     DetourUpdateThread(GetCurrentThread());
     DetourAttach(&(PVOID&)gateway_wglSwapBuffers, hooked_wglSwapBuffers);
     DetourTransactionCommit();
-    
+
+    // Attach a hook to the from the 16th to the 22th byte of the glDrawElements function
+    Hook32::midHookTrampoline((LPVOID)((DWORD)original_glDrawElements + 0x16), hooked_glDrawElements, 6);
+    // TODO: DETACH HOOK !
 
     // Idle mode, if menu isn't running anymore we can exit.
     while (menu->isRunning())
@@ -126,6 +155,7 @@ DWORD WINAPI injectedThread(HMODULE hModule)
 
     return 0;
 }
+
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

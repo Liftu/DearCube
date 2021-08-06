@@ -30,4 +30,8 @@ public:
 	static LPVOID getFunctionAddr(LPCSTR moduleName, LPCSTR functionName);
 	static bool detour32(LPVOID srcAddr, LPVOID dstAddr, const SIZE_T len);
 	static LPVOID trampolineHook32(LPVOID srcAddr, LPVOID dstAddr, const SIZE_T len);
+
+	// /!\ A mid hook function has to be declared as __declspec(naked) and end with a ret inst /!\ //
+	// Because of the PUSHAD and the CALL instructions, values in stack will be shifted of 0x24 bytes
+	static bool midHookTrampoline(LPVOID srcAddr, LPVOID dstAddr, const SIZE_T len);
 };

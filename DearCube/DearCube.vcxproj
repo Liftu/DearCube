@@ -137,6 +137,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>libs/detours/detours.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -158,6 +159,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>libs/detours/detours.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -166,7 +168,7 @@
     <ClInclude Include="glText.h" />
     <ClInclude Include="hacks.h" />
     <ClInclude Include="geom.h" />
-    <ClInclude Include="hook32.h" />
+    <ClInclude Include="Hook32.h" />
     <ClInclude Include="libs\detours\detours.h" />
     <ClInclude Include="libs\imgui\backends\imgui_impl_opengl2.h" />
     <ClInclude Include="libs\imgui\backends\imgui_impl_win32.h" />
@@ -184,7 +186,7 @@
     <ClCompile Include="geom.cpp" />
     <ClCompile Include="glDraw.cpp" />
     <ClCompile Include="glText.cpp" />
-    <ClCompile Include="hook32.cpp" />
+    <ClCompile Include="Hook32.cpp" />
     <ClCompile Include="libs\imgui\backends\imgui_impl_opengl2.cpp" />
     <ClCompile Include="libs\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="libs\imgui\imgui.cpp" />
