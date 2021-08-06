@@ -10,7 +10,7 @@ Hook32::Hook32(LPVOID srcAddr, LPVOID dstAddr, LPVOID ptrToGatewayFuncPtr, SIZE_
 	// intructions opcodes that will be override
 	// it shouldn't take more than 16 bytes
 	// Minimum jump size is 5 bytes in 32 bits
-	if (len < MIN_LEN || len > MAX_LEADBYTES)
+	if (len < MIN_LEN || len > MAX_LEN)
 		throw(EXCEPTION_HOOK_INCORRECT_LEN);
 	else
 		this->len = len;
@@ -33,7 +33,7 @@ Hook32::Hook32(LPCSTR moduleName, LPCSTR functionName, LPVOID dstAddr, LPVOID pt
 		// intructions opcodes that will be override
 		// it shouldn't take more than 16 bytes
 		// Minimum jump size is 5 bytes in 32 bits
-		if (len < MIN_LEN || len > MAX_LEADBYTES)
+		if (len < MIN_LEN || len > MAX_LEN)
 			throw(EXCEPTION_HOOK_INCORRECT_LEN);
 		else
 			this->len = len;
@@ -104,7 +104,7 @@ bool Hook32::detour32(LPVOID srcAddr, LPVOID dstAddr, const SIZE_T len)
 	// intructions opcodes that will be override
 	// it shouldn't take more than 16 bytes
 	// Minimum jump size is 5 bytes in 32 bits
-	if (len < MIN_LEN || len > MAX_LEADBYTES)
+	if (len < MIN_LEN || len > MAX_LEN)
 		return false;
 
 	// Save original page protection
@@ -134,7 +134,7 @@ LPVOID Hook32::trampolineHook32(LPVOID srcAddr, LPVOID dstAddr, const SIZE_T len
 	// intructions opcodes that will be override
 	// it shouldn't take more than 16 bytes
 	// Minimum jump size is 5 bytes in 32 bits
-	if (len < MIN_LEN || len > MAX_LEADBYTES)
+	if (len < MIN_LEN || len > MAX_LEN)
 		return nullptr;
 
 	// Create the gateway (5 bytes for the JMP relativeAddr)
