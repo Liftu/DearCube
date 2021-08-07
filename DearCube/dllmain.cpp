@@ -5,7 +5,7 @@
 #include "Menu.h"
 #include "gameStructures.h"
 #include "hacks.h"
-#include "MidHook32.h"
+//#include "MidHook32.h"
 
 // Globals
 // Version
@@ -22,33 +22,6 @@ typedef BOOL(__stdcall* t_wglSwapBuffers)(HDC hDc);
 // Declare the function pointer variable
 t_wglSwapBuffers gateway_wglSwapBuffers;
 // Define the hoooked function (this will be our mainloop)
-
-// Original OpenGL glDrawElements
-static void (__stdcall* original_glDrawElements)(GLenum mode, GLsizei count, GLenum type, const void* indices) = glDrawElements;
-//static VOID(WINAPI* TrueSleep)(DWORD dwMilliseconds) = Sleep;
-
-__declspec(naked) void hooked_glDrawElements()
-{
-    _asm
-    {
-        mov eax, dword ptr[esp + 0x24]
-        cmp eax, 0x100
-        jl enableDepth
-    }
-    //glDepthRange(0.0, 0.0);
-    glDepthFunc(GL_ALWAYS);
-    goto exit;
-
-enableDepth:
-    //glDepthRange(0.0, 1.0);
-    glDepthFunc(GL_LEQUAL);
-
-exit:
-    __asm
-    {
-        ret
-    }
-}
 
 
 Vector2 getScreenDimensions()
@@ -81,6 +54,7 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     // Draw menu
     menu->render(screenDimensions, gameObjects);
 
+    // Some hacks are directly called by the menu (to improve performances).
     // Call hacks that are external to the menu.
     if (menu->isAimbotEnabled())
     {
@@ -90,6 +64,8 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     {
         Hacks::triggerbot(gameObjects);
     }
+    //Hacks::wallhack(menu->isWallhackEnabled());
+    // Drawing functions
     if (menu->getCurrentDrawingTool() == Menu::DrawingTools::DRAWING_TOOL_OPENGL)
     {
         if (menu->isFovCircleEnabled())
@@ -134,11 +110,6 @@ DWORD WINAPI injectedThread(HMODULE hModule)
     DetourAttach(&(PVOID&)gateway_wglSwapBuffers, hooked_wglSwapBuffers);
     DetourTransactionCommit();
 
-    // Attach a hook to the from the 16th to the 22th byte of the glDrawElements function
-    MidHook32 midHook32glDrawElements((LPVOID)((DWORD)original_glDrawElements + 0x16), hooked_glDrawElements, 6);
-    midHook32glDrawElements.enable();
-    //MidHook32::midHookTrampoline((LPVOID)((DWORD)original_glDrawElements + 0x16), hooked_glDrawElements, 6);
-    // TODO: DETACH HOOK !
 
     // Idle mode, if menu isn't running anymore we can exit.
     while (menu->isRunning())
@@ -146,12 +117,13 @@ DWORD WINAPI injectedThread(HMODULE hModule)
 
 
     // Cleanup & exit (WHEN UNHOOKING IMPLEMENTED)
-    // Unhooks
+    // Unhooking
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
     DetourDetach(&(PVOID&)gateway_wglSwapBuffers, hooked_wglSwapBuffers);
     DetourTransactionCommit();
-    midHook32glDrawElements.disable();
+    // Disable all hacks midHooks
+    Hacks::disableMidHooks();
 
     // Exit
     // SOMETIMES THE WHOLE PROCCESS CRACHES WHEN CALLING THIS

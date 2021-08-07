@@ -61,6 +61,7 @@ private:
 	bool bEspHealthBar = false;
 	bool bEspShieldBar = false;
 	bool bEspHead = false;
+	bool bWallhack = false;
 
 	// Settings
 	DrawingTools currentDrawingTool = DrawingTools::DRAWING_TOOL_IMGUI;
@@ -100,8 +101,8 @@ public:
 	bool isEspNameEnabled() { return this->bEspName; }
 	bool isEspHealthBarEnabled() { return this->bEspHealthBar; }
 	bool isEspShieldBarEnabled() { return this->bEspShieldBar; }
-
 	bool isEspHeadEnabled() { return this->bEspHead; }
+	bool isWallhackEnabled() { return this->bWallhack; }
 
 
 	// Settings

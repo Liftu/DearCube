@@ -2,11 +2,14 @@
 
 #include <Windows.h>
 #include <vector>
+#include <set>
 #include <algorithm>
+#include <gl/GL.h>
 
 #include "gameStructures.h"
 #include "glText.h"
 #include "glDraw.h"
+#include "MidHook32.h"
 
 #define MAX_NUMBER_OF_PLAYER 32
 
@@ -36,6 +39,13 @@ namespace Hacks
 	const WORD c_defaultWeaponsRecoil[(int)WeaponTypes::SIZE] = { 0x00, 0x3A, 0x3C, 0x8C, 0x32, 0x55, 0x32, 0x32, 0x00, 0x19 };
 	const WORD c_defaultWeaponsRecoilAnimation[(int)WeaponTypes::SIZE] = { 0x00, 0x06, 0x04, 0x09, 0x01, 0x04, 0x00, 0x06, 0x03, 0x06 };
 	const WORD c_defaultWeaponsIsFullAuto[(int)WeaponTypes::SIZE] = { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x01 };
+
+
+	// Hooking related
+	void disableMidHooks();
+
+	// Original OpenGL glDrawElements
+	static void(__stdcall* original_glDrawElements)(GLenum mode, GLsizei count, GLenum type, const void* indices) = glDrawElements;
 
 
 	// Miscellaneous
@@ -99,4 +109,5 @@ namespace Hacks
 	Vector3 getEnemyLowerBoxPos(PlayerEntity* enemyPtr);
 	void drawEsp(GameObjects* gameObjects, Vector2 screenDimensions, bool drawEspBox, float espBoxThickness, Vector4 espBoxColor, 
 		bool displayName, bool displayHealth, bool displayShield, bool drawEspHead, float espHeadThickness, Vector4 espHeadColor);
+	bool wallhack(bool enable);
 }

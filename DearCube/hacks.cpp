@@ -1,5 +1,45 @@
 #include "hacks.h"
 
+// Hooks related
+std::set<MidHook32*> midHookList;
+
+void Hacks::disableMidHooks()
+{
+	std::for_each(midHookList.begin(), midHookList.end(), [](MidHook32* midHook) {midHook->disable(); });
+}
+
+__declspec(naked) void hooked_glDrawElements()
+{
+	_asm
+	{
+		mov eax, dword ptr[esp + 0x24]
+		cmp eax, 0x100
+		jl enableDepth
+	}
+	//glDepthRange(0.0, 0.0);
+	glDepthFunc(GL_ALWAYS);
+	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	//glDisableClientState(GL_COLOR_ARRAY);
+	//glEnable(GL_COLOR_MATERIAL);
+	//glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+	goto exit;
+
+enableDepth:
+	//glDepthRange(0.0, 1.0);
+	glDepthFunc(GL_LEQUAL);
+	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	//glEnableClientState(GL_COLOR_ARRAY);
+	//glDisable(GL_COLOR_MATERIAL);
+	//glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+exit:
+	__asm
+	{
+		ret
+	}
+}
+
+
 // Miscellaneous
 
 DWORD Hacks::getModuleBaseAddr()
@@ -8,7 +48,7 @@ DWORD Hacks::getModuleBaseAddr()
 }
 
 
-// Entities stuff
+// Entities related
 
 GameObjects* Hacks::getGameObjectsPtr()
 {
@@ -1110,4 +1150,20 @@ void Hacks::drawEsp(GameObjects* gameObjects, Vector2 screenDimensions, bool dra
 	GL::restoreGL();
 
 	return;
+}
+
+bool Hacks::wallhack(bool enable)
+{
+	// Attach a hook to the from the 16th to the 22th byte of the glDrawElements function
+	static MidHook32 midHook32glDrawElements((LPVOID)((DWORD)original_glDrawElements + 0x16), hooked_glDrawElements, 6);
+	midHookList.insert(&midHook32glDrawElements);
+
+	if (enable)
+	{
+		return midHook32glDrawElements.enable();
+	}
+	else
+		midHook32glDrawElements.disable();
+
+	return true;
 }

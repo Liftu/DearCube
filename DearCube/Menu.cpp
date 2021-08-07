@@ -123,6 +123,13 @@ void Menu::drawMenu(GameObjects* gameObjects)
 				ImGui::Checkbox("ESP head circle", &this->bEspHead);
 				ImGui::SameLine(); helpMarker("Display a circle around enemies head to detect them through walls.");
 
+				// Wallhack
+				if (ImGui::Checkbox("Wallhack (experimental)", &this->bWallhack))
+				{
+					Hacks::wallhack(this->bWallhack);
+				}
+				ImGui::SameLine(); helpMarker("Draw player models through walls.");
+
 				ImGui::EndTabItem();
 			}
 
