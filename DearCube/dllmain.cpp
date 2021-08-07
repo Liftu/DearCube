@@ -35,10 +35,12 @@ __declspec(naked) void hooked_glDrawElements()
         cmp eax, 0x100
         jl enableDepth
     }
+    //glDepthRange(0.0, 0.0);
     glDepthFunc(GL_ALWAYS);
     goto exit;
 
 enableDepth:
+    //glDepthRange(0.0, 1.0);
     glDepthFunc(GL_LEQUAL);
 
 exit:
@@ -79,19 +81,22 @@ BOOL __stdcall hooked_wglSwapBuffers(HDC hDc)
     // Draw menu
     menu->render(screenDimensions, gameObjects);
 
-    // Maybe call hacks that are external to the menu like aimbot if enbale
+    // Call hacks that are external to the menu.
     if (menu->isAimbotEnabled())
     {
         Hacks::aimbot(gameObjects, menu->getFovValue(), menu->getAimSmoothValue());
     }
     if (menu->isTriggerbotEnabled())
     {
-        Hacks::triggerbot(gameObjects);// , menu->getTriggerDistanceValue());
+        Hacks::triggerbot(gameObjects);
     }
-    if (menu->getCurrentESPTool() == Menu::ESPTools::ESP_TOOL_OPENGL)
+    if (menu->getCurrentDrawingTool() == Menu::DrawingTools::DRAWING_TOOL_OPENGL)
     {
-        Hacks::drawESP(gameObjects, screenDimensions, menu->isESPBoxEnabled(), menu->getESPBoxThickness(), menu->getESPBoxColor(), menu->isESPNameEnabled(),
-            menu->isESPHealthBarEnabled(), menu->isESPShieldBarEnabled(), menu->isESPHeadEnabled(), menu->getESPHeadThickness(), menu->getESPHeadColor());
+        if (menu->isFovCircleEnabled())
+            Hacks::drawFov(screenDimensions, menu->getFovValue(), menu->getFovThickness(), menu->getFovColor());
+
+        Hacks::drawEsp(gameObjects, screenDimensions, menu->isEspBoxEnabled(), menu->getEspBoxThickness(), menu->getEspBoxColor(), menu->isEspNameEnabled(),
+            menu->isEspHealthBarEnabled(), menu->isEspShieldBarEnabled(), menu->isEspHeadEnabled(), menu->getEspHeadThickness(), menu->getEspHeadColor());
     }
 
     // Update screen by calling the original opengl wglSwapBuffers function

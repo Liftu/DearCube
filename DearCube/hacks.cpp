@@ -19,33 +19,6 @@ GameObjects* Hacks::getGameObjectsPtr()
 	return reinterpret_cast<GameObjects*>(moduleBaseAddr + o_gameObjects);
 }
 
-//PlayerEntity* Hacks::getMyPlayerEntityPtr()
-//{
-//	GameObjects* gameObjectsPtr = getGameObjectsPtr();
-//	if (gameObjectsPtr == nullptr)
-//		return nullptr;
-//
-//	return gameObjectsPtr->myPlayerEntityPtr;
-//}
-
-//EntityVector* Hacks::getPlayerEntityVectorPtr()
-//{
-//	GameObjects* gameObjectsPtr = getGameObjectsPtr();
-//	if (gameObjectsPtr == nullptr)
-//		return nullptr;
-//
-//	return &gameObjectsPtr->playerEntityVector;
-//}
-
-//int Hacks::getNumberOfPlayer()
-//{
-//	GameObjects* gameObjectsPtr = getGameObjectsPtr();
-//	if (gameObjectsPtr == nullptr)
-//		return -1;
-//
-//	return gameObjectsPtr->playerEntityVector.length;
-//}
-
 bool Hacks::isValidEntity(PlayerEntity* playerEntity)
 {
 	if (playerEntity != nullptr)
@@ -137,18 +110,31 @@ std::vector<PlayerEntity*> Hacks::getEnemyList(GameObjects* gameObjects)
 	{
 		enemyList.clear();
 	}
-	// If team based game modes, then remove allies and spectators from the list
-	else if (gameMode == GameModes::TDM || gameMode == GameModes::TSURV || gameMode == GameModes::CTF || gameMode == GameModes::BTDM || gameMode == GameModes::TOSOK ||
-		gameMode == GameModes::TKTF || gameMode == GameModes::TPF || gameMode == GameModes::TLSS || gameMode == GameModes::BTSURV || gameMode == GameModes::BTOSOK)
+	//// If team based game modes, then remove allies and spectators from the list
+	//else if (gameMode == GameModes::TDM || gameMode == GameModes::TSURV || gameMode == GameModes::CTF || gameMode == GameModes::BTDM || gameMode == GameModes::TOSOK ||
+	//	gameMode == GameModes::TKTF || gameMode == GameModes::TPF || gameMode == GameModes::TLSS || gameMode == GameModes::BTSURV || gameMode == GameModes::BTOSOK)
+	//{
+	//	// Remove allies and spectators (filter function is a lambda)
+	//	enemyList.erase(
+	//		std::remove_if(
+	//			enemyList.begin(),
+	//			enemyList.end(),
+	//			[myPlayerEntityPtr](PlayerEntity* playerEntityPtr)
+	//			{
+	//				return (myPlayerEntityPtr->team == playerEntityPtr->team || (playerEntityPtr->team != Teams::Blue && playerEntityPtr->team != Teams::Red));
+	//			}),
+	//		enemyList.end());
+	//}
+	else
 	{
-		// Remove allies and spectators (filter function is a lambda)
+		// Remove non enemies
 		enemyList.erase(
 			std::remove_if(
 				enemyList.begin(),
 				enemyList.end(),
-				[myPlayerEntityPtr](PlayerEntity* playerEntityPtr)
+				[gameObjects](PlayerEntity* enemyEntityPtr)
 				{
-					return (myPlayerEntityPtr->team == playerEntityPtr->team || (playerEntityPtr->team != Teams::Blue && playerEntityPtr->team != Teams::Red));
+					return !isEnemyEntity(gameObjects, enemyEntityPtr);
 				}),
 			enemyList.end());
 	}
@@ -166,7 +152,7 @@ std::vector<PlayerEntity*> Hacks::getAliveEnemyList(GameObjects* gameObjects)
 			aliveEnemyList.end(),
 			[](PlayerEntity* playerEntityPtr)
 			{
-				return (playerEntityPtr->currentState != States::Alive);
+				return !isAliveEntity(playerEntityPtr);
 			}),
 		aliveEnemyList.end());
 
@@ -853,6 +839,18 @@ Vector3 Hacks::getEnemyTorsoPos(PlayerEntity* enemyPtr)
 	return enemyHeadPos;
 }
 
+void Hacks::drawFov(Vector2 screenDimensions, float fovValue, float fovThickness, Vector4 fovColor)
+{
+	GL::setupOrtho();
+
+	// 50 approximately represents the angle degree to the side of the screen 
+	// (it's actually 45, but it works best with 50).
+	float fovCircleRadius = fovValue / 50 * (screenDimensions.x / 2.0f);
+	GL::drawOutlineCircle(screenDimensions.x / 2.0f, screenDimensions.y / 2.0f, fovCircleRadius, 50, fovThickness, &fovColor.x);
+
+	GL::restoreGL();
+}
+
 
 // Triggerbot related
 
@@ -894,9 +892,6 @@ PlayerEntity* Hacks::getEnemyOnAim(PlayerEntity* myPlayerEntityPtr)
 		mov result, eax;			ret
 	}
 	return result;
-	//t_intersectClosest intersectClosest = (t_intersectClosest)(getModuleBaseAddr() + o_traceLineFunction_enemyOnCrosshair);
-	//PlayerEntity* enemyOnAim = intersectClosest(&myPlayerEntityPtr->headPos.x, (float*)aimAtPosPtr, myPlayerEntityPtr, dist, hitZone);
-	/*return enemyOnAim;*/
 }
 
 bool Hacks::triggerbot(GameObjects* gameObjects)
@@ -1049,7 +1044,7 @@ Vector3 Hacks::getEnemyLowerBoxPos(PlayerEntity* enemyPtr)
 	return enemyHeadPos;
 }
 
-void Hacks::drawESP(GameObjects* gameObjects, Vector2 screenDimensions, bool drawEspBox, float espBoxThickness, Vector4 espBoxColor, 
+void Hacks::drawEsp(GameObjects* gameObjects, Vector2 screenDimensions, bool drawEspBox, float espBoxThickness, Vector4 espBoxColor, 
 	bool displayName, bool displayHealth, bool displayShield, bool drawEspHead, float espHeadThickness, Vector4 espHeadColor)
 {
 	static GL::Font glFont;

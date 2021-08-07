@@ -44,9 +44,6 @@ namespace Hacks
 
 	// Entities related
 	GameObjects* getGameObjectsPtr();
-	//PlayerEntity* getMyPlayerEntityPtr();
-	//EntityVector* getPlayerEntityVectorPtr();
-	//int getNumberOfPlayer();
 	bool isValidEntity(PlayerEntity* playerEntity);
 	bool isEnemyEntity(GameObjects* gameObjects, PlayerEntity* enemyEntityPtr);
 	bool isAliveEntity(PlayerEntity* playerEntityPtr);
@@ -91,11 +88,11 @@ namespace Hacks
 	bool smoothSetViewAngles(PlayerEntity* myPlayerEntityPtr, Vector2 viewAnglesToEnemy, float smoothness);
 	bool isTargetVisible(PlayerEntity* myPlayerEntityPtr, Vector3 targetPos);
 	Vector3 getEnemyTorsoPos(PlayerEntity* enemyPtr);
+	void drawFov(Vector2 screenDimensions, float fovValue, float fovThickness, Vector4 fovColor);
 
 	
 	// Triggerbot related
 	Vector3* getAimAtPos();
-	//typedef PlayerEntity*(__cdecl* t_intersectClosest)(float from[3], float to[3], PlayerEntity* srcEntity, float &bestDistSquared, int &hitzone);
 	PlayerEntity* getEnemyOnAim(PlayerEntity* myPlayerEntityPtr);
 	bool triggerbot(GameObjects* gameObjects);
 
@@ -106,6 +103,6 @@ namespace Hacks
 	Vector3 getEnemyHeadPos(PlayerEntity* enemyPtr);
 	Vector3 getEnemyUpperBoxPos(PlayerEntity* enemyPtr);
 	Vector3 getEnemyLowerBoxPos(PlayerEntity* enemyPtr);
-	void drawESP(GameObjects* gameObjects, Vector2 screenDimensions, bool drawEspBox, float espBoxThickness, Vector4 espBoxColor, 
+	void drawEsp(GameObjects* gameObjects, Vector2 screenDimensions, bool drawEspBox, float espBoxThickness, Vector4 espBoxColor, 
 		bool displayName, bool displayHealth, bool displayShield, bool drawEspHead, float espHeadThickness, Vector4 espHeadColor);
 }

@@ -103,37 +103,25 @@ void Menu::drawMenu(GameObjects* gameObjects)
 			// ESP (may put in inside HUD tab)
 			if (ImGui::BeginTabItem("ESP"))
 			{
-				static const char* espToolNames[] = { "ImGui", "OpenGL" };
-				ImGui::Combo("Drawing tool", (int*)&this->currentESPTool, espToolNames, 2);
-				ImGui::SameLine(); helpMarker("This is the library that wiil be used to draw the ESP.\nChoose the one that work best for you or your favorite.");
-
 				// ESP box
-				ImGui::Checkbox("ESP box", &this->bESPBox);
+				ImGui::Checkbox("ESP box", &this->bEspBox);
 				ImGui::SameLine(); helpMarker("Display a box around enemies to detect them through walls.");
-				if (this->bESPBox)
+				if (this->bEspBox)
 				{
-					ImGui::BeginChild("ChildEspBox", ImVec2(0, 130), true);
+					ImGui::BeginGroup();
+					ImGui::Indent(ImGui::GetStyle().IndentSpacing);
+
 					// ESP box health and shield bar
-					ImGui::Checkbox("Display health bar", &this->bESPHealthBar);
-					ImGui::Checkbox("Display shield bar", &this->bESPShieldBar);
-					ImGui::Checkbox("Display name", &this->bESPName);
+					ImGui::Checkbox("Display health bar", &this->bEspHealthBar);
+					ImGui::Checkbox("Display shield bar", &this->bEspShieldBar);
+					ImGui::Checkbox("Display name", &this->bEspName);
 
-					ImGui::SliderFloat("ESP box thickness", &this->espBoxThickness, 1.0, 5.0, "%.2f px");
-					ImGui::ColorEdit4("ESP box color", &this->espBoxColor.x);
-
-					ImGui::EndChild();
+					ImGui::EndGroup();
 				}
 
 				// ESP head
-				ImGui::Checkbox("ESP head circle", &this->bESPHead);
+				ImGui::Checkbox("ESP head circle", &this->bEspHead);
 				ImGui::SameLine(); helpMarker("Display a circle around enemies head to detect them through walls.");
-				if (this->bESPHead)
-				{
-					ImGui::BeginChild("ChildEspHead", ImVec2(0, 58), true);
-					ImGui::SliderFloat("ESP head thickness", &this->espHeadThickness, 1.0, 5.0, "%.2f px");
-					ImGui::ColorEdit4("ESP head color", &this->espHeadColor.x);
-					ImGui::EndChild();
-				}
 
 				ImGui::EndTabItem();
 			}
@@ -142,59 +130,19 @@ void Menu::drawMenu(GameObjects* gameObjects)
 			if (ImGui::BeginTabItem("Aimbot"))
 			{
 				ImGui::Checkbox("Aimbot", &this->bAimbot);
-				
+
+				// Smoothness
+				ImGui::SliderFloat("Smoothness", &this->aimSmooth, 1.0f, 100.0f, "%.2f");
+				ImGui::SameLine(); helpMarker("The aim smoothness represents the spead at which the aimbot will aim at the target.");
+
 				// FOV
 				ImGui::SliderFloat("FOV size", &this->fov, 0.0f, 200.0f, "%.2f");
 				ImGui::SameLine(); helpMarker("The FOV represents the maximum distance in degrees from your current view to the enemy at which the aimbot will start aiming.");
 				// FOV circle
-				ImGui::Checkbox("Show FOV circle", &this->bShowFov);
-				if (this->bShowFov)
-				{
-					ImGui::SliderFloat("FOV circle thickness", &this->fovThickness, 1.0, 5.0, "%.2f px");
-					ImGui::ColorEdit4("FOV circle color", &this->fovColor.x);
-				}
-
-				// Smoothness
-				ImGui::SliderFloat("Smoothness", &this->aimSmooth, 1.0f, 100.0f, "%.2f°");
-				ImGui::SameLine(); helpMarker("The aim smoothness represents the spead at which the aimbot will aim at the target.");
+				ImGui::Checkbox("Show FOV circle", &this->bFovCircle);
 
 				// Triggerbot
 				ImGui::Checkbox("Triggerbot", &this->bTriggerbot);
-				ImGui::SliderFloat("Trigger distance", &this->triggerDistance, 0.1f, 10.0f, "%.2f°");
-				ImGui::SameLine(); helpMarker("The triggerbot distance represents the distance in degrees from the target at which the triggerbot will start shooting.");
-
-				//// Debugging
-				//ImGui::Separator();
-				//ImGui::Separator();
-				//ImGui::BeginChild("ChildPlayers", ImVec2(0, 0), true);
-				////ImGui::Text("%s : %.2f", closestEnemyPtr->name, myPlayerEntityPtr->headPos.getDistance(closestEnemyPtr->headPos));
-				////ImGui::Text("%s : %d : %s", playerEntity->name, playerEntity->health, (playerEntity->state == States::Alive ? "Alive" : "Dead"));
-
-				//Vector2 myViewAngles(myPlayerEntityPtr->viewAngles.x, myPlayerEntityPtr->viewAngles.y);
-				//ImGui::Text("Current pos        : %.3f, %.3f, %.3f", myPlayerEntityPtr->headPos.x, myPlayerEntityPtr->headPos.y, myPlayerEntityPtr->headPos.z);
-				//ImGui::Text("Current viewAngles : %.3f, %.3f", myViewAngles.x, myViewAngles.y);
-				//ImGui::Separator();
-
-				//PlayerEntity* closestEnemyPtr = Hacks::getClosestEnemyToCrosshair(gameObjects, this->fov);
-				//if (Hacks::isValidEntity(closestEnemyPtr))
-				//{
-				//	ImGui::Text("%s : ", closestEnemyPtr->name);
-				//	ImGui::Text("Pos        : % .3f, % .3f, % .3f", closestEnemyPtr->headPos.x, closestEnemyPtr->headPos.y, closestEnemyPtr->headPos.z);
-				//	ImGui::Text("Distance   : %.3f", myPlayerEntityPtr->headPos.getDistance(closestEnemyPtr->headPos));
-				//	Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, closestEnemyPtr->headPos);
-				//	ImGui::Text("viewAngle  : %.3f, %.3f", viewAnglesToEnemy.x, viewAnglesToEnemy.y);
-				//	Vector2 viewAnglesToEnemyDelta = viewAnglesToEnemy - myViewAngles;
-				//	ImGui::Text("angleDelta : %.3f, %.3f", viewAnglesToEnemyDelta.x, viewAnglesToEnemyDelta.y);
-				//}
-
-				//std::vector<PlayerEntity*> enemyList = Hacks::getEnemyList(gameObjects);
-				//for (PlayerEntity* enemyEntityPtr : enemyList)
-				//{
-				//	Vector2 viewAnglesToEnemy = Geom::calcAngle(myPlayerEntityPtr->headPos, enemyEntityPtr->headPos);
-				//	ImGui::Text("%s : distance to crosshair : %f", enemyEntityPtr->name, myViewAngles.getDistance(viewAnglesToEnemy));
-				//}
-
-				//ImGui::EndChild();
 
 				ImGui::EndTabItem();
 			}
@@ -208,8 +156,9 @@ void Menu::drawMenu(GameObjects* gameObjects)
 				static int currentWeaponIndex = (int)Hacks::getCurrentWeaponType(myPlayerEntityPtr) + 1;	// first time : display current weapon, then display last selected //0;
 				ImGui::Combo("##ComboWeapons", &currentWeaponIndex, weaponNames, (int)WeaponTypes::SIZE + 1);
 
-				// Size here is totally hardcoded and found by manual dcothomy.
-				ImGui::BeginChild("ChildWeapons", ImVec2(0, 105.0f), true);
+				// Depends on weapon choose
+				ImGui::BeginGroup();
+				ImGui::Indent(ImGui::GetStyle().IndentSpacing / 2.0f);
 
 				// If "All weapons"
 				if (currentWeaponIndex == 0)
@@ -287,7 +236,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 					ImGui::SameLine(); helpMarker("The full-auto feature only applies to semi auto weapons");
 				}
 
-				ImGui::EndChild();
+				ImGui::EndGroup();
 
 				// No self kickback
 				static bool noSelfKickback = false;
@@ -296,6 +245,40 @@ void Menu::drawMenu(GameObjects* gameObjects)
 					Hacks::toggleAllWeaponsHack(myPlayerEntityPtr, Hacks::WeaponHackTypes::NoSelfKickback, noSelfKickback);
 				}
 				ImGui::SameLine(); helpMarker("The no self kickback feature will prevent yourself from moving when getting shot.");
+
+				ImGui::EndTabItem();
+			}
+
+			// Settings
+			if (ImGui::BeginTabItem("Settings"))
+			{
+				static const char* espToolNames[] = { "ImGui", "OpenGL" };
+				ImGui::Combo("Drawing tool", (int*)&this->currentDrawingTool, espToolNames, 2);
+				ImGui::SameLine(); helpMarker("This is the library that will be used to draw on the screen.\nChoose the one that works best for you or just your favorite.");
+
+				if (ImGui::CollapsingHeader("Colors/thickness"))
+				{
+					if (ImGui::TreeNode("ESP box"))
+					{
+						ImGui::SliderFloat("Thickness", &this->espBoxThickness, 1.0, 5.0, "%.2f px");
+						ImGui::ColorEdit4("Color", &this->espBoxColor.x);
+						ImGui::TreePop();
+					}
+
+					if (ImGui::TreeNode("ESP head"))
+					{
+						ImGui::SliderFloat("Thickness", &this->espHeadThickness, 1.0, 5.0, "%.2f px");
+						ImGui::ColorEdit4("Color", &this->espHeadColor.x);
+						ImGui::TreePop();
+					}
+
+					if (ImGui::TreeNode("FOV circle"))
+					{
+						ImGui::SliderFloat("Thickness", &this->fovThickness, 1.0, 5.0, "%.2f px");
+						ImGui::ColorEdit4("Color", &this->fovColor.x);
+						ImGui::TreePop();
+					}
+				}
 
 				ImGui::EndTabItem();
 			}
@@ -404,21 +387,22 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 	}
 	//this->drawMenu(gameObjects);
 
-	// Draw the fov circle
-	if (this->bShowFov)
-	{
-		ImGui::Begin("##FOVCIRCLE", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | 
-			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
-		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-		// This calculation is approximate
-		float fovCircleRadius = this->fov / 50 * (screenDimensions.x / 2.0f);	// 50 approximately represents the angle degree to the side of the screen
-		drawList->AddCircle(ImVec2(screenDimensions.x / 2.0f, screenDimensions.y / 2.0f), fovCircleRadius, ImColor(this->fovColor), 0, this->fovThickness);
-		ImGui::End();
-	}
 
-	// Draw ESP
-	if (this->currentESPTool == ESPTools::ESP_TOOL_IMGUI)
+	if (this->currentDrawingTool == DrawingTools::DRAWING_TOOL_IMGUI)
 	{
+		// Draw the fov circle
+		if (this->bFovCircle)
+		{
+			ImGui::Begin("##FOVCIRCLE", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | 
+				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
+			ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+			// This calculation is approximate
+			float fovCircleRadius = this->fov / 50 * (screenDimensions.x / 2.0f);	// 50 approximately represents the angle degree to the side of the screen
+			drawList->AddCircle(ImVec2(screenDimensions.x / 2.0f, screenDimensions.y / 2.0f), fovCircleRadius, ImColor(this->fovColor), 0, this->fovThickness);
+			ImGui::End();
+		}
+
+		// Draw ESP
 		ImGui::Begin("##ESPDRAWS", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
@@ -426,7 +410,7 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 		for (PlayerEntity* enemyPtr : Hacks::getAliveEnemyList(gameObjects))
 		{
 			// Draw body box
-			if (this->bESPBox)
+			if (this->bEspBox)
 			{
 				Vector2 enemyLowerBoxPos;
 				Vector2 enemyUpperBoxPos;
@@ -445,15 +429,14 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 					drawList->AddRect(boxUpperLeftCoords, boxLowerRightCoords, ImColor(this->espBoxColor), 0.0f, 0, this->espBoxThickness);
 
 					// Draw name
-					if (this->bESPName)
+					if (this->bEspName)
 					{
-						float fontWidth = ImGui::GetFont()->FontSize / 2.0f;
-						float nameWidth = strlen(enemyPtr->name) * (fontWidth);
-						ImVec2 textCoords = ImVec2((boxUpperLeftCoords.x + boxLowerRightCoords.x) / 2.0f - (nameWidth / 2.0f), boxLowerRightCoords.y + 5);
+						ImVec2 textSize = ImGui::CalcTextSize(enemyPtr->name);
+						ImVec2 textCoords = ImVec2((boxUpperLeftCoords.x + boxLowerRightCoords.x) / 2.0f - (textSize.x / 2.0f), boxLowerRightCoords.y + textSize.y / 2.0f);
 						drawList->AddText(textCoords, ImColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), enemyPtr->name);
 					}
 
-					if (this->bESPHealthBar)
+					if (this->bEspHealthBar)
 					{
 						// Draw the backgound red bar
 						ImVec2 healthBarUpperLeftCoords = ImVec2(boxLowerRightCoords.x + 3.0f, boxUpperLeftCoords.y + 1);
@@ -465,13 +448,13 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 						drawList->AddRectFilled(healthBarUpperLeftCoords, healthBarLowerRightCoords, ImColor(ImVec4(0.0f, 1.0f, 0.0f, 1.0f)));
 					}
 
-					if (this->bESPShieldBar)
+					if (this->bEspShieldBar)
 					{
 						// Do not display backgorund for the shield bar
 						ImVec2 shieldhBarUpperLeftCoords = ImVec2(boxLowerRightCoords.x + 3.0f, boxUpperLeftCoords.y + 1);
 						ImVec2 shieldBarLowerRightCoords = ImVec2(boxLowerRightCoords.x + 6.0f, boxLowerRightCoords.y - 1);
 						// Do not overlap health bar if displayed
-						if (this->bESPHealthBar)
+						if (this->bEspHealthBar)
 						{
 							shieldhBarUpperLeftCoords.x += 6.0f;
 							shieldBarLowerRightCoords.x += 6.0f;
@@ -484,7 +467,7 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 				}
 			}
 			// Draw head circle
-			if (this->bESPHead)
+			if (this->bEspHead)
 			{
 				Vector2 enemyHeadScreenPos;
 				if (Hacks::worldToScreen(Hacks::getEnemyHeadPos(enemyPtr), screenDimensions, enemyHeadScreenPos))

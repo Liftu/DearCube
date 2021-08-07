@@ -26,10 +26,10 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 class Menu
 {
 public:
-	enum class ESPTools : int
+	enum class DrawingTools : int
 	{
-		ESP_TOOL_IMGUI = 0,
-		ESP_TOOL_OPENGL
+		DRAWING_TOOL_IMGUI = 0,
+		DRAWING_TOOL_OPENGL
 	};
 
 private:
@@ -51,27 +51,26 @@ private:
 	// Aimbot
 	bool bAimbot = false;
 	bool bTriggerbot = false;
-	bool bShowFov = false;
+	bool bFovCircle = false;
 	float fov = 10.0f;
 	float aimSmooth = 15.0f;
-	float triggerDistance = 0.5f;
-	float fovThickness = 2.0f;
-	ImVec4 fovColor = ImVec4(0.25f, 0.0f, 1.0f, 0.45f);
 
 	// ESP
-	ESPTools currentESPTool = ESPTools::ESP_TOOL_IMGUI;
+	bool bEspBox = false;
+	bool bEspName = false;
+	bool bEspHealthBar = false;
+	bool bEspShieldBar = false;
+	bool bEspHead = false;
 
-	bool bESPBox = false;
+	// Settings
+	DrawingTools currentDrawingTool = DrawingTools::DRAWING_TOOL_IMGUI;
 	float espBoxThickness = 1.0f;
 	ImVec4 espBoxColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
-
-	bool bESPName = false;
-	bool bESPHealthBar = false;
-	bool bESPShieldBar = false;
-
-	bool bESPHead = false;
 	float espHeadThickness = 1.0f;
 	ImVec4 espHeadColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+	float fovThickness = 1.0f;
+	ImVec4 fovColor = ImVec4(0.25f, 0.0f, 1.0f, 1.0f);
+
 
 public:
 	Menu(HWND hwnd);
@@ -90,23 +89,27 @@ public:
 
 	// Aimbot
 	bool isAimbotEnabled() { return this->bAimbot; }
+	bool isFovCircleEnabled() { return this->bFovCircle; }
 	bool isTriggerbotEnabled() { return this->bTriggerbot; }
 	float getFovValue() { return this->fov; }
 	float getAimSmoothValue() { return this->aimSmooth; }
-	float getTriggerDistanceValue() { return this->triggerDistance; }
 
 
 	// ESP
-	ESPTools getCurrentESPTool() { return this->currentESPTool; }
+	bool isEspBoxEnabled() { return this->bEspBox; }
+	bool isEspNameEnabled() { return this->bEspName; }
+	bool isEspHealthBarEnabled() { return this->bEspHealthBar; }
+	bool isEspShieldBarEnabled() { return this->bEspShieldBar; }
 
-	bool isESPBoxEnabled() { return this->bESPBox; }
-	float getESPBoxThickness() { return this->espBoxThickness; }
-	Vector4 getESPBoxColor() { return Vector4(this->espBoxColor.x, this->espBoxColor.y, this->espBoxColor.z, this->espBoxColor.w); }
-	bool isESPNameEnabled() { return this->bESPName; }
-	bool isESPHealthBarEnabled() { return this->bESPHealthBar; }
-	bool isESPShieldBarEnabled() { return this->bESPShieldBar; }
+	bool isEspHeadEnabled() { return this->bEspHead; }
 
-	bool isESPHeadEnabled() { return this->bESPHead; }
-	float getESPHeadThickness() { return this->espHeadThickness; }
-	Vector4 getESPHeadColor() { return Vector4(this->espHeadColor.x, this->espHeadColor.y, this->espHeadColor.z, this->espHeadColor.w); }
+
+	// Settings
+	DrawingTools getCurrentDrawingTool() { return this->currentDrawingTool; }
+	float getEspBoxThickness() { return this->espBoxThickness; }
+	Vector4 getEspBoxColor() { return Vector4(this->espBoxColor.x, this->espBoxColor.y, this->espBoxColor.z, this->espBoxColor.w); }
+	float getEspHeadThickness() { return this->espHeadThickness; }
+	Vector4 getEspHeadColor() { return Vector4(this->espHeadColor.x, this->espHeadColor.y, this->espHeadColor.z, this->espHeadColor.w); }
+	float getFovThickness() { return this->fovThickness; }
+	Vector4 getFovColor() { return Vector4(this->fovColor.x, this->fovColor.y, this->fovColor.z, this->fovColor.w); }
 };
