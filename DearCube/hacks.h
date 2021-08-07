@@ -75,12 +75,6 @@ namespace Hacks
 
 
 	// Aimbot related
-	struct TraceLineResult
-	{
-		Vector3 pos;
-		int8_t collided;
-	};
-
 	bool aimbot(GameObjects* gameObjects, float fov, float smoothness);
 	PlayerEntity* getClosestEnemy(GameObjects* gameObjects);
 	PlayerEntity* getClosestEnemyToCrosshair(GameObjects* gameObjects, float fov);
