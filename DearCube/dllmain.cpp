@@ -5,7 +5,7 @@
 #include "Menu.h"
 #include "gameStructures.h"
 #include "hacks.h"
-#include "Hook32.h"
+#include "MidHook32.h"
 
 // Globals
 // Version
@@ -130,7 +130,9 @@ DWORD WINAPI injectedThread(HMODULE hModule)
     DetourTransactionCommit();
 
     // Attach a hook to the from the 16th to the 22th byte of the glDrawElements function
-    Hook32::midHookTrampoline((LPVOID)((DWORD)original_glDrawElements + 0x16), hooked_glDrawElements, 6);
+    MidHook32 midHook32glDrawElements((LPVOID)((DWORD)original_glDrawElements + 0x16), hooked_glDrawElements, 6);
+    midHook32glDrawElements.enable();
+    //MidHook32::midHookTrampoline((LPVOID)((DWORD)original_glDrawElements + 0x16), hooked_glDrawElements, 6);
     // TODO: DETACH HOOK !
 
     // Idle mode, if menu isn't running anymore we can exit.
@@ -139,11 +141,12 @@ DWORD WINAPI injectedThread(HMODULE hModule)
 
 
     // Cleanup & exit (WHEN UNHOOKING IMPLEMENTED)
-    // Unhook
+    // Unhooks
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
     DetourDetach(&(PVOID&)gateway_wglSwapBuffers, hooked_wglSwapBuffers);
     DetourTransactionCommit();
+    midHook32glDrawElements.disable();
 
     // Exit
     // SOMETIMES THE WHOLE PROCCESS CRACHES WHEN CALLING THIS

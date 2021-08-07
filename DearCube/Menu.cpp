@@ -64,7 +64,7 @@ Menu::Menu(HWND hwnd)
 	this->init();
 
 	// Get some SDL functions
-	this->_SDL_WM_GrabInput = (t_SDL_WM_GrabInput)Hook32::getFunctionAddr("SDL.dll", "SDL_WM_GrabInput");
+	this->_SDL_WM_GrabInput = (t_SDL_WM_GrabInput)DetourFindFunction("SDL.dll", "SDL_WM_GrabInput");
 
 	// Set default values
 	this->bRunning	= true;

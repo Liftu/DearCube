@@ -1,12 +1,11 @@
 #pragma once
 
 #include <Windows.h>
-/**/#include <vector>
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_opengl2.h"
-#include "hook32.h"
+#include "detours.h"
 #include "hacks.h"
 /**/#include "imgui_memory_editor.h"
 
