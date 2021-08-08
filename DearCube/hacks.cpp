@@ -8,35 +8,26 @@ void Hacks::disableMidHooks()
 	std::for_each(midHookList.begin(), midHookList.end(), [](MidHook32* midHook) {midHook->disable(); });
 }
 
-__declspec(naked) void hooked_glDrawElements()
+void __cdecl midHooked_glDrawElements(LPVOID esp)
 {
-	_asm
-	{
-		mov eax, dword ptr[esp + 0x24]
-		cmp eax, 0x100
-		jl enableDepth
-	}
-	//glDepthRange(0.0, 0.0);
-	glDepthFunc(GL_ALWAYS);
-	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	//glDisableClientState(GL_COLOR_ARRAY);
-	//glEnable(GL_COLOR_MATERIAL);
-	//glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-	goto exit;
-
-enableDepth:
-	//glDepthRange(0.0, 1.0);
-	glDepthFunc(GL_LEQUAL);
-	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	//glEnableClientState(GL_COLOR_ARRAY);
-	//glDisable(GL_COLOR_MATERIAL);
-	//glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-exit:
-	__asm
-	{
-		ret
-	}
+	//if (*(int*)esp > 0x100)
+	//{
+		//glDepthRange(0.0, 0.0);
+		glDepthFunc(GL_ALWAYS);
+		//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		//glDisableClientState(GL_COLOR_ARRAY);
+		//glEnable(GL_COLOR_MATERIAL);
+		//glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+	//}
+	//else
+	//{
+		//glDepthRange(0.0, 1.0);
+		//glDepthFunc(GL_LEQUAL);
+		//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		//glEnableClientState(GL_COLOR_ARRAY);
+		//glDisable(GL_COLOR_MATERIAL);
+		//glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	//}
 }
 
 
@@ -1155,7 +1146,7 @@ void Hacks::drawEsp(GameObjects* gameObjects, Vector2 screenDimensions, bool dra
 bool Hacks::wallhack(bool enable)
 {
 	// Attach a hook to the from the 16th to the 22th byte of the glDrawElements function
-	static MidHook32 midHook32glDrawElements((LPVOID)((DWORD)original_glDrawElements + 0x16), hooked_glDrawElements, 6);
+	static MidHook32 midHook32glDrawElements((LPVOID)((DWORD)original_glDrawElements + 0x16), midHooked_glDrawElements, 6);
 	midHookList.insert(&midHook32glDrawElements);
 
 	if (enable)

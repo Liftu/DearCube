@@ -50,8 +50,6 @@ MidHook32::~MidHook32()
 	disable();
 }
 
-// /!\ A mid hook function has to be declared as __declspec(naked) and end with a ret inst /!\ //
-// Because of the PUSHAD and the CALL instructions, values in stack will be shifted of 0x24 bytes
 bool MidHook32::enable()
 {
 	if (this->bStatus)
@@ -123,37 +121,62 @@ LPVOID MidHook32::midHookTrampoline(LPVOID srcAddr, LPVOID dstAddr, const SIZE_T
 		return nullptr;
 
 	// Create the trampoline gateway
-	// 1 byte for PUSHAD
+	// 1 byte for PUSHAD						(this adds 0x20 bytes on the stack, so we have to pass esp to the hooking func)
+	// 1 byte for PUSH ESP						(send esp as only argument to function)
+	// 4 bytes for ADD dword ptr [ESP], 0x20	(but have to add 0x20 so esp points to value of esp before PUSHAD)
 	// 5 bytes for the CALL dstAddr
+	// 1 byte for POP EAX						(for cleaning the stack, it's cdecl calling conv, we use POP EAX, because it's only 1 byte and POPAD will restore EAX anyway)
 	// 1 byte for the POPAD
 	// len bytes for the stolen bytes
 	// 5 bytes for the JMP original
-	DWORD gateway = (DWORD)VirtualAlloc(NULL, (1 + 5 + 1 + len + 5), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+	int gatewayLen = 1 + 1 + 4 + 5 + 1 + len + 5;
+	DWORD gateway = (DWORD)VirtualAlloc(NULL, gatewayLen, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 	if (gateway == NULL)
 		return nullptr;
+	memset((LPVOID)gateway, 0x90, gatewayLen);
 
 	// Write trampoline gateway shellcode
+	int bytesWritten = 0;
 
 	// PUSHAD
 	*(BYTE*)(gateway) = 0x60;
+	bytesWritten += 1;
+
+	// PUSH ESP
+	*(BYTE*)(gateway + bytesWritten) = 0x54;
+	bytesWritten += 1;
+
+	// ADD dword ptr [ESP], 0x02
+	*(DWORD*)(gateway + bytesWritten) = 0x20240483;
+	bytesWritten += 4;
 
 	// Get the gateway to destination relative address
-	DWORD dstRelativeAddr = (DWORD)dstAddr - (gateway + 6);
+	DWORD dstRelativeAddr = (DWORD)dstAddr - (gateway + 5 + bytesWritten);
 	// CALL dstAddr
-	*(BYTE*)(gateway + 1) = 0xE8;
-	*(DWORD*)(gateway + 2) = dstRelativeAddr;
+	*(BYTE*)(gateway + bytesWritten) = 0xE8;
+	bytesWritten += 1;
+	*(DWORD*)(gateway + bytesWritten) = dstRelativeAddr;
+	bytesWritten += 4;
+
+	// POP EAX (clean stack)
+	*(BYTE*)(gateway + bytesWritten) = 0x58;
+	bytesWritten += 1;
 
 	// POPAD
-	*(BYTE*)(gateway + 6) = 0x61;
+	*(BYTE*)(gateway + bytesWritten) = 0x61;
+	bytesWritten += 1;
 
 	// Stolen bytes
-	memcpy_s((LPVOID)(gateway + 7), len, srcAddr, len);
+	memcpy_s((LPVOID)(gateway + bytesWritten), len, srcAddr, len);
+	bytesWritten += len;
 
 	// Get the gateway to source relative address
-	DWORD srcRelativeAddr = ((DWORD)srcAddr + len) - (gateway + 7 + len + 5);
+	DWORD srcRelativeAddr = ((DWORD)srcAddr + len) - (gateway + 5 + bytesWritten);
 	// JMP srcAddr + len
-	*(BYTE*)(gateway + 7 + len) = 0xE9;
-	*(DWORD*)(gateway + 7 + len + 1) = srcRelativeAddr;
+	*(BYTE*)(gateway + bytesWritten) = 0xE9;
+	bytesWritten += 1;
+	*(DWORD*)(gateway + bytesWritten) = srcRelativeAddr;
+	bytesWritten += 4;
 
 	return (LPVOID)gateway;
 }

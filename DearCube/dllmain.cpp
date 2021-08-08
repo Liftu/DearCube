@@ -5,7 +5,6 @@
 #include "Menu.h"
 #include "gameStructures.h"
 #include "hacks.h"
-//#include "MidHook32.h"
 
 // Globals
 // Version
