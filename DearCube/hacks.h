@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <vector>
 #include <set>
+#include <utility>
 #include <algorithm>
 #include <gl/GL.h>
 
@@ -10,6 +11,7 @@
 #include "glText.h"
 #include "glDraw.h"
 #include "MidHook32.h"
+#include "detours.h"
 
 #define MAX_NUMBER_OF_PLAYER 32
 
@@ -26,6 +28,7 @@ namespace Hacks
 	const DWORD o_aimAtPos = 0x0010A400;
 	const DWORD o_traceLineFunction = 0x0008A310;
 	const DWORD o_traceLineFunction_enemyOnCrosshair = 0x00060670;
+	const DWORD o_drawCrosshairFunction = 0x00008660;
 
 	// Constants
 	const DWORD c_playerEntityType = 0x004E4A98;
@@ -42,7 +45,9 @@ namespace Hacks
 
 
 	// Hooking related
+	void disableAllHooks();
 	void disableMidHooks();
+	void disableFuncHooks();
 
 	// Original OpenGL glDrawElements
 	static void(__stdcall* original_glDrawElements)(GLenum mode, GLsizei count, GLenum type, const void* indices) = glDrawElements;
@@ -110,4 +115,9 @@ namespace Hacks
 	void drawEsp(GameObjects* gameObjects, Vector2 screenDimensions, bool drawEspBox, float espBoxThickness, Vector4 espBoxColor, 
 		bool displayName, bool displayHealth, bool displayShield, bool drawEspHead, float espHeadThickness, Vector4 espHeadColor);
 	bool wallhack(bool enable);
+
+
+	// Misc
+
+	bool hideDefaultCrosshair(bool enable);
 }

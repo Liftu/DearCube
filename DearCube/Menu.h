@@ -63,6 +63,13 @@ private:
 	bool bEspHead = false;
 	bool bWallhack = false;
 
+	// Misc
+	bool bCrosshair = false;
+	bool bHideDefaultCrosshair = false;
+	float crosshairSize = 10.0f;
+	float crosshairThickness = 1.0f;
+	ImVec4 crosshairColor = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+
 	// Settings
 	DrawingTools currentDrawingTool = DrawingTools::DRAWING_TOOL_IMGUI;
 	float espBoxThickness = 1.0f;
@@ -73,16 +80,17 @@ private:
 	ImVec4 fovColor = ImVec4(0.25f, 0.0f, 1.0f, 1.0f);
 
 
+	void drawMenu(GameObjects* gameObjects);
+	void drawHud(Vector2 screenDimensions, GameObjects* gameObjects);
+	void init();
+	void helpMarker(const char* desc);
+
 public:
 	Menu(HWND hwnd);
 	~Menu();
 
-	void drawMenu(GameObjects* gameObjects);
 	void render(Vector2 screenDimensions, GameObjects* gameObjects);
-	void init();
 	void shutdown();
-
-	void helpMarker(const char* desc);
 
 	void toggleMenu() { this->bShow = !this->bShow; }
 	bool isShown() { return this->bShow; }
@@ -103,6 +111,13 @@ public:
 	bool isEspShieldBarEnabled() { return this->bEspShieldBar; }
 	bool isEspHeadEnabled() { return this->bEspHead; }
 	bool isWallhackEnabled() { return this->bWallhack; }
+
+	// Misc
+	bool isCustomCrosshairEnabled() { return this->bCrosshair; }
+	bool isHideDefaultCrosshairEnabled() { return this->bHideDefaultCrosshair; }
+	float getCustomCrosshairSize() { return this->crosshairSize; }
+	float getCustomCrosshairThickness() { return this->crosshairThickness; }
+	Vector4 getCustomCrosshairColor() { return Vector4(this->crosshairColor.x, this->crosshairColor.y, this->crosshairColor.z, this->crosshairColor.w); }
 
 
 	// Settings

@@ -2,10 +2,35 @@
 
 // Hooks related
 std::set<MidHook32*> midHookList;
+std::set<std::pair<LPVOID*, LPVOID>> funcHookList;
+
+void Hacks::disableAllHooks()
+{
+	disableMidHooks();
+	disableFuncHooks();
+}
 
 void Hacks::disableMidHooks()
 {
 	std::for_each(midHookList.begin(), midHookList.end(), [](MidHook32* midHook) {midHook->disable(); });
+}
+
+void Hacks::disableFuncHooks()
+{
+	std::for_each(funcHookList.begin(), funcHookList.end(), 
+		[](std::pair<LPVOID*, LPVOID> funcHook)
+		{		
+			DetourTransactionBegin();
+			DetourUpdateThread(GetCurrentThread());
+			DetourDetach(funcHook.first, funcHook.second);
+			DetourTransactionCommit();
+		});
+	funcHookList.clear();
+}
+
+void __cdecl hooked_dummy()
+{
+	return;
 }
 
 void __cdecl midHooked_glDrawElements(LPVOID esp)
@@ -1155,6 +1180,38 @@ bool Hacks::wallhack(bool enable)
 	}
 	else
 		midHook32glDrawElements.disable();
+
+	return true;
+}
+
+
+// Misc
+
+bool Hacks::hideDefaultCrosshair(bool enable)
+{
+	DWORD baseAddr = getModuleBaseAddr();
+	if (baseAddr == NULL)
+		return false;
+
+	static LPVOID drawCrosshairFunctionPtr = (LPVOID)(baseAddr + o_drawCrosshairFunction);
+	if (enable)
+	{
+		// Hook
+		DetourTransactionBegin();
+		DetourUpdateThread(GetCurrentThread());
+		DetourAttach(&drawCrosshairFunctionPtr, hooked_dummy);
+		DetourTransactionCommit();
+		funcHookList.insert(std::make_pair(&drawCrosshairFunctionPtr, hooked_dummy));
+	}
+	else
+	{
+		// Unhook
+		DetourTransactionBegin();
+		DetourUpdateThread(GetCurrentThread());
+		DetourDetach(&drawCrosshairFunctionPtr, hooked_dummy);
+		DetourTransactionCommit();
+		funcHookList.erase(std::make_pair(&drawCrosshairFunctionPtr, hooked_dummy));
+	}
 
 	return true;
 }

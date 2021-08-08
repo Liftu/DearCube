@@ -91,16 +91,7 @@ void Menu::drawMenu(GameObjects* gameObjects)
 		// If local player entity is found, then we can draw the different hack tabs
 		if (Hacks::isValidEntity(myPlayerEntityPtr))
 		{
-			// HUD
-			//if (ImGui::BeginTabItem("HUD"))
-			//{
-			//	ImGui::Text("This is the HUD tab!");
-			//	// Custom cursor
-
-			//	ImGui::EndTabItem();
-			//}
-
-			// ESP (may put in inside HUD tab)
+			// ESP/Wallhack
 			if (ImGui::BeginTabItem("ESP"))
 			{
 				// ESP box
@@ -256,6 +247,32 @@ void Menu::drawMenu(GameObjects* gameObjects)
 				ImGui::EndTabItem();
 			}
 
+			// Misc
+			if (ImGui::BeginTabItem("Misc"))
+			{
+				// Custom crosshair
+				ImGui::Checkbox("Custom crosshair", &this->bCrosshair);
+				if (this->bCrosshair)
+				{
+					ImGui::BeginGroup();
+					ImGui::Indent(ImGui::GetStyle().IndentSpacing);
+
+					if (ImGui::Checkbox("Hide default crosshair", &this->bHideDefaultCrosshair))
+					{
+						Hacks::hideDefaultCrosshair(this->bHideDefaultCrosshair);
+					}
+
+					ImGui::SliderFloat("Crosshair size", &this->crosshairSize, 1.0f, 50.0f);
+					ImGui::SliderFloat("Crosshair thickness", &this->crosshairThickness, 1.0f, 10.0f);
+					ImGui::ColorEdit4("Crosshair color", &this->crosshairColor.x);
+
+					ImGui::EndGroup();
+				}
+
+
+				ImGui::EndTabItem();
+			}
+
 			// Settings
 			if (ImGui::BeginTabItem("Settings"))
 			{
@@ -363,53 +380,25 @@ void Menu::drawMenu(GameObjects* gameObjects)
 	ImGui::End();
 }
 
-void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
+void Menu::drawHud(Vector2 screenDimensions, GameObjects* gameObjects)
 {
-	if (!this->bRunning)
-		return;
-
-	// Start the Dear ImGui frame
-	ImGui_ImplOpenGL2_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
-
-
-	// Hide/show the menu with INSERT
-	if (GetAsyncKeyState(VK_INSERT) & 1)
-		this->bShow = !this->bShow;
-
-
-	if (this->bShow)
-	{
-		// Intercept cursor
-		_SDL_WM_GrabInput(SDL_GrabMode(2));
-
-		// Actual menu code
-		this->drawMenu(gameObjects);
-	}
-	else
-	{
-		// Restore cursor
-		_SDL_WM_GrabInput(SDL_GrabMode(1));
-	}
-	//this->drawMenu(gameObjects);
-
-
 	if (this->currentDrawingTool == DrawingTools::DRAWING_TOOL_IMGUI)
 	{
 		// Draw the fov circle
 		if (this->bFovCircle)
 		{
-			ImGui::Begin("##FOVCIRCLE", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | 
+			ImGui::Begin("##FOVCIRCLE", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
 				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
 			ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 			// This calculation is approximate
 			float fovCircleRadius = this->fov / 50 * (screenDimensions.x / 2.0f);	// 50 approximately represents the angle degree to the side of the screen
 			drawList->AddCircle(ImVec2(screenDimensions.x / 2.0f, screenDimensions.y / 2.0f), fovCircleRadius, ImColor(this->fovColor), 0, this->fovThickness);
+
 			ImGui::End();
 		}
 
-		// Draw ESP
+
+		// Draw the ESPs
 		ImGui::Begin("##ESPDRAWS", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		ImDrawList* drawList = ImGui::GetBackgroundDrawList();
@@ -486,8 +475,60 @@ void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
 				}
 			}
 		}
+
 		ImGui::End();
+
+
+		// Draw the custom crosshair
+		if (this->bCrosshair)
+		{
+			ImGui::Begin("##CUSTOMCROSSHAIR", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+				ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
+			ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+
+			ImVec2 verticalCoords = ImVec2(screenDimensions.x / 2, screenDimensions.y / 2 - this->crosshairSize / 2);
+			drawList->AddLine(verticalCoords, ImVec2(verticalCoords.x, verticalCoords.y + this->crosshairSize), ImColor(this->crosshairColor), this->crosshairThickness);
+
+			ImVec2 horizontalCoords = ImVec2(screenDimensions.x / 2 - this->crosshairSize / 2, screenDimensions.y / 2);
+			drawList->AddLine(horizontalCoords, ImVec2(horizontalCoords.x + this->crosshairSize, horizontalCoords.y), ImColor(this->crosshairColor), this->crosshairThickness);
+
+			ImGui::End();
+		}
 	}
+}
+
+void Menu::render(Vector2 screenDimensions, GameObjects* gameObjects)
+{
+	if (!this->bRunning)
+		return;
+
+	// Start the Dear ImGui frame
+	ImGui_ImplOpenGL2_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+
+
+	// Hide/show the menu with INSERT
+	if (GetAsyncKeyState(VK_INSERT) & 1)
+		this->bShow = !this->bShow;
+
+
+	if (this->bShow)
+	{
+		// Intercept cursor
+		_SDL_WM_GrabInput(SDL_GrabMode(2));
+
+		// Actual menu code
+		this->drawMenu(gameObjects);
+	}
+	else
+	{
+		// Restore cursor
+		_SDL_WM_GrabInput(SDL_GrabMode(1));
+	}
+	//this->drawMenu(gameObjects);
+
+	this->drawHud(screenDimensions, gameObjects);
 
 
 	// ImGui rendering

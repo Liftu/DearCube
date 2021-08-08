@@ -122,7 +122,7 @@ DWORD WINAPI injectedThread(HMODULE hModule)
     DetourDetach(&(PVOID&)gateway_wglSwapBuffers, hooked_wglSwapBuffers);
     DetourTransactionCommit();
     // Disable all hacks midHooks
-    Hacks::disableMidHooks();
+    Hacks::disableAllHooks();
 
     // Exit
     // SOMETIMES THE WHOLE PROCCESS CRACHES WHEN CALLING THIS
