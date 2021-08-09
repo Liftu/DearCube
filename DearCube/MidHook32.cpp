@@ -122,14 +122,14 @@ LPVOID MidHook32::midHookTrampoline(LPVOID srcAddr, LPVOID dstAddr, const SIZE_T
 
 	// Create the trampoline gateway
 	// 1 byte for PUSHAD						(this adds 0x20 bytes on the stack, so we have to pass esp to the hooking func)
-	// 1 byte for PUSH ESP						(send esp as only argument to function)
-	// 4 bytes for ADD dword ptr [ESP], 0x20	(but have to add 0x20 so esp points to value of esp before PUSHAD)
+	//// 1 byte for PUSH ESP						(send esp as only argument to function)
+	//// 4 bytes for ADD dword ptr [ESP], 0x20	(but have to add 0x20 so esp points to value of esp before PUSHAD)
 	// 5 bytes for the CALL dstAddr
-	// 1 byte for POP EAX						(for cleaning the stack, it's cdecl calling conv, we use POP EAX, because it's only 1 byte and POPAD will restore EAX anyway)
+	//// 1 byte for POP EAX						(for cleaning the stack, it's cdecl calling conv, we use POP EAX, because it's only 1 byte and POPAD will restore EAX anyway)
 	// 1 byte for the POPAD
 	// len bytes for the stolen bytes
 	// 5 bytes for the JMP original
-	int gatewayLen = 1 + 1 + 4 + 5 + 1 + len + 5;
+	int gatewayLen = 1 /*+ 1 + 4*/ + 5 /*+ 1*/ + 1 + len + 5;
 	DWORD gateway = (DWORD)VirtualAlloc(NULL, gatewayLen, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 	if (gateway == NULL)
 		return nullptr;
@@ -142,13 +142,13 @@ LPVOID MidHook32::midHookTrampoline(LPVOID srcAddr, LPVOID dstAddr, const SIZE_T
 	*(BYTE*)(gateway) = 0x60;
 	bytesWritten += 1;
 
-	// PUSH ESP
-	*(BYTE*)(gateway + bytesWritten) = 0x54;
-	bytesWritten += 1;
-
-	// ADD dword ptr [ESP], 0x02
-	*(DWORD*)(gateway + bytesWritten) = 0x20240483;
-	bytesWritten += 4;
+	//// PUSH ESP
+	//*(BYTE*)(gateway + bytesWritten) = 0x54;
+	//bytesWritten += 1;
+	//
+	//// ADD dword ptr [ESP], 0x02
+	//*(DWORD*)(gateway + bytesWritten) = 0x20240483;
+	//bytesWritten += 4;
 
 	// Get the gateway to destination relative address
 	DWORD dstRelativeAddr = (DWORD)dstAddr - (gateway + 5 + bytesWritten);
@@ -158,9 +158,9 @@ LPVOID MidHook32::midHookTrampoline(LPVOID srcAddr, LPVOID dstAddr, const SIZE_T
 	*(DWORD*)(gateway + bytesWritten) = dstRelativeAddr;
 	bytesWritten += 4;
 
-	// POP EAX (clean stack)
-	*(BYTE*)(gateway + bytesWritten) = 0x58;
-	bytesWritten += 1;
+	//// POP EAX (clean stack)
+	//*(BYTE*)(gateway + bytesWritten) = 0x58;
+	//bytesWritten += 1;
 
 	// POPAD
 	*(BYTE*)(gateway + bytesWritten) = 0x61;

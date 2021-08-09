@@ -4,6 +4,9 @@
 std::set<MidHook32*> midHookList;
 std::set<std::pair<LPVOID*, LPVOID>> funcHookList;
 
+//void (*renderClientsFunctionPtr)() = (void(__stdcall*)())(0x004157ED);
+//void (*renderClientPFunctionPtr)(PlayerEntity*) = (void(__cdecl*)(PlayerEntity*))(0x004154F0);
+
 void Hacks::disableAllHooks()
 {
 	disableMidHooks();
@@ -33,26 +36,67 @@ void __cdecl hooked_dummy()
 	return;
 }
 
-void __cdecl midHooked_glDrawElements(LPVOID esp)
+
+//void __cdecl hooked_renderClientP(PlayerEntity* player)
+//{
+//	glDisable(GL_DEPTH_TEST);
+//	glDisable(GL_TEXTURE_2D);
+//
+//	(*renderClientPFunctionPtr)(player);
+//
+//	glEnable(GL_DEPTH_TEST);
+//}
+//
+//void __cdecl hooked_renderClients()
+//{
+//	glDisable(GL_DEPTH_TEST);
+//	glDisable(GL_TEXTURE_2D);
+//	(*renderClientsFunctionPtr)();
+//
+//	glEnable(GL_DEPTH_TEST);
+//}
+
+void __cdecl midHooked_renderClients(DWORD edi, DWORD esi, DWORD ebp, DWORD esp, DWORD ebx, DWORD edx, DWORD ecx, DWORD eax)
+{
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_TEXTURE_2D);
+
+	PlayerEntity* player = (PlayerEntity*)eax;
+	if (Hacks::isEnemyEntity(player))
+	{
+		GLubyte red[] = { 255, 0, 0, 255 };
+		glColorPointer(4, GL_UNSIGNED_BYTE, 0, red);
+	}
+	else
+	{
+		GLubyte green[] = { 0, 255, 0, 255 };
+		glColorPointer(4, GL_UNSIGNED_BYTE, 0, green);
+		//glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_TEXTURE_2D);
+	}
+}
+
+void __cdecl midHooked_glDrawElements(DWORD edi, DWORD esi, DWORD ebp, DWORD esp, DWORD ebx, DWORD edx, DWORD ecx, DWORD eax)
 {
 	//if (*(int*)esp > 0x100)
 	//{
 		//glDepthRange(0.0, 0.0);
-		glDepthFunc(GL_ALWAYS);
-		//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		//glDisableClientState(GL_COLOR_ARRAY);
-		//glEnable(GL_COLOR_MATERIAL);
-		//glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-	//}
-	//else
-	//{
-		//glDepthRange(0.0, 1.0);
-		//glDepthFunc(GL_LEQUAL);
-		//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		//glEnableClientState(GL_COLOR_ARRAY);
-		//glDisable(GL_COLOR_MATERIAL);
-		//glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	//}
+	glDepthFunc(GL_ALWAYS);
+	//glDisable(GL_DEPTH_TEST);
+	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	//glDisableClientState(GL_COLOR_ARRAY);
+	//glEnable(GL_COLOR_MATERIAL);
+	//glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+//}
+//else
+//{
+	//glDepthRange(0.0, 1.0);
+	//glDepthFunc(GL_LEQUAL);
+	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	//glEnableClientState(GL_COLOR_ARRAY);
+	//glDisable(GL_COLOR_MATERIAL);
+	//glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+//}
 }
 
 
@@ -75,9 +119,9 @@ GameObjects* Hacks::getGameObjectsPtr()
 	return reinterpret_cast<GameObjects*>(moduleBaseAddr + o_gameObjects);
 }
 
-bool Hacks::isValidEntity(PlayerEntity* playerEntity)
+bool Hacks::isValidEntity(PlayerEntity* playerEntityPtr)
 {
-	if (playerEntity != nullptr)
+	if (playerEntityPtr != nullptr)
 	{
 		// The try catch is to prevent try to dereference a not a pointer variable
 		// which would lead to an EXCEPTION_ACCESS_VIOLATION
@@ -90,7 +134,7 @@ bool Hacks::isValidEntity(PlayerEntity* playerEntity)
 		//return false;
 		__try
 		{
-			if (playerEntity->vTable == c_playerEntityType || playerEntity->vTable == c_botEntityType)
+			if (playerEntityPtr->vTable == c_playerEntityType || playerEntityPtr->vTable == c_botEntityType)
 				return true;
 		}
 		__except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_EXECUTION)
@@ -101,8 +145,12 @@ bool Hacks::isValidEntity(PlayerEntity* playerEntity)
 	return false;
 }
 
-bool Hacks::isEnemyEntity(GameObjects* gameObjects, PlayerEntity* enemyEntityPtr)
+bool Hacks::isEnemyEntity(PlayerEntity* enemyEntityPtr)
 {
+	GameObjects* gameObjects = getGameObjectsPtr();
+	if (gameObjects == nullptr)
+		return false;
+
 	PlayerEntity* myPlayerEntityPtr = gameObjects->myPlayerEntityPtr;
 	GameModes gameMode = gameObjects->gameMode;
 
@@ -128,6 +176,11 @@ bool Hacks::isAliveEntity(PlayerEntity* playerEntityPtr)
 		return false;
 
 	return playerEntityPtr->currentState == States::Alive;
+}
+
+bool Hacks::isAliveEnemyEntity(PlayerEntity* playerEntityPtr)
+{
+	return isAliveEntity(playerEntityPtr) && isEnemyEntity(playerEntityPtr);
 }
 
 std::vector<PlayerEntity*> Hacks::getValidEntityList(EntityVector* playerEntityVector)
@@ -188,9 +241,9 @@ std::vector<PlayerEntity*> Hacks::getEnemyList(GameObjects* gameObjects)
 			std::remove_if(
 				enemyList.begin(),
 				enemyList.end(),
-				[gameObjects](PlayerEntity* enemyEntityPtr)
+				[](PlayerEntity* enemyEntityPtr)
 				{
-					return !isEnemyEntity(gameObjects, enemyEntityPtr);
+					return !isEnemyEntity(enemyEntityPtr);
 				}),
 			enemyList.end());
 	}
@@ -960,7 +1013,7 @@ bool Hacks::triggerbot(GameObjects* gameObjects)
 	if (!isValidEntity(enemyOnAimPtr))
 		return false;
 
-	if (isEnemyEntity(gameObjects, enemyOnAimPtr) && isAliveEntity(enemyOnAimPtr))
+	if (isEnemyEntity(enemyOnAimPtr) && isAliveEntity(enemyOnAimPtr))
 	{
 		myPlayerEntityPtr->isShooting = true;
 		return true;
@@ -1168,6 +1221,22 @@ void Hacks::drawEsp(GameObjects* gameObjects, Vector2 screenDimensions, bool dra
 	return;
 }
 
+//bool Hacks::wallhack(bool enable)
+//{
+//	// Attach a hook to the from the 16th to the 22th byte of the glDrawElements function
+//	static MidHook32 midHook32glDrawElements((LPVOID)((DWORD)original_glDrawElements + 0x16), midHooked_glDrawElements, 6);
+//	midHookList.insert(&midHook32glDrawElements);
+//
+//	if (enable)
+//	{
+//		return midHook32glDrawElements.enable();
+//	}
+//	else
+//		midHook32glDrawElements.disable();
+//
+//	return true;
+//}
+
 bool Hacks::wallhack(bool enable)
 {
 	// Attach a hook to the from the 16th to the 22th byte of the glDrawElements function
@@ -1176,13 +1245,91 @@ bool Hacks::wallhack(bool enable)
 
 	if (enable)
 	{
+		chams(enable);
 		return midHook32glDrawElements.enable();
 	}
 	else
+	{
 		midHook32glDrawElements.disable();
+	}
 
 	return true;
 }
+
+bool Hacks::chams(bool enable)
+{
+	static MidHook32 midHook32renderClients((LPVOID)((DWORD)original_renderClients + 0x1D), midHooked_renderClients, 6);
+	midHookList.insert(&midHook32renderClients);
+
+	if (enable)
+	{
+		return midHook32renderClients.enable();
+	}
+	else
+	{
+		midHook32renderClients.disable();
+	}
+
+	return true;
+}
+
+//bool Hacks::wallhack(bool enable)
+//{
+//	// Attach a hook to the from the 16th to the 22th byte of the glDrawElements function
+//	//static MidHook32 midHook32glDrawElements((LPVOID)((DWORD)original_glDrawElements + 0x16), midHooked_glDrawElements, 6);
+//	//midHookList.insert(&midHook32glDrawElements);
+//
+//	//static LPVOID drawCrosshairFunctionPtr = (LPVOID)(0x004152AD);
+//	if (enable)
+//	{
+//		// Hook
+//		DetourTransactionBegin();
+//		DetourUpdateThread(GetCurrentThread());
+//		DetourAttach(&renderClientPFunctionPtr, hooked_renderClientP);
+//		DetourTransactionCommit();
+//		funcHookList.insert(std::make_pair(&(LPVOID&)renderClientPFunctionPtr, hooked_renderClientP));
+//	}
+//	else
+//	{
+//		// Unhook
+//		DetourTransactionBegin();
+//		DetourUpdateThread(GetCurrentThread());
+//		DetourDetach(&renderClientPFunctionPtr, hooked_renderClientP);
+//		DetourTransactionCommit();
+//		funcHookList.erase(std::make_pair(&(LPVOID&)renderClientPFunctionPtr, hooked_renderClientP));
+//	}
+//
+//	return true;
+//}
+
+//bool Hacks::wallhack(bool enable)
+//{
+//	// Attach a hook to the from the 16th to the 22th byte of the glDrawElements function
+//	//static MidHook32 midHook32glDrawElements((LPVOID)((DWORD)original_glDrawElements + 0x16), midHooked_glDrawElements, 6);
+//	//midHookList.insert(&midHook32glDrawElements);
+//
+//	//static LPVOID drawCrosshairFunctionPtr = (LPVOID)(0x004152AD);
+//	if (enable)
+//	{
+//		// Hook
+//		DetourTransactionBegin();
+//		DetourUpdateThread(GetCurrentThread());
+//		DetourAttach(&renderClientsFunctionPtr, hooked_renderClients);
+//		DetourTransactionCommit();
+//		funcHookList.insert(std::make_pair(&(LPVOID&)renderClientsFunctionPtr, hooked_renderClients));
+//	}
+//	else
+//	{
+//		// Unhook
+//		DetourTransactionBegin();
+//		DetourUpdateThread(GetCurrentThread());
+//		DetourDetach(&renderClientsFunctionPtr, hooked_renderClients);
+//		DetourTransactionCommit();
+//		funcHookList.erase(std::make_pair(&(LPVOID&)renderClientsFunctionPtr, hooked_renderClients));
+//	}
+//
+//	return true;
+//}
 
 
 // Misc

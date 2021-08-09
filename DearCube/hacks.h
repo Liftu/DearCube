@@ -29,6 +29,7 @@ namespace Hacks
 	const DWORD o_traceLineFunction = 0x0008A310;
 	const DWORD o_traceLineFunction_enemyOnCrosshair = 0x00060670;
 	const DWORD o_drawCrosshairFunction = 0x00008660;
+	const DWORD o_renderClientsFunction = 0x000157D0;
 
 	// Constants
 	const DWORD c_playerEntityType = 0x004E4A98;
@@ -51,6 +52,7 @@ namespace Hacks
 
 	// Original OpenGL glDrawElements
 	static void(__stdcall* original_glDrawElements)(GLenum mode, GLsizei count, GLenum type, const void* indices) = glDrawElements;
+	static void(__stdcall* original_renderClients)() = (void(__stdcall*)())(0x00400000 + o_renderClientsFunction);
 
 
 	// Miscellaneous
@@ -59,9 +61,10 @@ namespace Hacks
 
 	// Entities related
 	GameObjects* getGameObjectsPtr();
-	bool isValidEntity(PlayerEntity* playerEntity);
-	bool isEnemyEntity(GameObjects* gameObjects, PlayerEntity* enemyEntityPtr);
+	bool isValidEntity(PlayerEntity* playerEntityPtr);
+	bool isEnemyEntity(PlayerEntity* enemyEntityPtr);
 	bool isAliveEntity(PlayerEntity* playerEntityPtr);
+	bool isAliveEnemyEntity(PlayerEntity* playerEntityPtr);
 	std::vector<PlayerEntity*> getValidEntityList(EntityVector* playerEntityVector);
 	std::vector<PlayerEntity*> getEnemyList(GameObjects* gameObjects);
 	std::vector<PlayerEntity*> getAliveEnemyList(GameObjects* gameObjects);
@@ -115,6 +118,7 @@ namespace Hacks
 	void drawEsp(GameObjects* gameObjects, Vector2 screenDimensions, bool drawEspBox, float espBoxThickness, Vector4 espBoxColor, 
 		bool displayName, bool displayHealth, bool displayShield, bool drawEspHead, float espHeadThickness, Vector4 espHeadColor);
 	bool wallhack(bool enable);
+	bool chams(bool enable);
 
 
 	// Misc

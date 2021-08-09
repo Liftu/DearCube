@@ -20,11 +20,15 @@ private:
 	bool bGatewayInstanciated;
 
 public:
-	// /!\ A mid hook function has to be declared as __cdecl calling convention and can take 1 4 bytes argument /!\ //
+	// /!\ A mid hook function has to be declared as __cdecl calling convention /!\ //
+	// midHook function declaration : void __cdecl midHook(DWORD edi, DWORD esi, DWORD ebp, DWORD esp, DWORD ebx, DWORD edx, DWORD ecx, DWORD eax)
 	// Because because the gateway shellcode will send esp backup as argument to the stack and clean it.
+	// /!\ Do not hook on a CALL or a JMP that is relative to the instruction address, else it will break /!\ //
 	MidHook32(LPVOID srcAddr, LPVOID dstAddr, SIZE_T len);
-	// /!\ A mid hook function has to be declared as __cdecl calling convention and can take 1 4 bytes argument /!\ //
+	// /!\ A mid hook function has to be declared as __cdecl calling convention /!\ //
+	// midHook function declaration : void __cdecl midHook(DWORD edi, DWORD esi, DWORD ebp, DWORD esp, DWORD ebx, DWORD edx, DWORD ecx, DWORD eax)
 	// Because because the gateway shellcode will send esp backup as argument to the stack and clean it.
+	// /!\ Do not hook on a CALL or a JMP that is relative to the instruction address, else it will break /!\ //
 	MidHook32(LPCSTR moduleName, LPCSTR functionName, DWORD offsetToFunctionBeginning, LPVOID dstAddr, SIZE_T len);
 	~MidHook32();
 
