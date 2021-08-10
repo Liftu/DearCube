@@ -120,6 +120,11 @@ void Menu::drawMenu(GameObjects* gameObjects)
 					Hacks::wallhack(this->bWallhack);
 				}
 				ImGui::SameLine(); helpMarker("Draw player models through walls.");
+				if (ImGui::Checkbox("Chams (experimental)", &this->bChams))
+				{
+					Hacks::chams(this->bChams);
+				}
+				ImGui::SameLine(); helpMarker("Draw player models in unique color.");
 
 				ImGui::EndTabItem();
 			}

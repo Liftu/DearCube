@@ -4,8 +4,14 @@
 std::set<MidHook32*> midHookList;
 std::set<std::pair<LPVOID*, LPVOID>> funcHookList;
 
-//void (*renderClientsFunctionPtr)() = (void(__stdcall*)())(0x004157ED);
-//void (*renderClientPFunctionPtr)(PlayerEntity*) = (void(__cdecl*)(PlayerEntity*))(0x004154F0);
+// Original OpenGL glDrawElements function
+static void(__stdcall* original_glDrawElements)(GLenum mode, GLsizei count, GLenum type, const void* indices) = glDrawElements;
+// Original renderModel()
+static void(__stdcall* original_renderModel)() = (void(__stdcall*)())(Hacks::getModuleBaseAddr() + Hacks::o_renderModelFunction);
+// Original renderClients() function
+static void(__stdcall* original_renderClients)() = (void(__stdcall*)())(Hacks::getModuleBaseAddr() + Hacks::o_renderClientsFunction);
+// Original renderClientP(PlayerEntity* p) function (p is passed through EAX)
+static void(__stdcall* original_renderClientP)() = (void(__stdcall*)())(Hacks::getModuleBaseAddr() + Hacks::o_renderClientPFunction);
 
 void Hacks::disableAllHooks()
 {
@@ -15,19 +21,15 @@ void Hacks::disableAllHooks()
 
 void Hacks::disableMidHooks()
 {
-	std::for_each(midHookList.begin(), midHookList.end(), [](MidHook32* midHook) {midHook->disable(); });
+	std::for_each(midHookList.begin(), midHookList.end(), [](MidHook32* midHook) { midHook->disable(); });
 }
 
 void Hacks::disableFuncHooks()
 {
-	std::for_each(funcHookList.begin(), funcHookList.end(), 
-		[](std::pair<LPVOID*, LPVOID> funcHook)
-		{		
-			DetourTransactionBegin();
-			DetourUpdateThread(GetCurrentThread());
-			DetourDetach(funcHook.first, funcHook.second);
-			DetourTransactionCommit();
-		});
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	std::for_each(funcHookList.begin(), funcHookList.end(), [](std::pair<LPVOID*, LPVOID> funcHook) { DetourDetach(funcHook.first, funcHook.second); });
+	DetourTransactionCommit();
 	funcHookList.clear();
 }
 
@@ -36,41 +38,76 @@ void __cdecl hooked_dummy()
 	return;
 }
 
-
-//void __cdecl hooked_renderClientP(PlayerEntity* player)
+//PlayerEntity* renderClientP_playerEntity;
+//void __declspec(naked) hooked_renderClientP()
 //{
-//	glDisable(GL_DEPTH_TEST);
-//	glDisable(GL_TEXTURE_2D);
+//	__asm
+//	{
+//		pushad
+//		//sub esp, 0x100
+//		mov renderClientP_playerEntity, eax
+//	}
 //
-//	(*renderClientPFunctionPtr)(player);
+//	if (Hacks::isAliveEnemyEntity(renderClientP_playerEntity))
+//	{
+//		glDisable(GL_DEPTH_TEST);
+//		glDisable(GL_TEXTURE_2D);
+//		__asm { mov eax, renderClientP_playerEntity }
+//		original_renderClientP();
+//	}
+//	else
+//	{
+//		glEnable(GL_DEPTH_TEST);
+//		glEnable(GL_TEXTURE_2D);
+//	}
 //
-//	glEnable(GL_DEPTH_TEST);
+//	__asm { mov eax, renderClientP_playerEntity }
+//	original_renderClientP();
+//
+//	__asm
+//	{
+//		//add esp, 0x100
+//		popad
+//		ret
+//	}
 //}
-//
-//void __cdecl hooked_renderClients()
+
+//void __cdecl midHooked_renderClientP(DWORD edi, DWORD esi, DWORD ebp, DWORD esp, DWORD ebx, DWORD edx, DWORD ecx, DWORD reg_eax)
 //{
-//	glDisable(GL_DEPTH_TEST);
-//	glDisable(GL_TEXTURE_2D);
-//	(*renderClientsFunctionPtr)();
 //
-//	glEnable(GL_DEPTH_TEST);
+//	PlayerEntity* player = (PlayerEntity*)reg_eax;
+//	if (Hacks::isValidEntity(player))
+//	{
+//		glDisable(GL_DEPTH_TEST);
+//		glDisable(GL_TEXTURE_2D);
+//		GLubyte red[] = { 255, 0, 0, 255 };
+//		glColorPointer(4, GL_UNSIGNED_BYTE, 0, red);
+//		__asm { mov eax, reg_eax }
+//		(*original_renderClientP)();
+//		glEnable(GL_DEPTH_TEST);
+//	}
+//
+//	__asm { mov eax, reg_eax }
+//	(*original_renderClientP)();
 //}
 
 void __cdecl midHooked_renderClients(DWORD edi, DWORD esi, DWORD ebp, DWORD esp, DWORD ebx, DWORD edx, DWORD ecx, DWORD eax)
 {
-	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_TEXTURE_2D);
 
 	PlayerEntity* player = (PlayerEntity*)eax;
 	if (Hacks::isEnemyEntity(player))
 	{
-		GLubyte red[] = { 255, 0, 0, 255 };
-		glColorPointer(4, GL_UNSIGNED_BYTE, 0, red);
+		glDisableClientState(GL_COLOR_ARRAY);
+		glEnable(GL_COLOR_MATERIAL);
+		glColor3f(1.0, 0.0, 0.0);
+		//GLubyte red[] = { 255, 0, 0, 255 };
+		//glColorPointer(4, GL_UNSIGNED_BYTE, 0, &red);
 	}
 	else
 	{
-		GLubyte green[] = { 0, 255, 0, 255 };
-		glColorPointer(4, GL_UNSIGNED_BYTE, 0, green);
+		//GLubyte green[] = { 0, 255, 0, 255 };
+		//glColorPointer(4, GL_UNSIGNED_BYTE, 0, green);
 		//glEnable(GL_DEPTH_TEST);
 		//glEnable(GL_TEXTURE_2D);
 	}
@@ -78,26 +115,35 @@ void __cdecl midHooked_renderClients(DWORD edi, DWORD esi, DWORD ebp, DWORD esp,
 
 void __cdecl midHooked_glDrawElements(DWORD edi, DWORD esi, DWORD ebp, DWORD esp, DWORD ebx, DWORD edx, DWORD ecx, DWORD eax)
 {
-	//if (*(int*)esp > 0x100)
-	//{
-		//glDepthRange(0.0, 0.0);
 	glDepthFunc(GL_ALWAYS);
 	//glDisable(GL_DEPTH_TEST);
-	//glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	//glDisableClientState(GL_COLOR_ARRAY);
-	//glEnable(GL_COLOR_MATERIAL);
-	//glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-//}
-//else
-//{
-	//glDepthRange(0.0, 1.0);
-	//glDepthFunc(GL_LEQUAL);
-	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	//glEnableClientState(GL_COLOR_ARRAY);
-	//glDisable(GL_COLOR_MATERIAL);
-	//glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-//}
 }
+
+void __cdecl midHooked_renderModel_isOccluded(DWORD edi, DWORD esi, DWORD ebp, DWORD esp, DWORD ebx, DWORD edx, DWORD ecx, DWORD eax)
+{
+	if (Hacks::isValidEntity((PlayerEntity*)esi))
+	{
+		eax = 0;
+		glDepthFunc(GL_ALWAYS);
+	}
+	else
+	{
+		glDepthFunc(GL_LEQUAL);
+	}
+}
+
+//void __cdecl midHooked_renderModel_rayCubeLos(DWORD edi, DWORD esi, DWORD ebp, DWORD esp, DWORD ebx, DWORD edx, DWORD ecx, DWORD eax)
+//{
+//	if (Hacks::isValidEntity((PlayerEntity*)esp+0x4))
+//	{
+//		eax = 0;
+//		glDepthFunc(GL_ALWAYS);
+//	}
+//	else
+//	{
+//		glDepthFunc(GL_LEQUAL);
+//	}
+//}
 
 
 // Miscellaneous
@@ -119,7 +165,7 @@ GameObjects* Hacks::getGameObjectsPtr()
 	return reinterpret_cast<GameObjects*>(moduleBaseAddr + o_gameObjects);
 }
 
-bool Hacks::isValidEntity(PlayerEntity* playerEntityPtr)
+bool Hacks::isValidEntity(const PlayerEntity* playerEntityPtr)
 {
 	if (playerEntityPtr != nullptr)
 	{
@@ -1239,18 +1285,27 @@ void Hacks::drawEsp(GameObjects* gameObjects, Vector2 screenDimensions, bool dra
 
 bool Hacks::wallhack(bool enable)
 {
-	// Attach a hook to the from the 16th to the 22th byte of the glDrawElements function
-	static MidHook32 midHook32glDrawElements((LPVOID)((DWORD)original_glDrawElements + 0x16), midHooked_glDrawElements, 6);
-	midHookList.insert(&midHook32glDrawElements);
+	//// Render through walls.
+	//static MidHook32 midHook32_glDrawElements((LPVOID)((DWORD)original_glDrawElements + 0x16), midHooked_glDrawElements, 6);
+	//midHookList.insert(&midHook32_glDrawElements);
+
+	// Bypass isOccluded when rendering entities.
+	static MidHook32 midHook32_renderModel_isOcluded((LPVOID)((DWORD)original_renderModel + 0xDB), midHooked_renderModel_isOccluded, 5);
+	midHookList.insert(&midHook32_renderModel_isOcluded);
+
+	//// Bypass rayCubeLos when rendering entities.
+	//static MidHook32 midHook32_renderModel_rayCubeLos((LPVOID)((DWORD)original_renderModel + 0x14C), midHooked_renderModel_rayCubeLos, 5);
+	//midHookList.insert(&midHook32_renderModel_isOcluded);
 
 	if (enable)
 	{
-		chams(enable);
-		return midHook32glDrawElements.enable();
+		return /*midHook32_glDrawElements.enable() && */midHook32_renderModel_isOcluded.enable()/* && midHook32_renderModel_rayCubeLos.enable()*/;
 	}
 	else
 	{
-		midHook32glDrawElements.disable();
+		//midHook32_glDrawElements.disable();
+		midHook32_renderModel_isOcluded.disable();
+		//midHook32_renderModel_rayCubeLos.disable();
 	}
 
 	return true;
@@ -1273,59 +1328,42 @@ bool Hacks::chams(bool enable)
 	return true;
 }
 
-//bool Hacks::wallhack(bool enable)
+//bool Hacks::chams(bool enable)
 //{
-//	// Attach a hook to the from the 16th to the 22th byte of the glDrawElements function
-//	//static MidHook32 midHook32glDrawElements((LPVOID)((DWORD)original_glDrawElements + 0x16), midHooked_glDrawElements, 6);
-//	//midHookList.insert(&midHook32glDrawElements);
+//	static MidHook32 midHook32renderClientP((LPVOID)((DWORD)original_renderClientP), midHooked_renderClientP, 6, true);
+//	midHookList.insert(&midHook32renderClientP);
 //
-//	//static LPVOID drawCrosshairFunctionPtr = (LPVOID)(0x004152AD);
 //	if (enable)
 //	{
-//		// Hook
-//		DetourTransactionBegin();
-//		DetourUpdateThread(GetCurrentThread());
-//		DetourAttach(&renderClientPFunctionPtr, hooked_renderClientP);
-//		DetourTransactionCommit();
-//		funcHookList.insert(std::make_pair(&(LPVOID&)renderClientPFunctionPtr, hooked_renderClientP));
+//		return midHook32renderClientP.enable();
 //	}
 //	else
 //	{
-//		// Unhook
-//		DetourTransactionBegin();
-//		DetourUpdateThread(GetCurrentThread());
-//		DetourDetach(&renderClientPFunctionPtr, hooked_renderClientP);
-//		DetourTransactionCommit();
-//		funcHookList.erase(std::make_pair(&(LPVOID&)renderClientPFunctionPtr, hooked_renderClientP));
+//		midHook32renderClientP.disable();
 //	}
 //
 //	return true;
 //}
 
-//bool Hacks::wallhack(bool enable)
+//bool Hacks::chams(bool enable)
 //{
-//	// Attach a hook to the from the 16th to the 22th byte of the glDrawElements function
-//	//static MidHook32 midHook32glDrawElements((LPVOID)((DWORD)original_glDrawElements + 0x16), midHooked_glDrawElements, 6);
-//	//midHookList.insert(&midHook32glDrawElements);
-//
-//	//static LPVOID drawCrosshairFunctionPtr = (LPVOID)(0x004152AD);
 //	if (enable)
 //	{
 //		// Hook
 //		DetourTransactionBegin();
 //		DetourUpdateThread(GetCurrentThread());
-//		DetourAttach(&renderClientsFunctionPtr, hooked_renderClients);
+//		DetourAttach(&(PVOID&)original_renderClientP, hooked_renderClientP);
 //		DetourTransactionCommit();
-//		funcHookList.insert(std::make_pair(&(LPVOID&)renderClientsFunctionPtr, hooked_renderClients));
+//		funcHookList.insert(std::make_pair(&(LPVOID&)original_renderClientP, hooked_renderClientP));
 //	}
 //	else
 //	{
 //		// Unhook
 //		DetourTransactionBegin();
 //		DetourUpdateThread(GetCurrentThread());
-//		DetourDetach(&renderClientsFunctionPtr, hooked_renderClients);
+//		DetourDetach(&(PVOID&)original_renderClientP, hooked_renderClientP);
 //		DetourTransactionCommit();
-//		funcHookList.erase(std::make_pair(&(LPVOID&)renderClientsFunctionPtr, hooked_renderClients));
+//		funcHookList.erase(std::make_pair(&(LPVOID&)original_renderClientP, hooked_renderClientP));
 //	}
 //
 //	return true;

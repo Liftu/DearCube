@@ -62,6 +62,7 @@ private:
 	bool bEspShieldBar = false;
 	bool bEspHead = false;
 	bool bWallhack = false;
+	bool bChams = false;
 
 	// Misc
 	bool bCrosshair = false;
@@ -111,6 +112,7 @@ public:
 	bool isEspShieldBarEnabled() { return this->bEspShieldBar; }
 	bool isEspHeadEnabled() { return this->bEspHead; }
 	bool isWallhackEnabled() { return this->bWallhack; }
+	bool isChamsEnablef() { return this->bChams; }
 
 	// Misc
 	bool isCustomCrosshairEnabled() { return this->bCrosshair; }

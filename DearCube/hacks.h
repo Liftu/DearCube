@@ -29,7 +29,9 @@ namespace Hacks
 	const DWORD o_traceLineFunction = 0x0008A310;
 	const DWORD o_traceLineFunction_enemyOnCrosshair = 0x00060670;
 	const DWORD o_drawCrosshairFunction = 0x00008660;
+	const DWORD o_renderModelFunction = 0x00014350;
 	const DWORD o_renderClientsFunction = 0x000157D0;
+	const DWORD o_renderClientPFunction = 0x000154F0;
 
 	// Constants
 	const DWORD c_playerEntityType = 0x004E4A98;
@@ -50,10 +52,6 @@ namespace Hacks
 	void disableMidHooks();
 	void disableFuncHooks();
 
-	// Original OpenGL glDrawElements
-	static void(__stdcall* original_glDrawElements)(GLenum mode, GLsizei count, GLenum type, const void* indices) = glDrawElements;
-	static void(__stdcall* original_renderClients)() = (void(__stdcall*)())(0x00400000 + o_renderClientsFunction);
-
 
 	// Miscellaneous
 	DWORD getModuleBaseAddr();
@@ -61,7 +59,7 @@ namespace Hacks
 
 	// Entities related
 	GameObjects* getGameObjectsPtr();
-	bool isValidEntity(PlayerEntity* playerEntityPtr);
+	bool isValidEntity(const PlayerEntity* playerEntityPtr);
 	bool isEnemyEntity(PlayerEntity* enemyEntityPtr);
 	bool isAliveEntity(PlayerEntity* playerEntityPtr);
 	bool isAliveEnemyEntity(PlayerEntity* playerEntityPtr);
